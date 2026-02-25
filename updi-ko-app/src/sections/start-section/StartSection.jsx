@@ -50,7 +50,7 @@ function StartSection({setAppSection, setAppService}) {
                     <figcaption className="logo-name">
                         UPdi Ko!
                     </figcaption>
-                    <figcaption className='subheading'>Lorem ipsum dolor sit amet</figcaption>
+                    <figcaption className='subheading'>Buligan ta 'ka pangita!</figcaption>
                 </figure>
             </header>   
             
