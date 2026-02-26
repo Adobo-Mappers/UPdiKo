@@ -1,0 +1,401 @@
+/* Access to global styles */
+@import url('./../index.css');
+
+
+/* MAIN GROUP: BACKGROUND */
+.MapSection {
+    position: relative;
+    z-index: 1;
+    width: var(--screen-width);
+    height: 100dvh;
+    margin: auto;
+    background-color: var(--color-background);
+}
+
+.MapSection::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;  
+    opacity: 20%; 
+    z-index: -1;
+    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-size: cover;
+}
+
+/* MAIN GROUP: HEADER */
+.MapSection header.active-search-layout {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    gap: var(--mar-8);
+    align-items: center;
+}
+
+.MapSection header.inactive-search-layout {
+    display: flex; 
+}
+
+.MapSection header {
+    width: calc(100% - 64px);
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    z-index: 11;
+    transform: translateX(-50%);
+    align-items: center;
+
+
+    /* SUBGROUP: SEARCH BAR */
+    .search-container {
+        width: 100%;
+        position: relative;
+    }
+    .search-bar {
+        display: flex;
+        position: relative;
+        width: 100%;
+        height: 48px;
+        padding: var(--pad-16) var(--pad-32);
+        border-radius: 50px;
+        background-color: var(--color-primary-80a);    
+        box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.40);
+        font-size: var(--fs-14);
+        letter-spacing: 1px;
+        padding-left: var(--pad-48);
+        color: white;
+    }
+    .icon {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        left: 24px;
+        width: 18px;
+        opacity: 50%;
+        z-index: 1;
+    }
+    .search-bar::placeholder {
+        color: white;
+        letter-spacing: 1px;
+        opacity: 60%;
+    }
+
+    .close-search-btn {
+        height: 24px;
+        aspect-ratio: 1/1;
+    }
+}
+
+
+/* MAIN GROUP: SEARCH LIST BUTTONS */
+.MapSection .search-list-section {
+    width: 100%;
+    height: inherit;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 5;
+    margin: auto;
+    padding: var(--pad-24) var(--pad-48);
+    background-color: var(--color-background);
+    
+    /* SUBGROUP: SERVICES LIST */
+    .service-list {
+        width: 100%;
+        margin-top: var(--mar-72);  
+        height: calc(100dvh - 150px);
+        overflow-y: auto;
+
+        -webkit-mask-image: linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 1%, 
+            black 99%, 
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to bottom, 
+            transparent 0%, 
+            black 1%, 
+            black 99%, 
+            transparent 100%
+        );
+    
+    }
+    .service-list::-webkit-scrollbar {
+        display: none;
+    }
+    .service-list .service-btn {
+        width: 99%;
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        padding: var(--pad-16);
+        border-radius: 10px;
+        margin-bottom: var(--mar-16);
+        box-shadow: 0px 4px 4px  rgba(0, 0, 0, 0.2);;
+        background-color: var(--color-primary-80a);
+        color: white;
+    }
+    .service-btn img {
+        height: 24px;
+        aspect-ratio: 1/1;
+        margin-right: var(--mar-16);
+    }
+    .service-btn .title {
+        font-family: var(--ff-heading);
+        font-size: var(--fs-16);
+        line-height: 100%;
+        letter-spacing: 0.5px;
+        opacity: 50%;
+    }
+    .service-btn .tag {
+        font-size: var(--fs-11);
+        padding-top: var(--pad-4);
+        letter-spacing: 0.25px;
+        opacity: 50%;
+    }
+}
+.MapSection .search-list-section::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;  
+    opacity: 20%; 
+    z-index: -1;
+    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-size: cover;
+}
+
+/* MAIN GROUP: MAP */
+.MapSection .map {
+    width: var(--screen-width);
+    height: var(--screen-height);
+    object-fit: cover;
+    
+    /* SUBGROUP: PIN INFORMATION */
+    .map-pin-info-container {
+        width: 100%;
+        height: 50vh;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        z-index: 102;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: start;
+        padding: var(--pad-24);
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;    
+        background-color: var(--color-primary);
+    }
+    .map-pin-info-container::before {
+        content: "";
+        position: absolute;
+        top: 0; 
+        left: 0;
+        width: 100%; 
+        height: 100%;  
+        opacity: 20%; 
+        z-index: -1;
+        background-image: url('./../assets/images/bg/pin-info-ng.png');
+        background-size: cover;
+    }
+}
+
+/* MAIN GROUP: CONTROL BUTTONS */
+.MapSection .controls {
+    position: absolute;
+    bottom: 80px;   
+    right: 5%;
+
+    /* SUBGROUP: TO CURRENT LOCATION BUTTON */
+    .current-location-btn {
+        height: 60px;   
+        aspect-ratio: 1/1;
+        border: none;
+        border-radius: 50%;
+        background-color: var(--color-primary);
+        z-index: 0;
+    }
+
+    .current-location-img {
+        height: 20px;
+        aspect-ratio: 1/1;  
+    }
+}
+
+/* MAIN GROUP: ADD PINS */
+.create-pin-sheet {
+  border-radius: 12px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-Index: 999;
+  width: 100%;
+  height: 50vh;
+  background: var(--color-primary);
+  padding: var(--pad-32);
+
+    span {
+        color: white;
+        font-size: var(--fs-24);
+        cursor: pointer;
+    }
+}
+.create-pin-sheet::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;  
+    opacity: 20%; 
+    z-index: -1;
+    background-image: url('./../assets/images/bg/pin-info-ng.png');
+    background-size: cover;
+}
+
+.info-input {
+    border-radius: 10px;
+    height: 36px;
+    padding: 0 12px;
+}
+
+.sheet-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: var(--mar-16);
+  padding-top: 0.5em;
+}
+.description-input textarea {
+  height: 150px;
+  width: 100%;
+  padding: var(--pad-8);
+  resize: none;
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 5px;
+  background: #ccc;
+  border-radius: 10px;
+  margin: 0 auto 12px;
+}
+
+.sheet-header {
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--mar-8);
+}
+.sheet-header h2 {
+  width: 30ch;
+  font-family: var(--ff-heading);
+  font-size: var(--fs-24);
+}
+
+.sheet-header .close-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background-color: var(--color-accent-2);
+}
+.sheet-header .close-btn img {
+  height: 20px;
+  width: 20px;
+}
+.separator {
+  border: solid 1px var(--color-accent-2);
+  opacity: 50%;  
+}
+
+.pin-info-form, .coordinates-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--mar-16);
+}
+.pin-info-form input , .coordinates-inputs input {
+    width: 100%;
+} 
+
+.confirm-container {
+    display: flex;
+    justify-content: right;
+    padding-block: var(--pad-8);
+}
+.confirm-pin-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-accent-2);
+  border-radius: 50%;
+}
+
+.confirm-pin-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+
+
+/* MAIN GROUP: FOOTER */
+.MapSection footer {
+    width: 100%;
+    height: 50px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-footer);
+
+    /* SUBGROUP: NAVIGATION */
+    nav {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center; 
+    }
+    nav ul {
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;   
+        align-items: center;
+        padding: 0;
+        list-style: none;
+    }
+    nav .navigation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 20%;
+    }
+    nav .active {
+        opacity: 100% !important;
+    }
+    nav .icon {
+        width: 24px;
+        height: 24px;
+    }
+    nav .label {
+        font-size: var(--fs-12);
+        font-weight: var(--fw-med);
+        letter-spacing: 0.5px;
+        color: var(--color-accent-2);
+    }
+}

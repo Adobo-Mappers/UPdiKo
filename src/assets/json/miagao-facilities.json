@@ -1,0 +1,478 @@
+[
+  {
+    "id": 1,
+    "name": "E&T Laundry Shop",
+    "tags": ["Miagao Services", "Laundry"],
+    "address": "Zulueta Avenue, Bolho, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641202,
+      122.233722
+    ],
+    "opening_hours": [
+      "Everyday: 8am - 5pm"
+    ],
+    "contact_info": [
+      "Phone: 9925372083",
+      "Phone: 9163289507"
+    ],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/E&T Laundry Shop/IMG_20251027_093935-min.jpg",
+      "../assets/images/location/E&T Laundry Shop/IMG_20251027_093947-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 2,
+    "name": "Green Ribbon",
+    "tags": ["Miagao Services", "Grocery"],
+    "address": "Green Ribbon Minimart, Octaviano St., Bolho, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.640541,
+      122.236712
+    ],
+    "opening_hours": [
+      "Everyday: 8am - 6pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Green Ribbon/IMG_20251027_112419-min.jpg",
+      "../assets/images/location/Green Ribbon/IMG_20251027_112422-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 3,
+    "name": "Nulada's Trading 12",
+    "tags": ["Miagao Services", "Grocery"],
+    "address": "NT Miagao, Orbe St., Baybay Norte, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641363,
+      122.237085
+    ],
+    "opening_hours": [
+      "Everyday: 7am - 8pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Nuladas/IMG_20251027_113359-min.jpg",
+      "../assets/images/location/Nuladas/IMG_20251027_113404-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 4,
+    "name": "Nochete",
+    "tags": ["Miagao Services", "Legal Services"],
+    "address": "",
+    "reformat_coords": [
+      10.641176,
+      122.235082
+    ],
+    "opening_hours": [
+      "Weekdays: 8:30AM - 12PM",
+      "Weekdays: 1PM - 4PM"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Nochete Law Office/IMG_20251027_100453-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 5,
+    "name": "Law office of atty. Mark Justic Mooc",
+    "tags": ["Miagao Services", "Legal Services"],
+    "address": "2F, Noble St., Ubos Ilawod, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.642468,
+      122.235997
+    ],
+    "opening_hours": [
+      "Weekdays: 8:30am - 11:30am",
+      "Weekdays: 1pm - 4:30pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Mark Justice Law/IMG_20251027_114132-min.jpg",
+      "../assets/images/location/Mark Justice Law/IMG_20251027_114141-min.jpg",
+      "../assets/images/location/Mark Justice Law/IMG_20251027_114236-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 6,
+    "name": "Kandingan sa Tacas Miagao",
+    "tags": ["Miagao Services", "Restaurant"],
+    "address": "Tajanlangit St., Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.642674,
+      122.234608
+    ],
+    "opening_hours": [
+      "Sun to Fri: 6am - 8pm"
+    ],
+    "contact_info": [
+      "Phone: 9991940327"
+    ],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "https://i.imgur.com/yKO1b0g.jpeg",
+      "https://i.imgur.com/aq5GVLE.jpeg",
+      "https://i.imgur.com/6vOSyeO.jpeg"
+      ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 7,
+    "name": "AK sisig house Box 1",
+    "tags": ["Miagao Services", "Restaurant"],
+    "address": "Box 1 UPV, Zulueta Avenue, Brgy. Sapa, Sapa-Miagao, Philippines, Iloilo, 5023",
+    "reformat_coords": [
+      10.640435,
+      122.231978
+    ],
+    "opening_hours": [
+      "Everyday: 6:30am - 9pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/AK Sisig House/20251027_121356-min.jpg",
+      "../assets/images/location/AK Sisig House/IMG_20251027_121353-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 8,
+    "name": "Mercury Drug Store",
+    "tags": ["Miagao Services", "Pharmacy"],
+    "address": "Zulueta Avenue, Bolho, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641182,
+      122.234390
+    ],
+    "opening_hours": [
+      "Everyday: 7am - 8pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Mercury Drug Store/IMG_20251027_094945-min.jpg",
+      "../assets/images/location/Mercury Drug Store/IMG_20251027_094946-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 9,
+    "name": "Farmacia Elna",
+    "tags": ["Miagao Services", "Pharmacy"],
+    "address": "Legaspi St., Baybay Norte, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.640840,
+      122.236847
+    ],
+    "opening_hours": [
+      "Everyday: 7:30am - 5:30pm",
+      "Sunday: 7am - 5pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Farmacia Elna/20251027_112919-min.jpg",
+      "../assets/images/location/Farmacia Elna/IMG_20251027_112830-min.jpg",
+      "../assets/images/location/Farmacia Elna/IMG_20251027_112849-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 10,
+    "name": "Double Check - Barber shop",
+    "tags": ["Miagao Services", "Barber Shop"],
+    "address": "Legaspi St., Baybay Norte, Miagao, Iloilo, Iloilo, 5023",
+    "reformat_coords": [
+      10.641126,
+      122.237447
+    ],
+    "opening_hours": [
+      "Everyday: 6am - 5pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Double Check/IMG_20251027_101801-min.jpg",
+      "../assets/images/location/Double Check/IMG_20251027_101806-min.jpg",
+      "../assets/images/location/Double Check/IMG_20251027_101821-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 11,
+    "name": "KC's BarberShop",
+    "tags": ["Miagao Services", "Barber Shop"],
+    "address": "Orbe St., Baybay Norte, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.640988,
+      122.237640
+    ],
+    "opening_hours": [
+      "Everyday: 6:30am - 5pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/KC Barber Shop/IMG_20251027_102213-min.jpg",
+      "../assets/images/location/KC Barber Shop/IMG_20251027_102222-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 12,
+    "name": "Printlab by Stanphil",
+    "tags": ["Miagao Services", "Media and Printing"],
+    "address": "2F Nite Plaza Commercial Building, Tajanlangit St. Tacas, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641780,
+      122.234923
+    ],
+    "opening_hours": [
+      "Weekdays: 9am - 6pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Printlab/20251027_092015-min.jpg",
+      "../assets/images/location/Printlab/IMG_20251027_092356-min.jpg",
+      "../assets/images/location/Printlab/IMG_20251027_113915-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 13,
+    "name": "Mitsubishi Digital",
+    "tags": ["Miagao Services", "Media and Printing"],
+    "address": "Noble St., Bolho, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.642180,
+      122.236290
+    ],
+    "opening_hours": [
+      "Everyday: 8am - 5pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 14,
+    "name": "RD Pawnshop",
+    "tags": ["Miagao Services", "Pawnshop"],
+    "address": "Rizal St., Bolho, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641579,
+      122.236402
+    ],
+    "opening_hours": [
+      "Everyday: 8am - 5pm",
+      "Sunday: 9am - 5pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/RD Pawnshop/20251027_101403-min.jpg",
+      "../assets/images/location/RD Pawnshop/IMG_20251027_101356-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 15,
+    "name": "Palawan Pawnshop",
+    "tags": ["Miagao Services", "Pawnshop"],
+    "address": "Orbe St., Baybay Norte, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641117,
+      122.237603
+    ],
+    "opening_hours": [
+      "Everyday: 8am - 5:30pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Palawan Pawnshop/20251027_101844-min.jpg",
+      "../assets/images/location/Palawan Pawnshop/IMG_20251027_102002-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 16,
+    "name": "Las Hijas",
+    "tags": ["Miagao Services", "Student Lounge"],
+    "address": "2F Novilla Bldg., Mueda St., Bolho, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.641174,
+      122.235056
+    ],
+    "opening_hours": [
+      "Everyday: 10am - 9pm"
+    ],
+    "contact_info": [
+      "Phone: 9277317956"
+    ],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Las Hijas/IMG_20251027_100316-min.jpg",
+      "../assets/images/location/Las Hijas/IMG_20251027_100413-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 17,
+    "name": "Studio SG",
+    "tags": ["Miagao Services", "Student Lounge"],
+    "address": "Sapa-Bolho Road, Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.640684,
+      122.233392
+    ],
+    "opening_hours": [
+      "Sun to Thu: 11am - 11pm"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  },
+  {
+    "id": 18,
+    "name": "Flippers E-Sports Cafe",
+    "tags": ["Miagao Services", "Computer Shop"],
+    "address": "Tajanlangit St., Miagao, Iloilo, 5023",
+    "reformat_coords": [
+      10.642304,
+      122.234654
+    ],
+    "opening_hours": [
+      "Everyday: 24/7"
+    ],
+    "contact_info": [],
+    "services": {
+      "global": []
+    },
+    "images": [
+      "../assets/images/location/Flippers/IMG_20251027_092623-min.jpg"
+    ],
+    "additional_info": {
+      "text_based": [],
+      "image_based": [],
+      "link_based": []
+    }
+  }
+]

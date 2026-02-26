@@ -1,0 +1,190 @@
+/* Access to global styles */
+@import url('./../index.css');
+
+/* Page Styles */ 
+/* MAIN GROUP: BACKGROUND */
+.LoginSection {
+    width: var(--screen-width);
+    height: 100dvh;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    padding: var(--pad-24) var(--pad-48);
+    background-color: var(--color-background);
+}
+
+.LoginSection::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;  
+    opacity: 20%; 
+    z-index: -1;
+    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-size: cover;
+}
+
+/* MAIN GROUP: HEADER */
+.LoginSection header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    /* SUBGROUP: LOGO and PAGE TITLE */
+    .logo {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .logo img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+    }
+    .logo .logo-name {
+        font-family: var(--ff-heading);
+        font-size: var(--fs-48);
+        color: white;
+    }
+    .logo .subheading {   
+        width: 30ch; 
+        margin-block: var(--mar-16) var(--mar-32);
+        text-align: center;
+        font-size: var(--fs-16);
+        font-weight: var(--fw-med);
+        letter-spacing: 0.25px;
+        color: white;
+    }
+}  
+
+/* MAIN GROUP: FORM */
+.LoginSection .form-section {
+    display: flex;
+    width: 100%;
+
+    /* SUBGROUP: FORM CONTAINER */
+    .login-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .login-container input, .login-container button {
+        width: 100%;
+        height: 54px;       
+        display: flex;
+        border-radius: 8px;
+        background-color: var(--color-primary);
+        color: white;
+        margin-block: var(--mar-4);
+    }
+    .login-container  .password-input-container {
+        position: relative;
+    }
+    .password-input-container .show-pass-btn {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        z-index: 1;
+        transform: translateY(-50%);
+        opacity: 50%;
+    }
+    .password-input-container .show-pass-btn {
+        height: 24px;
+        aspect-ratio: 1/1;
+    }
+    .login-container input {
+        opacity: 80%;
+        padding-inline: var(--pad-24);
+        box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.40);    
+    }
+    .login-container button {
+        margin-top: var(--mar-24);
+        box-shadow: 0px 2px 2px  rgba(0, 0, 0, 0.2);;
+    } 
+    .login-container .error-message {
+        color: var(--color-danger); 
+        font-size: var(--fs-12); 
+        margin-top: var(--mar-8);
+        margin-bottom: var(--mar-8); 
+        padding: var(--pad-8);
+        background-color: #ffdddd; 
+        border: 1px solid var(--color-danger);
+        border-radius: 4px;
+        text-align: center;
+    }
+}
+
+
+/* MAIN GROUP: EXTRA INFO */
+.LoginSection .register-description-section {
+    margin-top: var(--mar-32);
+    text-align: center;
+    font-size: var(--fs-16);
+    letter-spacing: 0.5px;
+    color: white;
+
+    /* SUB GROUP: LINK */
+    .to-register-ref {
+        font-weight: var(--fw-bold);
+        text-decoration: underline;
+        color: var(--color-accent-1);
+        cursor: pointer;
+    }
+}
+
+/* MAIN GROUP: FOOTER */
+.LoginSection footer {
+    width: 100%;
+    height: 50px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-footer);
+
+    /* SUBGROUP: NAVIGATION */
+    nav {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center; 
+    }
+    nav ul {
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;   
+        align-items: center;
+        padding: 0;
+        list-style: none;
+    }
+    nav .navigation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 20%;
+    }
+    nav .active {
+        opacity: 100% !important;
+    }
+    nav .icon {
+        width: 24px;
+        height: 24px;
+    }
+    nav .label {
+        font-size: var(--fs-12);
+        font-weight: var(--fw-med);
+        letter-spacing: 0.5px;
+        color: var(--color-accent-2);
+    }
+}

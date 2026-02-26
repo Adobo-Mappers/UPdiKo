@@ -1,0 +1,352 @@
+/* Access to global styles */
+@import url('./../index.css');
+
+/* Access to global styles */
+@import url('./../index.css');
+
+/* Page Styles */ 
+/* MAIN GROUP: BACKGROUND */
+.AccountUpdateSection {
+    width: var(--screen-width);
+    height: 100dvh;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: auto;
+    padding: var(--pad-24) var(--pad-48);
+    background-color: var(--color-background);
+}
+
+.AccountUpdateSection::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;  
+    opacity: 20%; 
+    z-index: -1;
+    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-size: cover;
+}
+
+
+
+/* MAIN GROUP: HEADER */
+.AccountUpdateSection header {
+    width: 100%;
+    height: 150px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    grid-template-columns: 1fr 40px;
+    padding-top: var(--pad-32);
+    padding-inline: var(--pad-16);
+    background-color: var(--color-primary);
+
+
+    /* SUBGROUP: PROFILE */
+    .profile {
+        width: 100%;
+        display: flex;
+    }
+    
+    /* SUBGROUP: LOGO */
+    .logo img {
+        height: 60px;
+        aspect-ratio: 1/1;
+        border-radius: 50%;
+    }
+    
+    /* SUBGROUP: PROFILE INFO */
+    .information {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        margin-left: var(--mar-16);
+        color: white;
+    }
+    .information .name {
+        font-size: var(--fs-28);
+        font-family: var(--ff-heading);
+        line-height: 100%;
+        letter-spacing: 1px;
+    }
+    .information .email {
+        margin-top: var(--mar-8);
+        font-size: var(--fs-14);
+    }
+
+    /* SUBGROUP: LOGO */
+    .buttons .logout-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        background-color: var(--color-accent-2);
+    }
+    .logout-icon img {
+        height: 20px;
+        width: 20x;
+    }
+}   
+
+
+/* MAIN GROUP: SECTION-HEADER */
+.AccountUpdateSection .section-name {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 170px;
+
+    /* SUBGROUP: HEADING*/
+    hgroup {
+        color: white;
+    }
+    hgroup h1 {
+        font-size: var(--fs-32);
+        font-family: var(--ff-heading);
+    }
+    hgroup h2 {
+        font-size: var(--fs-14);
+    }
+
+    /* BUTTON */
+    .back-button {
+        width: 28px;
+        height: 28px;       
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        background-color: var(--color-accent-2);
+    }
+    .back-button img {
+        height: 20px;
+        width: 20px;
+    }
+}  
+
+/* MAIN GROUP: FORM */
+.AccountUpdateSection .form-section {
+    display: flex;
+    width: 100%;
+    margin-top: var(--mar-32);
+    
+    /* SUBGROUP: FORM CONTAINER */
+    .register-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .register-container input, .register-container button {
+        width: 100%;
+        height: 54px;       
+        display: flex;
+        border-radius: 8px;
+        background-color: var(--color-primary);
+        color: white;
+        margin-block: var(--mar-4);
+    }
+    .register-container  .password-input-container {
+        position: relative;
+    }
+    .password-input-container .show-pass-btn {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        z-index: 1;
+        transform: translateY(-50%);
+        opacity: 50%;
+    }
+    .password-input-container .show-pass-btn {
+        height: 24px;
+        aspect-ratio: 1/1;
+    }
+    .register-container input {
+        opacity: 80%;
+        padding-inline: var(--pad-24);
+        box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.40);    
+    }
+    .register-container button {
+        margin-top: var(--mar-24);
+        box-shadow: 0px 2px 2px  rgba(0, 0, 0, 0.2);;
+    }  
+    .register-container .error-message {
+        color: var(--color-danger); 
+        font-size: var(--fs-12); 
+        margin-top: var(--mar-8);
+        margin-bottom: var(--mar-8); 
+        padding: var(--pad-8);
+        background-color: #ffdddd; 
+        border: 1px solid var(--color-danger);
+        border-radius: 4px;
+        text-align: center;
+    }
+}
+
+.AccountUpdateSection footer {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    background-color: var(--color-very-light);
+}
+
+.AccountUpdateSection .nav-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    padding-block: var(--pad-8);
+}
+
+.AccountUpdateSection .navigations {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs-12);
+    color: var(--color-dark);
+    cursor: pointer;
+}
+
+.AccountUpdateSection .navigations img {
+    width: 24px;
+    aspect-ratio: 1/1;
+    filter: opacity(0.5);
+    margin-bottom: var(--mar-4);
+} 
+
+/* MAIN GROUP: FOOTER */
+.AccountUpdateSection footer {
+    width: 100%;
+    height: 50px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-footer);
+
+    /* SUBGROUP: NAVIGATION */
+    nav {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center; 
+    }
+    nav ul {
+        width: 100%;
+        display: flex;
+        justify-content: space-evenly;   
+        align-items: center;
+        padding: 0;
+        list-style: none;
+    }
+    nav .navigation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 20%;
+    }
+    nav .active {
+        opacity: 100% !important;
+    }
+    nav .icon {
+        width: 24px;
+        height: 24px;
+    }
+    nav .label {
+        font-size: var(--fs-12);
+        font-weight: var(--fw-med);
+        letter-spacing: 0.5px;
+        color: var(--color-accent-2);
+    }
+}
+
+.AccountUpdateSection .modal {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100% - 64px);
+    margin: var(--mar-32);
+    padding: var(--mar-24);
+    height: 250px;
+    background-color: var(--color-background);
+    z-index: 2;
+    box-shadow: 0px 4px 4px  rgba(0, 0, 0, 0.2);;
+
+    .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        justify-self: right;
+        align-items: center;
+        background-color: var(--color-accent-2);
+    }
+    .close-btn img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dialogue {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    p {
+        color: white;
+    }
+    input {
+        display: flex;
+        margin-block: var(--pad-16);
+        width: 100%;
+        height: 54px;          
+        background-color: var(--color-primary);
+        color: white;
+        padding-block: var(--pad-16);
+        opacity: 80%;
+    }
+    button {
+        width: 100%;
+        background-color: var(--color-primary);
+        border-radius: 10px;
+        height: 54px;          
+        padding-block: var(--pad-16);
+        color: white;
+    }
+}
+.AccountUpdateSection .modal::before {
+    content: "";
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;  
+    opacity: 20%; 
+    z-index: -1;
+    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-size: cover;
+} 
+
+
+
