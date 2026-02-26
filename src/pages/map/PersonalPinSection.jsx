@@ -1,16 +1,16 @@
 import './PersonalPinSection.css'
 
-import mascot from '../assets/images/logo/logo.png'
-import homeIcon from '../assets/images/icon/home-icon.png'
-import mapIcon from '../assets/images/icon/map-pin-icon.png'
-import accountIcon from '../assets/images/icon/user-icon.png'
-import bookmarkIcon from '../assets/images/icon/saved-icon.png'
-import logoutIcon from '../assets/images/icon/logout-icon.png'
-import backIcon from '../assets/images/icon/back-icon-2.png'
+import mascot from '../../assets/images/logo/logo.png'
+import homeIcon from '../../assets/images/icon/home-icon.png'
+import mapIcon from '../../assets/images/icon/map-pin-icon.png'
+import accountIcon from '../../assets/images/icon/user-icon.png'
+import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
+import logoutIcon from '../../assets/images/icon/logout-icon.png'
+import backIcon from '../../assets/images/icon/back-icon-2.png'
 
 import { useState, useEffect } from 'react';
 
-import { getCurrentUser, logOut, getPinnedLocationsFromDB, deletePinnedLocationFromDB } from '../services/firebase/firebase.js';
+import { getCurrentUser, logOut, getPinnedLocationsFromDB, deletePinnedLocationFromDB } from '../../services/firebase/firebase.js';
 
 function PersonalPinSection({setAppSection, setAppService}) {  
     

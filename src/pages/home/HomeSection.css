@@ -1,9 +1,9 @@
 /* Access to global styles */
-@import url('./../index.css');
+@import url('./../../index.css');
 
 
 /* MAIN GROUP: BACKGROUND */
-.StartSection {
+.HomeSection {
     position: relative;
     z-index: 1;
     width: var(--screen-width);
@@ -13,7 +13,7 @@
     background-color: var(--color-background);
 }
 
-.StartSection::before {
+.HomeSection::before {
     content: "";
     position: absolute;
     top: 0; 
@@ -22,13 +22,13 @@
     height: 100%;  
     opacity: 20%; 
     z-index: -1;
-    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-image: url('./../../../assets/images/bg/mountain-1.jpg');
     background-size: cover;
 }
 
 
 /* MAIN GROUP: HEADER */
-.StartSection header {
+.HomeSection header {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -70,7 +70,7 @@
 }   
 
 /* MAIN GROUP: SEARCH SECTION */
-.StartSection .search-section {
+.HomeSection .search-section {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -109,7 +109,7 @@
 }
 
 /* MAIN GROUP: SERVICE SECTION */
-.StartSection .service-section {
+.HomeSection .service-section {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -235,7 +235,7 @@
 }
 
 /* MAIN GROUP: FOOTER */
-.StartSection footer {
+.HomeSection footer {
     width: 100%;
     height: 50px;
     position: absolute;

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import MapSection from './pages/MapSection.jsx';
-import StartSection from './pages/StartSection.jsx';
-import AccountSection from './pages/AccountSection.jsx';
-import LoginSection from './pages/LoginSection.jsx';
-import RegisterSection from './pages/RegisterSection.jsx';
-import AccountInfoSection from './pages/AccountInfoSection.jsx';
-import AccountUpdateSection from './pages/AccountUpdateSection.jsx';
-import PersonalPinSection from './pages/PersonalPinSection.jsx';
+import MapSection from './pages/map/MapSection.jsx';
+import HomeSection from './pages/home/HomeSection.jsx';
+import AccountSection from './pages/account/AccountSection.jsx';
+import LoginSection from './pages/auth/LoginSection.jsx';
+import RegisterSection from './pages/auth/RegisterSection.jsx';
+import AccountInfoSection from './pages/account/AccountInfoSection.jsx';
+import AccountUpdateSection from './pages/account/AccountUpdateSection.jsx';
+import PersonalPinSection from './pages/map/PersonalPinSection.jsx';
 
 function App() {
     /** 
@@ -30,7 +30,7 @@ function App() {
      */
     switch (section) {
     case "HOME":
-        return <StartSection setAppSection={setSection} setAppService={setService} />;
+        return <HomeSection setAppSection={setSection} setAppService={setService} />;
     case "MAP":
         return <MapSection setAppSection={setSection} service={service} setAppService={setService} />;
     case "ACCOUNT":
@@ -44,7 +44,7 @@ function App() {
     case "PERSONAL-PIN":
         return <PersonalPinSection setAppSection={setSection} />;
     default:
-        return <StartSection setAppSection={setSection} setAppService={setService} />; // Fallback
+        return <HomeSection setAppSection={setSection} setAppService={setService} />; // Fallback
     }
 }
 

@@ -3,22 +3,22 @@
  * but this means that to get image files, json files, css files, and such, we import them.
  * 
  */ 
-import './StartSection.css'
+import './HomeSection.css'
 
-import mascot from '../assets/images/logo/logo.png'
-import homeIcon from '../assets/images/icon/home-icon.png'
-import mapIcon from '../assets/images/icon/map-pin-icon.png'
-import accountIcon from '../assets/images/icon/user-icon.png'
-import searchIcon from '../assets/images/icon/search-icon.png'
+import mascot from '../../assets/images/logo/logo.png'
+import homeIcon from '../../assets/images/icon/home-icon.png'
+import mapIcon from '../../assets/images/icon/map-pin-icon.png'
+import accountIcon from '../../assets/images/icon/user-icon.png'
+import searchIcon from '../../assets/images/icon/search-icon.png'
 
-import serviceTagsData from '../assets/json/tags.json';
-import campusServicesData from '../assets/json/campus-facilities.json';
-import communityServicesData from '../assets/json/miagao-facilities.json';
+import serviceTagsData from '../../assets/json/tags.json';
+import campusServicesData from '../../assets/json/campus-facilities.json';
+import communityServicesData from '../../assets/json/miagao-facilities.json';
 
 import { use, useState } from 'react';
-import { onAuthStateChangedListener, getCurrentUser } from '../services/firebase/firebase.js'
+import { onAuthStateChangedListener, getCurrentUser } from '../../services/firebase/firebase.js'
 
-function StartSection({setAppSection, setAppService}) {
+function HomeSection({setAppSection, setAppService}) {
     /* For searching services through the search bar or filtering displayed services with tags */
     const [activeCategory, setCategory] = useState("All")          
     const [searchQuery, setSearchQuery] = useState("") 
@@ -43,7 +43,7 @@ function StartSection({setAppSection, setAppService}) {
     });
 
     return (
-        <div className="StartSection">
+        <div className="HomeSection">
             <header> 
                 <figure className='logo'>
                     <img src={mascot} alt='Logo Image'></img>
@@ -116,4 +116,4 @@ function StartSection({setAppSection, setAppService}) {
     )
 }
 
-export default StartSection;
+export default HomeSection;

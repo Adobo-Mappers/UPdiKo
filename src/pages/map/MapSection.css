@@ -1,5 +1,5 @@
 /* Access to global styles */
-@import url('./../index.css');
+@import url('./../../index.css');
 
 
 /* MAIN GROUP: BACKGROUND */
@@ -21,7 +21,7 @@
     height: 100%;  
     opacity: 20%; 
     z-index: -1;
-    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-image: url('./../../../assets/images/bg/mountain-1.jpg');
     background-size: cover;
 }
 
@@ -166,7 +166,7 @@
     height: 100%;  
     opacity: 20%; 
     z-index: -1;
-    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-image: url('./../../../assets/images/bg/mountain-1.jpg');
     background-size: cover;
 }
 
@@ -202,7 +202,7 @@
         height: 100%;  
         opacity: 20%; 
         z-index: -1;
-        background-image: url('./../assets/images/bg/pin-info-ng.png');
+        background-image: url('./../../../assets/images/bg/pin-info-ng.png');
         background-size: cover;
     }
 }
@@ -257,7 +257,7 @@
     height: 100%;  
     opacity: 20%; 
     z-index: -1;
-    background-image: url('./../assets/images/bg/pin-info-ng.png');
+    background-image: url('./../../../assets/images/bg/pin-info-ng.png');
     background-size: cover;
 }
 

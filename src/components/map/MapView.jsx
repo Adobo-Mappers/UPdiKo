@@ -6,16 +6,16 @@ import "./MapView.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import closeIcon from '../assets/images/icon/close-icon.png';
-import timeIcon from '../assets/images/icon/time-icon.png';
-import userPinIcon from '../assets/images/icon/5.png';
-import communityPinIcon from '../assets/images/icon/3.png';
-import universityPinIcon from '../assets/images/icon/4.png';
-import customPinIcon from '../assets/images/icon/6.png';
+import closeIcon from '../../assets/images/icon/close-icon.png';
+import timeIcon from '../../assets/images/icon/time-icon.png';
+import userPinIcon from '../../assets/images/icon/5.png';
+import communityPinIcon from '../../assets/images/icon/3.png';
+import universityPinIcon from '../../assets/images/icon/4.png';
+import customPinIcon from '../../assets/images/icon/6.png';
 
-import { onAuthStateChangedListener, getPinnedLocationsFromDB } from "../services/firebase/firebase.js";
-import Miagao from "../assets/json/miagao-facilities.json"
-import Campus from "../assets/json/campus-facilities.json"
+import { onAuthStateChangedListener, getPinnedLocationsFromDB } from "../../services/firebase/firebase.js";
+import Miagao from "../../assets/json/miagao-facilities.json"
+import Campus from "../../assets/json/campus-facilities.json"
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;

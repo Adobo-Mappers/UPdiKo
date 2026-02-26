@@ -1,22 +1,22 @@
 import './MapSection.css'
 
-import searchIcon from '../assets/images/icon/search-icon.png'
-import homeIcon from '../assets/images/icon/home-icon.png'
-import mapIcon from '../assets/images/icon/map-pin-icon.png'
-import accountIcon from '../assets/images/icon/user-icon.png';
-import compassIcon from '../assets/images/icon/compass-icon.png';
-import backIcon from '../assets/images/icon/back-icon.png';
-import closeIcon from '../assets/images/icon/close-icon.png';
-import nextIcon from '../assets/images/icon/next-icon.png';
+import searchIcon from '../../assets/images/icon/search-icon.png'
+import homeIcon from '../../assets/images/icon/home-icon.png'
+import mapIcon from '../../assets/images/icon/map-pin-icon.png'
+import accountIcon from '../../assets/images/icon/user-icon.png';
+import compassIcon from '../../assets/images/icon/compass-icon.png';
+import backIcon from '../../assets/images/icon/back-icon.png';
+import closeIcon from '../../assets/images/icon/close-icon.png';
+import nextIcon from '../../assets/images/icon/next-icon.png';
 
-import campusServicesData from '../assets/json/campus-facilities.json';
-import communityServicesData from '../assets/json/miagao-facilities.json';
+import campusServicesData from '../../assets/json/campus-facilities.json';
+import communityServicesData from '../../assets/json/miagao-facilities.json';
 import { act, useState, useEffect, useRef } from 'react';
 
-import { getCurrentUser, addPinnedLocationToDB } from '../services/firebase/firebase.js';
+import { getCurrentUser, addPinnedLocationToDB } from '../../services/firebase/firebase.js';
 
 import React from "react";
-import MapView from "../components/MapView.jsx";
+import MapView from "../../components/map/MapView.jsx";
 
 function MapSection({setAppSection, service, setAppService}) {   
     /* Search Location Logic */

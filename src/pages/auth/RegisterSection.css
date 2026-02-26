@@ -1,9 +1,12 @@
 /* Access to global styles */
-@import url('./../index.css');
+@import url('./../../index.css');
+
+/* Access to global styles */
+@import url('./../../index.css');
 
 /* Page Styles */ 
 /* MAIN GROUP: BACKGROUND */
-.LoginSection {
+.RegisterSection {
     width: var(--screen-width);
     height: 100dvh;
     position: relative;
@@ -17,7 +20,7 @@
     background-color: var(--color-background);
 }
 
-.LoginSection::before {
+.RegisterSection::before {
     content: "";
     position: absolute;
     top: 0; 
@@ -26,12 +29,12 @@
     height: 100%;  
     opacity: 20%; 
     z-index: -1;
-    background-image: url('./../assets/images/bg/mountain-1.jpg');
+    background-image: url('./../../../assets/images/bg/mountain-1.jpg');
     background-size: cover;
 }
 
 /* MAIN GROUP: HEADER */
-.LoginSection header {
+.RegisterSection header {
     width: 100%;
     display: flex;
     justify-content: center;
@@ -53,30 +56,22 @@
         font-size: var(--fs-48);
         color: white;
     }
-    .logo .subheading {   
-        width: 30ch; 
-        margin-block: var(--mar-16) var(--mar-32);
-        text-align: center;
-        font-size: var(--fs-16);
-        font-weight: var(--fw-med);
-        letter-spacing: 0.25px;
-        color: white;
-    }
 }  
 
 /* MAIN GROUP: FORM */
-.LoginSection .form-section {
+.RegisterSection .form-section {
     display: flex;
     width: 100%;
-
+    margin-top: var(--mar-16);
+    
     /* SUBGROUP: FORM CONTAINER */
-    .login-container {
+    .register-container {
         width: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
     }
-    .login-container input, .login-container button {
+    .register-container input, .register-container button {
         width: 100%;
         height: 54px;       
         display: flex;
@@ -85,7 +80,7 @@
         color: white;
         margin-block: var(--mar-4);
     }
-    .login-container  .password-input-container {
+    .register-container  .password-input-container {
         position: relative;
     }
     .password-input-container .show-pass-btn {
@@ -100,16 +95,16 @@
         height: 24px;
         aspect-ratio: 1/1;
     }
-    .login-container input {
+    .register-container input {
         opacity: 80%;
         padding-inline: var(--pad-24);
         box-shadow: inset 0 4px 4px rgba(0, 0, 0, 0.40);    
     }
-    .login-container button {
+    .register-container button {
         margin-top: var(--mar-24);
         box-shadow: 0px 2px 2px  rgba(0, 0, 0, 0.2);;
-    } 
-    .login-container .error-message {
+    }  
+    .register-container .error-message {
         color: var(--color-danger); 
         font-size: var(--fs-12); 
         margin-top: var(--mar-8);
@@ -124,7 +119,7 @@
 
 
 /* MAIN GROUP: EXTRA INFO */
-.LoginSection .register-description-section {
+.RegisterSection .register-description-section {
     margin-top: var(--mar-32);
     text-align: center;
     font-size: var(--fs-16);
@@ -141,7 +136,7 @@
 }
 
 /* MAIN GROUP: FOOTER */
-.LoginSection footer {
+.RegisterSection footer {
     width: 100%;
     height: 50px;
     position: absolute;
@@ -188,3 +183,8 @@
         color: var(--color-accent-2);
     }
 }
+
+
+
+
+

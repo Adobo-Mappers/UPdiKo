@@ -1,13 +1,13 @@
 import './AccountSection.css';
 
-import mascot from '../assets/images/logo/logo.png'
-import homeIcon from '../assets/images/icon/home-icon.png'
-import mapIcon from '../assets/images/icon/map-pin-icon.png'
-import accountIcon from '../assets/images/icon/user-icon.png'
-import bookmarkIcon from '../assets/images/icon/saved-icon.png'
-import logoutIcon from '../assets/images/icon/logout-icon.png'
+import mascot from '../../assets/images/logo/logo.png'
+import homeIcon from '../../assets/images/icon/home-icon.png'
+import mapIcon from '../../assets/images/icon/map-pin-icon.png'
+import accountIcon from '../../assets/images/icon/user-icon.png'
+import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
+import logoutIcon from '../../assets/images/icon/logout-icon.png'
 
-import { logOut, getCurrentUser, getUserDataFromDB } from '../services/firebase/firebase.js';
+import { logOut, getCurrentUser, getUserDataFromDB } from '../../services/firebase/firebase.js';
 import { useRef, useState, useEffect } from "react";
 
 function AccountSection({ setAppSection}) {    

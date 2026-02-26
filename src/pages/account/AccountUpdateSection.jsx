@@ -1,14 +1,14 @@
 import "./AccountUpdateSection.css";
-import mascot from '../assets/images/logo/logo.png'
-import homeIcon from '../assets/images/icon/home-icon.png'
-import mapIcon from '../assets/images/icon/map-pin-icon.png'
-import accountIcon from '../assets/images/icon/user-icon.png'
-import showPassIcon from '../assets/images/icon/view-pass-icon.png'
-import hidePassIcon from '../assets/images/icon/hide-pass-icon.png'
-import bookmarkIcon from '../assets/images/icon/saved-icon.png'
-import logoutIcon from '../assets/images/icon/logout-icon.png'
-import backIcon from '../assets/images/icon/back-icon-2.png'
-import closeIcon from '../assets/images/icon/close-icon.png'
+import mascot from '../../assets/images/logo/logo.png'
+import homeIcon from '../../assets/images/icon/home-icon.png'
+import mapIcon from '../../assets/images/icon/map-pin-icon.png'
+import accountIcon from '../../assets/images/icon/user-icon.png'
+import showPassIcon from '../../assets/images/icon/view-pass-icon.png'
+import hidePassIcon from '../../assets/images/icon/hide-pass-icon.png'
+import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
+import logoutIcon from '../../assets/images/icon/logout-icon.png'
+import backIcon from '../../assets/images/icon/back-icon-2.png'
+import closeIcon from '../../assets/images/icon/close-icon.png'
 
 import {
   getCurrentUser,
@@ -16,7 +16,7 @@ import {
   updateUserPassword,
   saveUserDataToDB,
   logOut
-} from "../services/firebase/firebase.js";
+} from "../../services/firebase/firebase.js";
 
 import { useEffect, useState } from "react";
 function AccountUpdateSection({ setAppSection, redirect, setAppRedirectBody}) {

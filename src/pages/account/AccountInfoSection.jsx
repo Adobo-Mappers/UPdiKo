@@ -1,8 +1,8 @@
 import './AccountInfoSection.css';
-import homeIcon from '../assets/images/icon/home-icon.png'
-import mapIcon from '../assets/images/icon/map-pin-icon.png'
-import accountIcon from '../assets/images/icon/user-icon.png'
-import { getCurrentUser } from '../services/firebase/firebase.js';
+import homeIcon from '../../assets/images/icon/home-icon.png'
+import mapIcon from '../../assets/images/icon/map-pin-icon.png'
+import accountIcon from '../../assets/images/icon/user-icon.png'
+import { getCurrentUser } from '../../services/firebase/firebase.js';
 import { useRef, useState } from "react";
 
 function AccountInfoSection({ setAppSection }) {
