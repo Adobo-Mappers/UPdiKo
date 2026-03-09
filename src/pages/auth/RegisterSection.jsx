@@ -1,5 +1,5 @@
 import './RegisterSection.css';
-import { signUp, saveUserDataToDB, updateUserProfile } from "../../services/firebase/firebase.js"; 
+import { signUp, saveUserDataToDB, updateUserProfile } from "../../services/supabase.js";
 
 import mascot from '../../assets/images/logo/logo.png'
 import homeIcon from '../../assets/images/icon/home-icon.png'
@@ -18,17 +18,18 @@ function RegisterSection({ setAppSection }) {
         setVisible(!isVisible);
     }
 
-    const mapFirebaseError = (error) => {
-        switch (error.code) {
-            case 'auth/email-already-in-use':
-                return "This email address is already registered. Please log in.";
-            case 'auth/invalid-email':
-                return "The email address is not in a valid format.";
-            case 'auth/weak-password':
-                return "The password must be at least 6 characters long.";
-            default:
-                return "Registration failed. Please check your inputs and try again.";
+    const mapSupabaseError = (error) => {
+        const msg = error.message?.toLowerCase() ?? "";
+        if (msg.includes("user already registered") || msg.includes("already been registered")) {
+            return "This email address is already registered. Please log in.";
         }
+        if (msg.includes("invalid email") || msg.includes("unable to validate email")) {
+            return "The email address is not in a valid format.";
+        }
+        if (msg.includes("password should be at least") || msg.includes("weak password")) {
+            return "The password must be at least 6 characters long.";
+        }
+        return "Registration failed. Please check your inputs and try again.";
     };
 
     
@@ -62,7 +63,7 @@ function RegisterSection({ setAppSection }) {
             setAppSection("HOME");
         } catch (error) {
             console.error("Error creating account:", error);
-            setErrorMessage(mapFirebaseError(error));
+            setErrorMessage(mapSupabaseError(error));
         }
     }
     
