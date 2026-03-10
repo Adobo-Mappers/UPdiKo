@@ -1,5 +1,6 @@
 // SearchBar.jsx
 import { useState } from "react";
+import { supabase } from "../../services/supabase.js";
 
 export default function SearchBar({ onSelectLocation }) {
   const [query, setQuery] = useState("");
@@ -13,21 +14,20 @@ export default function SearchBar({ onSelectLocation }) {
       return;
     }
 
-    // const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-    //   value
-    // )}`;
-    
-    const url = `http://localhost:4000/search?q=${query}`;
+    // Search static_locations using Supabase's ILIKE — powered by the pg_trgm index.
+    // Searches both name and address fields, returns up to 8 results.
+    const { data, error } = await supabase
+      .from("static_locations")
+      .select("id, name, address, latitude, longitude, tags, location_type")
+      .or(`name.ilike.%${value}%,address.ilike.%${value}%`)
+      .limit(8);
 
-    const res = await fetch(url
-    //     , {
-    //   headers: {
-    //     "User-Agent": "your-app-name", // required by OSM
-    //   },
-    // }
-    );
+    if (error) {
+      console.error("Error searching locations:", error);
+      setResults([]);
+      return;
+    }
 
-    const data = await res.json();
     setResults(data);
   };
 
@@ -63,13 +63,14 @@ export default function SearchBar({ onSelectLocation }) {
         >
           {results.map((place) => (
             <div
-              key={place.place_id}
+              key={place.id}
               onClick={() => {
                 onSelectLocation({
-                  lat: parseFloat(place.lat),
-                  lng: parseFloat(place.lon),
+                  lat: parseFloat(place.latitude),
+                  lng: parseFloat(place.longitude),
                 });
-                setQuery(place.display_name);
+                // Show name in the search bar after selecting
+                setQuery(place.name);
                 setResults([]);
               }}
               style={{
@@ -78,7 +79,11 @@ export default function SearchBar({ onSelectLocation }) {
                 borderBottom: "1px solid #eee",
               }}
             >
-              {place.display_name}
+              {/* Name as primary label, address as secondary hint */}
+              <div style={{ fontWeight: 500 }}>{place.name}</div>
+              {place.address && (
+                <div style={{ fontSize: "12px", color: "#888" }}>{place.address}</div>
+              )}
             </div>
           ))}
         </div>
