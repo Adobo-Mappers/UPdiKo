@@ -236,9 +236,12 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   };
 
   const handleServiceClick = (selectedService) => {
-    if (selectedService) {
-      handleMarkerClick({...selectedService, type: selectedService.location_type ?? "community"}, parseFloat(selectedService.latitude), parseFloat(selectedService.longitude))
-    }
+    if (!selectedService) return;
+    handleMarkerClick(
+      { ...selectedService, type: selectedService.location_type ?? "community" },
+      parseFloat(selectedService.latitude),
+      parseFloat(selectedService.longitude)
+    );
   }
 
   useEffect(() => {
@@ -308,8 +311,6 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
     return facility.name && facility.name.includes(selectedService.name);
   };
 
-  const STADIA_API_KEY = import.meta.env.VITE_STADIA_API_KEY;
-
   return (
     <div className="MapView">
       <MapContainer center={center} zoom={mapZoom} style={{ width: "100%", height: "100%", zIndex: 0}} zoomControl={false}>
@@ -317,7 +318,7 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
         {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`}
+          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
         />
         {/* Render the user's current location marker and tracking logic */}
         <UserLocationMarker coords={currentCoords} trackingEnabled={trackingEnabled} />
