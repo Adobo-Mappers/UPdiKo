@@ -8,7 +8,7 @@ import showPassIcon from '../../assets/images/icon/view-pass-icon.png'
 import hidePassIcon from '../../assets/images/icon/hide-pass-icon.png'
 
 import { useState } from "react" 
-import { logIn } from "../../services/firebase/firebase.js"; 
+import { logIn } from "../../services/supabase.js";
 
 function LoginSection({ setAppSection }) {
     const [isVisible, setVisible] = useState(false);

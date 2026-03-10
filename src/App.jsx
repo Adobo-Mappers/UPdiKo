@@ -42,7 +42,7 @@ function App() {
     case "REGISTER":
         return <RegisterSection setAppSection={setSection} />;
     case "PERSONAL-PIN":
-        return <PersonalPinSection setAppSection={setSection} />;
+        return <PersonalPinSection setAppSection={setSection} setAppService={setService} />;
     default:
         return <HomeSection setAppSection={setSection} setAppService={setService} />; // Fallback
     }

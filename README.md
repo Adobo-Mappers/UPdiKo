@@ -59,10 +59,11 @@ src/
 ## Logic and View Layer
 
 ```
-App.jsx             # responsible for site requests
-├─ pages/           # contains website applets
-├─ components/      # contains reusable ui components
+src/
 ├─ assets/          # contains image and static data assets
+├─ components/      # contains reusable ui components
+├─ pages/           # contains website applets
+├─ App.jsx	        # responsible for site requests
 ```
 
 ## Services Layer
@@ -90,14 +91,14 @@ pages/
 │  ├─ PersonalPinSection.jsx	    # displays and manages personal pins
 ```
 
-## Pages Folder Structure
+## Components Folder Structure
 
 ```
 components/
 ├─ map/                        
 │  ├─ MapView.jsx		# displays user account details
 	                    # main account page, displays account actions
-│  ├─ ASearchBar.jsx	# search component for public location data
+│  ├─ SearchBar.jsx	# search component for public location data
 ```   
 
 # License

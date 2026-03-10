@@ -13,9 +13,7 @@ import communityPinIcon from '../../assets/images/icon/3.png';
 import universityPinIcon from '../../assets/images/icon/4.png';
 import customPinIcon from '../../assets/images/icon/6.png';
 
-import { onAuthStateChangedListener, getPinnedLocationsFromDB } from "../../services/firebase/firebase.js";
-import Miagao from "../../assets/json/miagao-facilities.json"
-import Campus from "../../assets/json/campus-facilities.json"
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -213,9 +211,10 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
-  const [pinnedLocations, setPinnedLocations] = useState([]); // NEW
-  const [selectedMarkerInfo, setSelectedMarkerInfo] = useState(selectedService); // NEW state
-  const [selectedPanelTab, setSelectedPanelTab] = useState("About"); // NEW state
+  const [pinnedLocations, setPinnedLocations] = useState([]);
+  const [staticLocations, setStaticLocations] = useState([]); // replaces Miagao/Campus JSON imports
+  const [selectedMarkerInfo, setSelectedMarkerInfo] = useState(selectedService);
+  const [selectedPanelTab, setSelectedPanelTab] = useState("About");
   const [tempLocation, setTempLocation] = useState(null);
 
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
@@ -237,9 +236,12 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   };
 
   const handleServiceClick = (selectedService) => {
-    if (selectedService) {
-      handleMarkerClick({...selectedService, type: "Miagao"}, selectedService.reformat_coords[0], selectedService.reformat_coords[1])
-    }
+    if (!selectedService) return;
+    handleMarkerClick(
+      { ...selectedService, type: selectedService.location_type ?? "community" },
+      parseFloat(selectedService.latitude),
+      parseFloat(selectedService.longitude)
+    );
   }
 
   useEffect(() => {
@@ -256,7 +258,7 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   useEffect(() => {
     const unsubscribe = onAuthStateChangedListener(async (user) => {
       if (user) {
-        const pins = await getPinnedLocationsFromDB(user.uid);
+        const pins = await getPinnedLocationsFromDB(user.id);
         setPinnedLocations(
           pins.map((pin) => ({
             id: pin.id,
@@ -276,6 +278,23 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
     });
     return () => unsubscribe();
   }, []);
+  // Replaces static JSON imports — fetch all locations from Supabase static_locations table
+  useEffect(() => {
+    const fetchStaticLocations = async () => {
+      const { data, error } = await supabase
+        .from("static_locations")
+        .select("id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type");
+
+      if (error) {
+        console.error("Error fetching static locations:", error);
+        return;
+      }
+      setStaticLocations(data);
+    };
+    fetchStaticLocations();
+  }, []);
+
+
 
   if (loading) {
     return (
@@ -292,19 +311,14 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
     return facility.name && facility.name.includes(selectedService.name);
   };
 
-  const STADIA_API_KEY = import.meta.env.VITE_STADIA_API_KEY;
-  
-  return (  
+  return (
     <div className="MapView">
       <MapContainer center={center} zoom={mapZoom} style={{ width: "100%", height: "100%", zIndex: 0}} zoomControl={false}>
         <ChangeView center={center} zoom={mapZoom} />
-        {/* <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        /> */}
+        {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
-            attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-            url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`}
+          attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
         />
         {/* Render the user's current location marker and tracking logic */}
         <UserLocationMarker coords={currentCoords} trackingEnabled={trackingEnabled} />
@@ -338,13 +352,20 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
             {/* <Popup>{pin.name}</Popup> */}
           </Marker>
         ))}
-        {Miagao.filter(shouldShowMarker).map((facility) => (
-          <Marker key={facility.id} position={facility.reformat_coords} icon={communityIcon} eventHandlers={{ click: () => {handleMarkerClick({...facility, type: "Miagao"}, facility.reformat_coords[0], facility.reformat_coords[1])} }}>
-            {/* <Popup>{facility.name}</Popup> */}
-          </Marker>
-        ))}
-        {Campus.filter(shouldShowMarker).map((facility) => (
-          <Marker key={facility.id} position={facility.reformat_coords} icon={universityIcon} eventHandlers={{ click: () => {handleMarkerClick({...facility, type: "Campus"}, facility.reformat_coords[0], facility.reformat_coords[1])} }}>
+        {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
+        {staticLocations.filter(shouldShowMarker).map((facility) => (
+          <Marker
+            key={facility.id}
+            position={[parseFloat(facility.latitude), parseFloat(facility.longitude)]}
+            icon={facility.location_type === "campus" ? universityIcon : communityIcon}
+            eventHandlers={{ click: () => {
+              handleMarkerClick(
+                { ...facility, type: facility.location_type },
+                parseFloat(facility.latitude),
+                parseFloat(facility.longitude)
+              );
+            }}}
+          >
             {/* <Popup>{facility.name}</Popup> */}
           </Marker>
         ))} 
