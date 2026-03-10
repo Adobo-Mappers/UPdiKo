@@ -164,16 +164,45 @@ export async function updateUserProfile(updates) {
 }
 
 // Replaces: saveUserDataToDB(uid, data)
-// Upserts a row in public.users (insert or update if exists)
+// Tries to update an existing row in public.users first.
+// Falls back to insert (with email required) only if the row doesn't exist yet.
+// This prevents NOT NULL violations when partial data (e.g. only name) is passed.
 export async function saveUserDataToDB(uid, data) {
-  const { error } = await supabase
+  // Check if the row already exists
+  const { data: existing, error: fetchError } = await supabase
     .from("users")
-    .upsert({ id: uid, ...data }, { onConflict: "id" });
+    .select("id")
+    .eq("id", uid)
+    .maybeSingle();
 
-  if (error) {
-    console.error("Error saving user data:", error);
-    throw error;
+  if (fetchError) {
+    console.error("Error checking user data:", fetchError);
+    throw fetchError;
   }
+
+  if (existing) {
+    // Row exists — only update the provided fields, don't touch email or other columns
+    const { error } = await supabase
+      .from("users")
+      .update(data)
+      .eq("id", uid);
+
+    if (error) {
+      console.error("Error saving user data:", error);
+      throw error;
+    }
+  } else {
+    // Row doesn't exist yet (e.g. trigger hasn't fired) — full insert
+    const { error } = await supabase
+      .from("users")
+      .insert({ id: uid, ...data });
+
+    if (error) {
+      console.error("Error saving user data:", error);
+      throw error;
+    }
+  }
+
   return { uid, ...data };
 }
 
