@@ -309,18 +309,15 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   };
 
   const STADIA_API_KEY = import.meta.env.VITE_STADIA_API_KEY;
-  
-  return (  
+
+  return (
     <div className="MapView">
       <MapContainer center={center} zoom={mapZoom} style={{ width: "100%", height: "100%", zIndex: 0}} zoomControl={false}>
         <ChangeView center={center} zoom={mapZoom} />
-        {/* <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        /> */}
+        {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
-            attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-            url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`}
+          attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
+          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${STADIA_API_KEY}`}
         />
         {/* Render the user's current location marker and tracking logic */}
         <UserLocationMarker coords={currentCoords} trackingEnabled={trackingEnabled} />
