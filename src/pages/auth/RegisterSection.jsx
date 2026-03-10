@@ -1,5 +1,5 @@
 import './RegisterSection.css';
-import { signUp, saveUserDataToDB, updateUserProfile } from "../../services/supabase.js";
+import { signUp, saveUserDataToDB } from "../../services/supabase.js";
 
 import mascot from '../../assets/images/logo/logo.png'
 import homeIcon from '../../assets/images/icon/home-icon.png'
@@ -48,17 +48,14 @@ function RegisterSection({ setAppSection }) {
         }
 
         try {
-            const newUserCredential = await signUp(email, password);
-            
-            await updateUserProfile({
-              displayName: name
-            });
-            
-            await saveUserDataToDB(newUserCredential.uid, {
+            // signUp now accepts name and stores it in Supabase Auth user_metadata
+            const newUserCredential = await signUp(email, password, name);
+
+            // Save to public.users table using user.id (Supabase uses .id not .uid)
+            await saveUserDataToDB(newUserCredential.id, {
               name,
               email
             });
-
 
             setAppSection("HOME");
         } catch (error) {

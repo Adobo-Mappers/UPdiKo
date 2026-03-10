@@ -74,8 +74,16 @@ export async function deletePinnedLocationFromDB(uid, id) {
 // ============================================================
 
 // Replaces: signUp(email, password) + createUserWithEmailAndPassword
-export async function signUp(email, password) {
-  const { data, error } = await supabase.auth.signUp({ email, password });
+// Accepts optional name and stores it in user_metadata at sign-up time,
+// avoiding the need for a separate updateUserProfile() call after registration.
+export async function signUp(email, password, name = "") {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { display_name: name }
+    }
+  });
 
   if (error) {
     console.error("Error signing up:", error);
