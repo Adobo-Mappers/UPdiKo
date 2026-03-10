@@ -7,16 +7,24 @@ import accountIcon from '../../assets/images/icon/user-icon.png'
 import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
 import logoutIcon from '../../assets/images/icon/logout-icon.png'
 
-import { logOut, getCurrentUser, getUserDataFromDB } from '../../services/firebase/firebase.js';
-import { useRef, useState, useEffect } from "react";
+import { logOut, getCurrentUser } from '../../services/supabase.js';
+import { useState, useEffect } from "react";
 
-function AccountSection({ setAppSection}) {    
-     async function userLogOut() {
+function AccountSection({ setAppSection }) {
+    // getCurrentUser() is now async — load user into state on mount
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        getCurrentUser().then(setUser);
+    }, []);
+
+    async function userLogOut() {
         await logOut();
-        setAppSection("LOGIN");  
+        setAppSection("LOGIN");
     }
 
-    const user = getCurrentUser();
+    // Don't render until user is resolved
+    if (!user) return null;
 
     return (
         <div className="AccountSection">
@@ -24,12 +32,13 @@ function AccountSection({ setAppSection}) {
                 <div className='profile'>
                     <figure className='logo'><img src={mascot}></img></figure>
                     <div className='information'>
-                        <div className='name'>{user.displayName}</div>
+                        {/* Supabase stores display name in user_metadata */}
+                        <div className='name'>{user.user_metadata?.display_name ?? user.email}</div>
                         <div className='email'>{user.email}</div>
                     </div>
                 </div>
                 <div className='buttons'>
-                    <figure className='logout-icon btn'><img src={logoutIcon} onClick={ userLogOut }></img></figure>
+                    <figure className='logout-icon btn'><img src={logoutIcon} onClick={userLogOut}></img></figure>
                 </div>
             </header>
 
@@ -46,32 +55,31 @@ function AccountSection({ setAppSection}) {
                             <h3 className='subtitle'>Change your account details</h3>
                         </div>
                     </div>
-                    <div className='option-btn btn' onClick={ () => setAppSection("PERSONAL-PIN") }>
+                    <div className='option-btn btn' onClick={() => setAppSection("PERSONAL-PIN")}>
                         <img src={mapIcon}></img>
                         <div>
                             <h2 className='title'>Your Personal Pins</h2>
                             <h3 className='subtitle'>Manage your created pins</h3>
                         </div>
-                    </div>      
+                    </div>
                 </div>
             </section>
-      
-           
+
             {/* NAV BAR */}
             <footer>
                 <nav>
                     <ul>
-                        <li className='navigation btn' onClick={ () => setAppSection("HOME") }>
+                        <li className='navigation btn' onClick={() => setAppSection("HOME")}>
                             <img className='icon' src={homeIcon}></img>
-                            <p className='label'>Service</p>    
+                            <p className='label'>Service</p>
                         </li>
                         <li className='navigation btn'>
-                            <img className='icon' src={mapIcon} onClick={ () => setAppSection("MAP") }></img>
-                            <p className='label'>Map</p>    
+                            <img className='icon' src={mapIcon} onClick={() => setAppSection("MAP")}></img>
+                            <p className='label'>Map</p>
                         </li>
-                        <li className='navigation active btn' onClick={ () => setAppSection("ACCOUNT") }>
+                        <li className='navigation active btn' onClick={() => setAppSection("ACCOUNT")}>
                             <img className='icon' src={accountIcon}></img>
-                            <p className='label'>Account</p>    
+                            <p className='label'>Account</p>
                         </li>
                     </ul>
                 </nav>

@@ -2,11 +2,16 @@ import './AccountInfoSection.css';
 import homeIcon from '../../assets/images/icon/home-icon.png'
 import mapIcon from '../../assets/images/icon/map-pin-icon.png'
 import accountIcon from '../../assets/images/icon/user-icon.png'
-import { getCurrentUser } from '../../services/firebase/firebase.js';
-import { useRef, useState } from "react";
+import { getCurrentUser } from '../../services/supabase.js';
+import { useEffect, useState } from "react";
 
 function AccountInfoSection({ setAppSection }) {
-    const user = getCurrentUser();
+    // getCurrentUser() is now async — load user into state on mount
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        getCurrentUser().then(setUser);
+    }, []);
 
     return (
         <div className="AccountInfoSection">
@@ -20,12 +25,13 @@ function AccountInfoSection({ setAppSection }) {
             </main>
 
             {
-                getCurrentUser() ? (
+                user ? (
                     <div className="user-info-container">
                         <h2 className="info-title">User Information</h2>
                         <div className="user-info">
                             <p className="info-label">Name:</p>
-                            <p className="info-content">{user.displayName}</p>
+                            {/* Supabase stores display name in user_metadata */}
+                            <p className="info-content">{user.user_metadata?.display_name ?? user.email}</p>
                         </div>
                         <div className="user-info">
                             <p className="info-label">Email:</p>
