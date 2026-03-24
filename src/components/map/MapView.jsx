@@ -12,6 +12,7 @@ import userPinIcon from '../../assets/images/icon/5.png';
 import communityPinIcon from '../../assets/images/icon/3.png';
 import universityPinIcon from '../../assets/images/icon/4.png';
 import customPinIcon from '../../assets/images/icon/6.png';
+import { getStaticLocations } from "../../services/locations.js";
 
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
 
@@ -281,20 +282,11 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   // Replaces static JSON imports — fetch all locations from Supabase static_locations table
   useEffect(() => {
     const fetchStaticLocations = async () => {
-      const { data, error } = await supabase
-        .from("static_locations")
-        .select("id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type");
-
-      if (error) {
-        console.error("Error fetching static locations:", error);
-        return;
-      }
+      const data = await getStaticLocations();
       setStaticLocations(data);
     };
     fetchStaticLocations();
   }, []);
-
-
 
   if (loading) {
     return (
