@@ -11,6 +11,8 @@ import searchIcon from '../../assets/images/icon/search-icon.png'
 
 import { useState, useEffect } from 'react';
 import { getCurrentUser, supabase } from '../../services/supabase.js'
+import CalendarView from '../../components/calendar/Calendar.jsx';
+import WeatherView from '../../components/weather/Weather.jsx';
 
 function HomeSection({setAppSection, setAppService}) {
     /* For searching services through the search bar or filtering displayed services with tags */
@@ -72,6 +74,8 @@ function HomeSection({setAppSection, setAppService}) {
                 </figure>
             </header>
 
+            {/* <WeatherView /> */} // Weather widget temporarily for testing
+
             <section className='search-section'>
                 <img src={searchIcon} className="icon"></img>
                 <input
@@ -107,6 +111,8 @@ function HomeSection({setAppSection, setAppService}) {
                     ))}
                 </div>
             </section>
+
+            {/* <CalendarView /> */} // Calendar temporarily for testing
 
             <footer>
                 <nav>
