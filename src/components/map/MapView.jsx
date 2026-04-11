@@ -367,13 +367,30 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
 
   return (
     <div className="MapView">
-      <MapContainer center={center} zoom={mapZoom} style={{ width: "100%", height: "100%", zIndex: 0}} zoomControl={false}>
+      <MapContainer 
+        center={center} 
+        zoom={mapZoom} 
+        style={{ width: "100%", height: "100%", zIndex: 0}} 
+        zoomControl={false}
+
+        // NEW COMPONENT: Clamps the user only to Miagao
+        minZoom={13}
+        maxZoom={20}
+        maxBounds={[
+          [10.55, 122.10],
+          [10.78, 122.35],
+        ]}
+        maxBoundsViscosity={1.0}
+        >
         <ChangeView center={center} zoom={mapZoom} />
         {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
           url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
           // Light Mode: url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}        />
+          // NEW COMPONENT: Clamps the user only to Miagao
+          minZoom={13}
+          maxZoom={20}
         />
         {/* Render the user's current location marker and tracking logic */}
         <UserLocationMarker coords={currentCoords} trackingEnabled={trackingEnabled} />
