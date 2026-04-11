@@ -82,6 +82,9 @@ function MapSection({setAppSection, service, setAppService}) {
     // Ref to hold the watchPosition ID so we can clear it later
     const watchIdRef = useRef(null);
 
+    // For Map Rotation
+    const [mapBearing, setMapBearing] = useState(0);
+
     // Start continuous GPS tracking on mount
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -238,6 +241,8 @@ function MapSection({setAppSection, service, setAppService}) {
                         onMapClickForPin={handleOpenCreatePin}
                         onClosePinForm={handleCloseCreatePin}
                         onMarkerClick={handleCenterToPin}
+                        bearing={mapBearing}
+                        onBearingChange={setMapBearing}
                     />
                 </div>
             </section>
@@ -309,8 +314,21 @@ function MapSection({setAppSection, service, setAppService}) {
                 >
                     <img className="current-location-img" src={compassIcon}></img>
                 </button>
+                {/* <button
+                    className="reset-rotation-btn"
+                    onClick={() => setMapBearing(0)}
+                    style={{ opacity: mapBearing === 0 ? 0.4 : 1 }}
+                >
+                    <img className="current-location-img" src={compassIcon}></img>
+                </button> */}
             </section>
-
+            {/* TEST ROTATION BUTTONS — remove when done testing */}
+            <div style={{ position: "absolute", top: 90, right: "5%", zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
+                <button className="test-btn" onClick={() => setMapBearing(prev => prev - 45)}>↺</button>
+                <button className="test-btn" onClick={() => setMapBearing(0)}>⊙</button>
+                <button className="test-btn" onClick={() => setMapBearing(prev => prev + 45)}>↻</button>
+            </div>
+            {/* END TEST ROTATION BUTTONS */}
             <footer>
                 <nav>
                     <ul>

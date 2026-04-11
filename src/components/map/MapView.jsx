@@ -1,8 +1,10 @@
+// Important Dependencies
 import React, { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
 import "./MapView.css";
+import "leaflet-rotate";
 
 // Placeholder Icons from Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -215,8 +217,21 @@ function UserLocationMarker({ coords, trackingEnabled }) {
     );
 }
 
+// NEW COMPONENT: Controls the Map rotation
+function RotationController({ bearing, setBearing }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (map.setBearing) {
+      map.setBearing(bearing);
+    }
+  }, [bearing, map]);
+
+  return null;
+}
+
 // // main map element
-function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick }) {
+function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange}) {
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
@@ -381,8 +396,17 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
           [10.78, 122.35],
         ]}
         maxBoundsViscosity={1.0}
+
+        // NEW COMPONENT: Makes the Map rotatable
+        rotate={true}          
+        rotateControl={false}   
+
+        // NEW COMPONENT: Add mobile rotation and zoom
+        touchRotate={true}    // NEW
+        touchZoom={true} 
         >
         <ChangeView center={center} zoom={mapZoom} />
+        <RotationController bearing={bearing} />
         {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
@@ -448,7 +472,7 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
           </Marker>
         ))} 
       </MapContainer>
-
+      
       {selectedMarkerInfo && (
         <div className="marker-info-panel">
 
