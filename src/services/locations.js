@@ -24,3 +24,28 @@ export const getStaticLocations = async () => {
     return [];
   }
 };
+
+export const getRoute = async (startLat, startLng, endLat, endLng) => {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.code !== "Ok") {
+      console.error("OSRM routing failed:", data.message);
+      return [];
+    }
+
+    // Convert [lng, lat] to Leaflet's [lat, lng]
+    const coords = data.routes[0].geometry.coordinates.map(
+      ([lng, lat]) => [lat, lng]
+    );
+
+    return coords;
+
+  } catch (error) {
+    console.error("Failed to fetch route:", error);
+    return [];
+  }
+};

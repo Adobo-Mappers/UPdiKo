@@ -1,20 +1,28 @@
 import React, { useEffect, useState, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
 import "./MapView.css";
+
+// Placeholder Icons from Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
+// Custom Icons
 import closeIcon from '../../assets/images/icon/close-icon.png';
 import timeIcon from '../../assets/images/icon/time-icon.png';
 import userPinIcon from '../../assets/images/icon/5.png';
 import communityPinIcon from '../../assets/images/icon/3.png';
 import universityPinIcon from '../../assets/images/icon/4.png';
 import customPinIcon from '../../assets/images/icon/6.png';
-import { getStaticLocations } from "../../services/locations.js";
+
+// Getting Static Locations and Routing
+import { getStaticLocations, getRoute } from "../../services/locations.js";
 
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
+
+
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -218,6 +226,12 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   const [selectedPanelTab, setSelectedPanelTab] = useState("About");
   const [tempLocation, setTempLocation] = useState(null);
 
+  // States for PostGIS directions using Leaflet
+  const [routeCoords, setRouteCoords] = useState([]);
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+  const [routeDestination, setRouteDestination] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
   const mapZoom = userLocation?.zoom || 16;
 
@@ -303,6 +317,54 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
     return facility.name && facility.name.includes(selectedService.name);
   };
 
+  // NEW COMPONENT: Gets the direction to the location selected from user's current location
+  const handleGetDirections = async (destination) => {
+    if (!currentCoords) {
+      alert("Your location is not available yet.");
+      return;
+    }
+
+    setIsLoadingRoute(true);
+    setRouteDestination(destination);
+
+    try {
+      // get route coords for polyline
+      const coords = await getRoute(
+        currentCoords.lat,
+        currentCoords.lng,
+        parseFloat(destination.latitude),
+        parseFloat(destination.longitude)
+      );
+
+      // also fetch distance and duration info
+      const url = `https://router.project-osrm.org/route/v1/driving/${currentCoords.lng},${currentCoords.lat};${destination.longitude},${destination.latitude}?overview=full&geometries=geojson`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.code === "Ok") {
+        const route = data.routes[0];
+        setRouteInfo({
+          distance: (route.distance / 1000).toFixed(2) + " km",
+          duration: Math.ceil(route.duration / 60) + " mins"
+        });
+      }
+
+      setRouteCoords(coords);
+
+    } catch (error) {
+      console.error("Directions error:", error);
+    } finally {
+      setIsLoadingRoute(false);
+    }
+  };
+
+  // NEW COMPONENT: removes the routing given
+  const handleClearRoute = () => {
+    setRouteCoords([]);
+    setRouteDestination(null);
+    setRouteInfo(null);
+  };
+
   return (
     <div className="MapView">
       <MapContainer center={center} zoom={mapZoom} style={{ width: "100%", height: "100%", zIndex: 0}} zoomControl={false}>
@@ -311,9 +373,16 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
           url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
+          // Light Mode: url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}        />
         />
         {/* Render the user's current location marker and tracking logic */}
         <UserLocationMarker coords={currentCoords} trackingEnabled={trackingEnabled} />
+        {routeCoords.length > 0 && (
+          <Polyline
+            positions={routeCoords}
+            pathOptions={{ color: '#4A90E2', weight: 5, opacity: 0.8 }}
+          />
+        )}
         <LocationMarker 
             tempLocation={tempLocation}
             setTempLocation={setTempLocation} 
@@ -362,12 +431,33 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
           </Marker>
         ))} 
       </MapContainer>
+
       {selectedMarkerInfo && (
         <div className="marker-info-panel">
 
           <div className="panel-handle">
           <h2>{selectedMarkerInfo.name}</h2>
           <span className="close-btn btn" onClick={() => setSelectedMarkerInfo(null)}><img src={closeIcon}></img></span>
+          </div>
+        
+          <div className="directions-container">
+            <button
+              className="directions-btn btn"
+              onClick={() => handleGetDirections(selectedMarkerInfo)}
+              disabled={isLoadingRoute}
+            >
+              {isLoadingRoute ? "Loading route..." : "Get Directions"}
+            </button>
+
+            {routeInfo && (
+              <div className="route-info">
+                <span> 🚗 {routeInfo.distance}</span>
+                <span> ⏱ {routeInfo.duration}</span>
+                <button className="clear-route-btn btn" onClick={handleClearRoute}>
+                  Clear
+                </button>
+              </div>
+            )}
           </div>
 
           <hr className="separator"></hr>
