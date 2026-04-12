@@ -2,7 +2,7 @@ import './AccountInfoSection.css';
 import homeIcon from '../../assets/images/icon/home-icon.png'
 import mapIcon from '../../assets/images/icon/map-pin-icon.png'
 import accountIcon from '../../assets/images/icon/user-icon.png'
-import { getCurrentUser } from '../../services/supabase.js';
+// import { getCurrentUser } from '../../services/supabase.js';
 import { useEffect, useState } from "react";
 
 function AccountInfoSection({ setAppSection }) {

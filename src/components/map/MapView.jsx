@@ -14,7 +14,7 @@ import universityPinIcon from '../../assets/images/icon/4.png';
 import customPinIcon from '../../assets/images/icon/6.png';
 import { getStaticLocations } from "../../services/locations.js";
 
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
+// import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;

@@ -7,7 +7,7 @@ import accountIcon from '../../assets/images/icon/user-icon.png'
 import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
 import logoutIcon from '../../assets/images/icon/logout-icon.png'
 
-import { logOut, getCurrentUser } from '../../services/supabase.js';
+// import { logOut, getCurrentUser } from '../../services/supabase.js';
 import { useState, useEffect } from "react";
 
 function AccountSection({ setAppSection }) {
