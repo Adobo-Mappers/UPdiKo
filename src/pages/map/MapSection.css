@@ -228,22 +228,21 @@
         aspect-ratio: 1/1;  
     }
 
-    .reset-rotation-btn {
-        height: 60px;
-        aspect-ratio: 1/1;
-        border: none;
-        border-radius: 50%;
-        background-color: var(--color-primary);
-        z-index: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: opacity 0.2s;
-    }
 }
-/* Test Button for Rotation */  
-.test-btn {
-    height: 50px;
+
+/* MAIN GROUP: ROTATION BUTTONS */
+.rotation-test-controls {
+  position: absolute;
+  top: 90px;
+  right: 5%;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rotate-btn {
+    height: 40px;
     aspect-ratio: 1/1;
     border: none;
     border-radius: 50%;

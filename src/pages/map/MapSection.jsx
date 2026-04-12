@@ -84,6 +84,7 @@ function MapSection({setAppSection, service, setAppService}) {
 
     // For Map Rotation
     const [mapBearing, setMapBearing] = useState(0);
+    const rotateIntervalRef = useRef(null);
 
     // Start continuous GPS tracking on mount
     useEffect(() => {
@@ -195,6 +196,46 @@ function MapSection({setAppSection, service, setAppService}) {
         const nameLower = service.name.toLowerCase();
         return nameLower.includes(searchQuery);
     });
+
+    /* Rotation functions */
+    const startRotating = (direction) => {
+        rotateIntervalRef.current = setInterval(() => {
+            setMapBearing(prev => prev + (direction === "left" ? -2 : 2));
+        }, 16); // ~60fps
+    };
+
+    const stopRotating = () => {
+        if (rotateIntervalRef.current) {
+            clearInterval(rotateIntervalRef.current);
+            rotateIntervalRef.current = null;
+        }
+    };
+
+    const smoothResetBearing = () => {
+        const animationRef = { current: null };
+
+        const animate = () => {
+            setMapBearing(prev => {
+            // Normalize bearing to -180 to 180 range for shortest path
+            let current = prev % 360;
+            if (current > 180) current -= 360;
+            if (current < -180) current += 360;
+
+            // If close enough to 0, snap to 0 and stop
+            if (Math.abs(current) < 0.5) {
+                cancelAnimationFrame(animationRef.current);
+                return 0;
+            }
+
+            // Ease towards 0 — multiply by 0.85 each frame for smooth deceleration
+            return current * 0.85;
+            });
+
+            animationRef.current = requestAnimationFrame(animate);
+        };
+
+        animationRef.current = requestAnimationFrame(animate);
+    };
 
     return (
         <div className="MapSection">
@@ -314,21 +355,29 @@ function MapSection({setAppSection, service, setAppService}) {
                 >
                     <img className="current-location-img" src={compassIcon}></img>
                 </button>
-                {/* <button
-                    className="reset-rotation-btn"
-                    onClick={() => setMapBearing(0)}
-                    style={{ opacity: mapBearing === 0 ? 0.4 : 1 }}
-                >
-                    <img className="current-location-img" src={compassIcon}></img>
-                </button> */}
             </section>
-            {/* TEST ROTATION BUTTONS — remove when done testing */}
-            <div style={{ position: "absolute", top: 90, right: "5%", zIndex: 1000, display: "flex", flexDirection: "column", gap: 8 }}>
-                <button className="test-btn" onClick={() => setMapBearing(prev => prev - 45)}>↺</button>
-                <button className="test-btn" onClick={() => setMapBearing(0)}>⊙</button>
-                <button className="test-btn" onClick={() => setMapBearing(prev => prev + 45)}>↻</button>
+            <div className="rotation-test-controls">                
+                <button
+                    className="rotate-btn"
+                    onMouseDown={() => startRotating("left")}
+                    onMouseUp={stopRotating}
+                    onMouseLeave={stopRotating}
+                    onTouchStart={() => startRotating("left")}
+                    onTouchEnd={stopRotating}
+                >↺</button>
+                <button
+                    className="rotate-btn"
+                    onClick={smoothResetBearing}
+                >⊙</button>
+                <button
+                    className="rotate-btn"
+                    onMouseDown={() => startRotating("right")}
+                    onMouseUp={stopRotating}
+                    onMouseLeave={stopRotating}
+                    onTouchStart={() => startRotating("right")}
+                    onTouchEnd={stopRotating}
+                >↻</button>
             </div>
-            {/* END TEST ROTATION BUTTONS */}
             <footer>
                 <nav>
                     <ul>
