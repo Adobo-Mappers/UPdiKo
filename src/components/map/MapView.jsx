@@ -312,6 +312,8 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   useEffect(() => {
     const fetchStaticLocations = async () => {
       const data = await getStaticLocations();
+      const valid = data.filter(r => !isNaN(parseFloat(r.latitude)) && !isNaN(parseFloat(r.longitude)));
+      console.log(`🗺 Total loaded: ${data.length} | Valid coords: ${valid.length} | Skipped: ${data.length - valid.length}`);
       setStaticLocations(data);
     };
     fetchStaticLocations();
@@ -449,13 +451,23 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
         {/* <Marker position={center}>
           <Popup>You are here</Popup>
         </Marker> */}
-         {pinnedLocations.map((pin) => (
+        {pinnedLocations.map((pin) => (
           <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={customIcon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
             {/* <Popup>{pin.name}</Popup> */}
           </Marker>
         ))}
         {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
-        {staticLocations.filter(shouldShowMarker).map((facility) => (
+        {staticLocations
+          .filter(shouldShowMarker)
+          .filter(facility => {
+            const lat = parseFloat(facility.latitude);
+            const lng = parseFloat(facility.longitude);
+            if (isNaN(lat) || isNaN(lng)) {
+              return false;
+            }
+            return true;
+          })
+          .map((facility) => (
           <Marker
             key={facility.id}
             position={[parseFloat(facility.latitude), parseFloat(facility.longitude)]}
