@@ -13,8 +13,10 @@ import { useState, useEffect } from 'react';
 import { getCurrentUser, supabase } from '../../services/supabase.js'
 import CalendarView from '../../components/calendar/Calendar.jsx';
 import WeatherView from '../../components/weather/Weather.jsx';
+import EventDisplay from '../../components/events/EventDisplay.jsx';
 
 function HomeSection({setAppSection, setAppService}) {
+
     /* For searching services through the search bar or filtering displayed services with tags */
     const [activeCategory, setCategory] = useState("All")
     const [searchQuery, setSearchQuery] = useState("")
@@ -64,6 +66,7 @@ function HomeSection({setAppSection, setAppService}) {
 
     return (
         <div className="HomeSection">
+            <EventDisplay />
             <header>
                 <figure className='logo'>
                     <img src={mascot} alt='Logo Image'></img>

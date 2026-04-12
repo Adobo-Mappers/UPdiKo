@@ -22,7 +22,7 @@ import customPinIcon from '../../assets/images/icon/6.png';
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../services/locations.js";
 
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
+// import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
 
 
 
