@@ -74,7 +74,7 @@ function HomeSection({setAppSection, setAppService}) {
                 </figure>
             </header>
 
-            {/* <WeatherView /> */} // Weather widget temporarily for testing
+            {/* <WeatherView /> // Weather widget temporarily for testing */}
 
             <section className='search-section'>
                 <img src={searchIcon} className="icon"></img>
@@ -112,7 +112,7 @@ function HomeSection({setAppSection, setAppService}) {
                 </div>
             </section>
 
-            {/* <CalendarView /> */} // Calendar temporarily for testing
+            {/* <CalendarView /> // Calendar temporarily for testing */}
 
             <footer>
                 <nav>
