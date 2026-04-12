@@ -19,7 +19,7 @@ export default function EventDisplay() {
     
     return (
         <div className='displayed-events'>
-            { events.filter(event => event.date == new Date('2026-05-01').toISOString().split('T')[0]).map(event => (
+            { events.filter(event => event.date == new Date().toISOString().split('T')[0]).map(event => (
                 <div key={event.id} className='event-item'>
                     <h3>{event.name}</h3>   
                     <p>{event.date}</p>
