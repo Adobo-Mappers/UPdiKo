@@ -15,7 +15,8 @@ db.exec(`
     location_type TEXT,
     services TEXT,
     images TEXT,
-    additional_info TEXT
+    additional_info TEXT,
+    geom TEXT
   );
 
   CREATE TABLE IF NOT EXISTS sync_metadata (
