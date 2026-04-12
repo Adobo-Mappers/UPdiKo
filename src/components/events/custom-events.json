@@ -1,11 +1,114 @@
 [
- {
-    "date": "2026-02-14",
-    "name": "Valentine's Day"
-  }, 
   {
-    "date": "2026-04-10",
-    "name": "Friday Blaze"
+    "date": "2026-01-01",
+    "name": "New Year's Day"
+  },
+  {
+    "date": "2026-02-01",
+    "name": "Start of Salakayanfestival"
+  },
+  {
+    "date": "2026-02-11",
+    "name": "Evelio Javier Day (Local - Panay)"
+  },
+  {
+    "date": "2026-02-17",
+    "name": "Chinese Lunar New Year's Day"
+  },
+  {
+    "date": "2026-02-18",
+    "name": "Ash Wednesday"
+  },
+  {
+    "date": "2026-02-25",
+    "name": "EDSA People Power Revolution"
+  },
+  {
+    "date": "2026-03-18",
+    "name": "Liberation of Panay (Local - Panay)"
+  },
+  {
+    "date": "2026-03-20",
+    "name": "Eidul Fitr"
+  },
+  {
+    "date": "2026-04-02",
+    "name": "Maundy Thursday"
+  },
+  {
+    "date": "2026-04-03",
+    "name": "Good Friday"
+  },
+  {
+    "date": "2026-04-04",
+    "name": "Black Saturday"
+  },
+  {
+    "date": "2026-04-05",
+    "name": "Easter Sunday"
+  },
+  {
+    "date": "2026-04-09",
+    "name": "Araw ng Kagitingan"
+  },
+  {
+    "date": "2026-05-01",
+    "name": "Labor day"
+  },
+  {
+    "date": "2026-05-10",
+    "name": "Mother's Day"
+  },
+  {
+    "date": "2026-05-27",
+    "name": "Eid’l Adha"
+  },
+  {
+    "date": "2026-05-31",
+    "name": "Flores de Mayo"
+  },
+  {
+    "date": "2026-06-12",
+    "name": "Independence Day"
+  },
+  {
+    "date": "2026-06-21",
+    "name": "Father's Day"
+  },
+  {
+    "date": "2026-08-21",
+    "name": "Ninoy Aquino Day"
+  },
+  {
+    "date": "2026-08-25",
+    "name": "Iloilo City Charter Day"
+  },
+  {
+    "date": "2026-08-31",
+    "name": "National Heroes Day"
+  },
+  {
+    "date": "2026-09-08",
+    "name": "Feast of the Nativity of Mary"
+  },
+  {
+    "date": "2026-09-16",
+    "name": "Start of Hablon Festival"
+  },
+  {
+    "date": "2026-09-22",
+    "name": "St. Thomas of Villanova Fiesta (Local - Miagao)"
+  },
+  {
+    "date": "2026-10-05",
+    "name": "Teachers’ Day"
+  },
+  {
+    "date": "2026-11-01",
+    "name": "All Saints' Day"
+  },
+  {
+    "date": "2026-11-02",
+    "name": "All Souls' Day"
   }
-
 ]
