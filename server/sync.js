@@ -1,54 +1,81 @@
 const db = require('./database');
 
-const fetchOSMLocations = async () => {
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.tystems.net/api/interpreter",
+  "https://maps.mailab.de/overpass/api/interpreter",
+];
 
-  // Query 1: nodes (have direct lat/lon)
-  const nodeQuery = `
-    [out:json][timeout:60];
-    area[name="Miagao"]->.searchArea;
-    (
-      node["amenity"](area.searchArea);
-      node["shop"](area.searchArea);
-      node["tourism"](area.searchArea);
-    );
-    out body;
-  `;
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-  // Query 2: ways and relations (need center)
-  const wayQuery = `
-    [out:json][timeout:60];
-    area[name="Miagao"]->.searchArea;
-    (
-      way["amenity"](area.searchArea);
-      way["shop"](area.searchArea);
-      way["tourism"](area.searchArea);
-      relation["amenity"](area.searchArea);
-      relation["shop"](area.searchArea);
-      relation["tourism"](area.searchArea);
-    );
-    out center;
-  `;
+const fetchOSMLocations = async (retries = 3, backoffMs = 5000) => {
+  let lastError = null;
 
-  const [nodeRes, wayRes] = await Promise.all([
-    fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: nodeQuery }),
-    fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: wayQuery }),
-  ]);
+  for (let attempt = 0; attempt < retries; attempt++) {
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      try {
+        const nodeQuery = `
+          [out:json][timeout:60];
+          area[name="Miagao"]->.searchArea;
+          (
+            node["amenity"](area.searchArea);
+            node["shop"](area.searchArea);
+            node["tourism"](area.searchArea);
+          );
+          out body;
+        `;
 
-  const nodeText = await nodeRes.text();
-  const wayText = await wayRes.text();
+        const wayQuery = `
+          [out:json][timeout:60];
+          area[name="Miagao"]->.searchArea;
+          (
+            way["amenity"](area.searchArea);
+            way["shop"](area.searchArea);
+            way["tourism"](area.searchArea);
+            relation["amenity"](area.searchArea);
+            relation["shop"](area.searchArea);
+            relation["tourism"](area.searchArea);
+          );
+          out center;
+        `;
 
-  if (nodeText.startsWith("<") || wayText.startsWith("<")) {
-    throw new Error("Overpass API returned XML — likely rate limited");
+        const [nodeRes, wayRes] = await Promise.all([
+          fetch(endpoint, { method: "POST", body: nodeQuery }),
+          fetch(endpoint, { method: "POST", body: wayQuery }),
+        ]);
+
+        const nodeText = await nodeRes.text();
+        const wayText = await wayRes.text();
+
+        if (nodeText.startsWith("<") || wayText.startsWith("<")) {
+          console.log(`⚠️  Rate limited on ${endpoint}, trying next...`);
+          continue;
+        }
+
+        const nodeData = JSON.parse(nodeText);
+        const wayData = JSON.parse(wayText);
+
+        const allElements = [...nodeData.elements, ...wayData.elements];
+        const named = allElements.filter(el => el.tags?.name);
+
+        console.log(`🌐 Nodes: ${nodeData.elements.length} | Ways/Relations: ${wayData.elements.length} | Named: ${named.length}`);
+        return named;
+
+      } catch (err) {
+        lastError = err;
+        console.log(`⚠️  Failed on ${endpoint}: ${err.message}`);
+        continue;
+      }
+    }
+
+    if (attempt < retries - 1) {
+      console.log(`⏳ Waiting ${backoffMs / 1000}s before retry...`);
+      await sleep(backoffMs);
+      backoffMs *= 2;
+    }
   }
 
-  const nodeData = JSON.parse(nodeText);
-  const wayData = JSON.parse(wayText);
-
-  const allElements = [...nodeData.elements, ...wayData.elements];
-  const named = allElements.filter(el => el.tags?.name);
-
-  console.log(`🌐 Nodes: ${nodeData.elements.length} | Ways/Relations: ${wayData.elements.length} | Named: ${named.length}`);
-  return named;
+  throw lastError || new Error("All Overpass endpoints failed");
 };
 
 const syncLocations = async () => {
