@@ -58,3 +58,43 @@ export const getRoute = async (startLat, startLng, endLat, endLng) => {
     return [];
   }
 };
+
+export const matchLocation = (locations, searchTerm) => {
+  const term = searchTerm.toLowerCase().trim();
+  if (!term || !locations.length) return null;
+  
+  return locations.find(loc => {
+    const name = (loc.name || '').toLowerCase();
+    const tags = (loc.tags || []).map(t => t.toLowerCase());
+    
+    if (name === term) return true;
+    if (name.includes(term)) return true;
+    if (tags.some(tag => tag.includes(term) || term.includes(tag))) return true;
+    return false;
+  }) || null;
+};
+
+export const getNearbyLocations = async (lat, lng, radius = 5) => {
+  try {
+    const response = await fetch(`${BASE_URL}/locations/nearby?lat=${lat}&lng=${lng}&radius=${radius}`);
+    if (!response.ok) {
+      console.error("Error fetching nearby locations:", response.statusText);
+      return [];
+    }
+    const data = await response.json();
+
+    const parsed = data.map(row => ({
+      ...row,
+      tags: JSON.parse(row.tags || "[]"),
+      opening_hours: JSON.parse(row.opening_hours || "[]"),
+      contact_info: JSON.parse(row.contact_info || "[]"),
+      services: JSON.parse(row.services || "[]"),
+      images: JSON.parse(row.images || "[]"),
+    }));
+
+    return parsed;
+  } catch (error) {
+    console.error("Error fetching nearby locations:", error);
+    return [];
+  }
+};
