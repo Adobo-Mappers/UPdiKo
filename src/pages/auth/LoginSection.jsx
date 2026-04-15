@@ -66,6 +66,10 @@ function LoginSection({ setAppSection }) {
                 </div>
             </section>
 
+            <section className='forget-password-section'>
+                <span className='to-forget-pass-ref' onClick={ () => setAppSection("FORGET-PASS") }>Forget Password</span> 
+            </section>
+
             <section className='register-description-section'>
                 Do not have an account, yet? <br></br><span className='to-register-ref' onClick={ () => setAppSection("REGISTER") }>Create new account</span> 
             </section>

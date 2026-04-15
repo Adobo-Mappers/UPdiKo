@@ -4,6 +4,7 @@ import HomeSection from './pages/home/HomeSection.jsx';
 import AccountSection from './pages/account/AccountSection.jsx';
 import LoginSection from './pages/auth/LoginSection.jsx';
 import RegisterSection from './pages/auth/RegisterSection.jsx';
+import ForgetPassSection from './pages/auth/ForgetPassSection.jsx';
 import AccountInfoSection from './pages/account/AccountInfoSection.jsx';
 import AccountUpdateSection from './pages/account/AccountUpdateSection.jsx';
 import PersonalPinSection from './pages/map/PersonalPinSection.jsx';
@@ -41,6 +42,8 @@ function App() {
         return <LoginSection setAppSection={setSection} />;
     case "REGISTER":
         return <RegisterSection setAppSection={setSection} />;
+    case "FORGET-PASS":
+        return <ForgetPassSection setAppSection={setSection} />;
     case "PERSONAL-PIN":
         return <PersonalPinSection setAppSection={setSection} setAppService={setService} />;
     default:
