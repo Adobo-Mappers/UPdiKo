@@ -19,7 +19,7 @@ import React from "react";
 import MapView from "../../components/map/MapView.jsx";
 import CassieWidget from "../../components/cassie/CassieWidget.jsx";
 
-function MapSection({setAppSection, service, setAppService}) {
+function MapSection({setAppSection, service, setAppService, navigateTo, onNavigateComplete}) {
 
     /* Search Location Logic */
     const [searchQuery, setSearchQuery] = useState((service) ? service.name : "");
@@ -361,6 +361,7 @@ function MapSection({setAppSection, service, setAppService}) {
                     selectedService={service}
                     userLocation={userCurrentLocation}
                     onNavigateToLocation={(place) => {
+                        setAppService(place);
                         handleCenterToPin(parseFloat(place.latitude), parseFloat(place.longitude));
                     }}
                 />

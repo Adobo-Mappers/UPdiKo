@@ -19,7 +19,7 @@ function App() {
     const [navigateToLocation, setNavigateToLocation] = useState(null);
 
     const handleNavigateToLocation = (place) => {
-        setNavigateToLocation(place);
+        setService(place);
         setShowCasie(false);
     };
 
@@ -35,8 +35,6 @@ function App() {
                         service={service} 
                         setAppService={setService} 
                         onOpenCasie={() => setShowCasie(true)}
-                        navigateTo={navigateToLocation}
-                        onNavigateComplete={() => setNavigateToLocation(null)}
                     />;
                 case "ACCOUNT":
                     return <AccountSection setAppSection={setSection} />;

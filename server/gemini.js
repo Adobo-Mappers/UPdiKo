@@ -32,9 +32,15 @@ You combine the warmth of a kuya or ate who's been around campus for years with 
 - Use real coordinates for the Miagao area (approximately lat: 10.64, lng: 122.07).
 
 ## Tool Usage & Boundaries (CRITICAL)
-- You have access to a "search_locations" tool. Use it whenever the user asks about finding places, getting directions, or local services.
+- You have access to a "search_locations" tool. Use it whenever the user asks about finding places, getting directions, or any location-related queries.
 - If a user greets you or says thanks, respond warmly and naturally without using the tool.
-- STRICT BOUNDARY: You are ONLY a local guide for Miagao. If a user asks you to write code, solve math, write essays, or answer general trivia, you MUST decline. Respond exactly with: "I'm just here to help you navigate around UPV and Miagao! I can't help with that, but let me know if you need to find a place nearby."`;
+- STRICT BOUNDARY: You are ONLY a local guide for Miagao. If a user asks you to write code, solve math, write essays, or answer general trivia, you MUST decline. Respond exactly with: "I'm just here to help you navigate around UPV and Miagao! I can't help with that, but let me know if you need to find a place nearby."
+
+## When Showing Locations (VERY IMPORTANT)
+- ONLY mention the EXACT location names returned by the search tool - do NOT add or substitute any other names.
+- If the search returns "Restaurant A", "Restaurant B", "Restaurant C", you must ONLY mention those exact names.
+- Never say "like Restaurant A or other places" - only use the exact names from the results.
+- The location cards on the screen will show the exact places found, so your text must match those exactly.`;
 
 const sessions = new Map();
 
@@ -100,7 +106,7 @@ async function queryLocations(category, keyword, userLat, userLng) {
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
           return { ...loc, distance: R * c };
         })
-        .sort((a, b) => a.distance - b.distance);
+        .sort(() => Math.random() - 0.5);
     }
     
     return locations.slice(0, 10).map(loc => ({
@@ -207,9 +213,10 @@ router.post('/', async (req, res) => {
       
       // Provide an extra prompt instruction for handling empty database results
       const searchTerm = category || keyword || 'that';
+      const locationNames = dbResults.map(l => l.name).join(', ');
       const synthesisInstruction = dbResults.length === 0 
         ? `IMPORTANT: The database returned no results. Respond conversationally telling the user you couldn't find any ${searchTerm} in Miagao.`
-        : fullSystemInstruction;
+        : fullSystemInstruction + `\n\nIMPORTANT: The search returned these exact locations: ${locationNames}. Your response MUST mention ONLY these exact names - do not add or substitute any other place names.`;
 
       // 4. Second call to Gemini to synthesize the data into a natural response
       const synthesisResponse = await genAI.models.generateContent({
@@ -238,6 +245,7 @@ router.post('/', async (req, res) => {
       userHistory.push({ role: 'model', parts: [{ text: finalText }] });
     }
 
+    console.log('[DEBUG] Returning locations:', locations);
     res.json({ 
         message: finalText,
         places: locations,

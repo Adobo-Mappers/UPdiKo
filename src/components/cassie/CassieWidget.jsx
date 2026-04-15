@@ -97,25 +97,29 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
  
     try {
       const { message, places: placesData } = await sendToCasie(userMessage, context);
+      console.log('[DEBUG] placesData from AI:', placesData);
       
       if (placesData && placesData.length > 0) {
         const matchedPlaces = [];
         for (const place of placesData) {
-          const matched = matchLocation(dbLocations, place.name);
-          if (matched) {
-              matchedPlaces.push({
-              ...matched,
-              latitude: matched.latitude || place.lat,
-              longitude: matched.longitude || place.lng
-            });
-          } else if (place.lat && place.lng) {
-            // Use AI-provided coordinates if no match in DB
+          // Trust AI's data first - use coordinates if provided
+          if (place.lat && place.lng) {
             matchedPlaces.push({
               name: place.name,
               address: place.address,
               latitude: place.lat,
               longitude: place.lng
             });
+          } else {
+            // Fallback to DB match only if AI didn't provide coordinates
+            const matched = matchLocation(dbLocations, place.name);
+            if (matched) {
+              matchedPlaces.push({
+                ...matched,
+                latitude: matched.latitude || place.lat,
+                longitude: matched.longitude || place.lng
+              });
+            }
           }
         }
 
@@ -204,14 +208,25 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
     if (places && places.length > 0) {
       const matchedPlaces = [];
       for (const place of places) {
-        const matched = matchLocation(dbLocations, place.name);
-        if (matched) {
-          matchedPlaces.push(matched);
+        // Trust AI's data first - use coordinates if provided
+        if (place.lat && place.lng) {
+          matchedPlaces.push({
+            name: place.name,
+            address: place.address,
+            latitude: parseFloat(place.lat),
+            longitude: parseFloat(place.lng)
+          });
+        } else {
+          // Fallback to DB match only if AI didn't provide coordinates
+          const matched = matchLocation(dbLocations, place.name);
+          if (matched) {
+            matchedPlaces.push(matched);
+          }
         }
       }
 
       if (matchedPlaces.length === 0 && places.length > 0) {
-        cleanText = cleanText + "\n\nI couldn't find any of those locations in my database. Try a different search.";
+        cleanText = cleanText + "\n\nI couldn't find those locations. Try searching for a specific place.";
         places = null;
       } else {
         places = matchedPlaces;
