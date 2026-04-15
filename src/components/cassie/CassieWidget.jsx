@@ -24,6 +24,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { sendToCasie, clearCasieHistory, resetSession } from '../../services/cassieService';
 import { getStaticLocations, matchLocation } from '../../services/locations.js';
+import { supabase } from '../../services/supabase.js';
 import LocationCards from '../../components/casie/LocationCards';
 import chatIcon from '../../assets/images/icon/chatIcon.svg';
 import closeIcon from '../../assets/images/icon/x.svg';
@@ -80,7 +81,7 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    getStaticLocations().then(setDbLocations);
+    getStaticLocations(supabase).then(setDbLocations);
   }, []);
 
   // Auto-scroll to bottom when new messages arrive
