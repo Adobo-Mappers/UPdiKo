@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { sendToCasie, clearCasieHistory } from '../../services/cassieService';
+import { sendToCasie, clearCasieHistory, resetSession } from '../../services/cassieService';
 import { getStaticLocations, matchLocation } from '../../services/locations.js';
 import LocationCards from '../../components/casie/LocationCards';
 import CasieModal from '../../components/casie/CasieModal';
@@ -12,7 +12,7 @@ import './CassieSection.css';
 const GREETING = "Hi! I'm Casie, your friendly guide to Miagao. How can I help you explore today?";
 const MAX_CARDS = parseInt(import.meta.env.VITE_CASIE_MAX_CARDS) || 3;
 
-function CassieSection({ currentSection = 'HOME', selectedService = null, onClose, onNavigateToLocation }) {
+function CassieSection({ currentSection = 'HOME', selectedService = null, userLocation = null, onClose, onNavigateToLocation }) {
   const [messages, setMessages] = useState([
     { role: 'assistant', content: GREETING }
   ]);
@@ -49,6 +49,13 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, onClos
       context.selectedLocation = {
         name: selectedService.name,
         type: selectedService.tags?.join(', ')
+      };
+    }
+
+    if (userLocation && userLocation.lat && userLocation.lng) {
+      context.userLocation = {
+        lat: userLocation.lat,
+        lng: userLocation.lng
       };
     }
 
@@ -176,6 +183,7 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, onClos
 
   const handleClear = async () => {
     await clearCasieHistory();
+    resetSession();
     setMessages([{ role: 'assistant', content: GREETING }]);
   };
 

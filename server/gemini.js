@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 
-console.log('Loading Casie routes...');
+const API_BASE = process.env.API_BASE || 'http://localhost:3000/api';
+const SESSION_MAX_HISTORY = 20;
+const SESSION_CLEANUP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 let GoogleGenAI;
 async function getGenAIInstance(apiKey) {
@@ -43,6 +45,18 @@ You combine the warmth of a kuya or ate who's been around campus for years with 
 - The location cards on the screen will show the exact places found, so your text must match those exactly.`;
 
 const sessions = new Map();
+const sessionTimestamps = new Map();
+
+// Cleanup old sessions periodically to prevent memory leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [sessionId, lastActive] of sessionTimestamps) {
+    if (now - lastActive > SESSION_CLEANUP_INTERVAL_MS) {
+      sessions.delete(sessionId);
+      sessionTimestamps.delete(sessionId);
+    }
+  }
+}, SESSION_CLEANUP_INTERVAL_MS);
 
 const searchLocationsTool = {
   name: "search_locations",
@@ -63,8 +77,6 @@ const searchLocationsTool = {
 };
 
 async function queryLocations(category, keyword, userLat, userLng) {
-  const API_BASE = 'http://localhost:3000/api';
-  
   try {
     const response = await fetch(`${API_BASE}/locations`);
     if (!response.ok) {
@@ -135,6 +147,9 @@ router.post('/', async (req, res) => {
   
   if (!sessions.has(currentSessionId)) {
     sessions.set(currentSessionId, []);
+    sessionTimestamps.set(currentSessionId, Date.now());
+  } else {
+    sessionTimestamps.set(currentSessionId, Date.now());
   }
   
   const userHistory = sessions.get(currentSessionId);
@@ -160,7 +175,7 @@ router.post('/', async (req, res) => {
     userHistory.push({ role: 'user', parts: [{ text: message }] });
 
     // Ensure history doesn't grow infinitely (keep last 20 messages to preserve context)
-    if (userHistory.length > 20) {
+    if (userHistory.length > SESSION_MAX_HISTORY) {
       userHistory.splice(0, userHistory.length - 20);
     }
 
@@ -245,7 +260,6 @@ router.post('/', async (req, res) => {
       userHistory.push({ role: 'model', parts: [{ text: finalText }] });
     }
 
-    console.log('[DEBUG] Returning locations:', locations);
     res.json({ 
         message: finalText,
         places: locations,

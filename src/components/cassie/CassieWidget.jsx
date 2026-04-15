@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { sendToCasie, clearCasieHistory, resetSession } from '../../services/cassieService';
-import { getStaticLocations, getNearbyLocations, matchLocation } from '../../services/locations.js';
+import { getStaticLocations, matchLocation } from '../../services/locations.js';
 import LocationCards from '../../components/casie/LocationCards';
 import chatIcon from '../../assets/images/icon/chatIcon.svg';
 import closeIcon from '../../assets/images/icon/x.svg';
 import nextIcon from '../../assets/images/icon/next-icon.png';
-import saveIcon from '../../assets/images/icon/save-icon.png';
+import clearIcon from '../../assets/images/icon/broom.svg';
 import './CassieWidget.css';
 
 const GREETING = "Hi! I'm Casie, your friendly guide to Miagao. How can I help you explore today?";
@@ -36,18 +36,6 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Calculate distance between two points (in km)
-  const getDistance = (lat1, lng1, lat2, lng2) => {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
 
   // Build context for AI
   const getContext = () => {
@@ -84,8 +72,6 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
 
   const handleSend = async (overrideMessage = null) => {
     const context = getContext();
-    console.log('Cassie getContext:', context);
-    console.log('userLocation:', userLocation);
     const userMessage = overrideMessage || input.trim();
     if (!userMessage || isLoading) return;
 
@@ -94,10 +80,9 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
     }
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
- 
+  
     try {
       const { message, places: placesData } = await sendToCasie(userMessage, context);
-      console.log('[DEBUG] placesData from AI:', placesData);
       
       if (placesData && placesData.length > 0) {
         const matchedPlaces = [];
@@ -146,15 +131,13 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
   };
 
   const handlePlaceClick = (place) => {
-    console.log('handlePlaceClick place:', place);
-    console.log('latitude:', place.latitude, 'longitude:', place.longitude);
     if (onNavigateToLocation) {
       onNavigateToLocation(place);
       setIsOpen(false);
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -172,70 +155,6 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
     handleSend(prompt);
   };
 
-  const parseResponse = (response) => {
-    let places = null;
-    let cleanText = response;
-
-    try {
-      const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[1].trim());
-        if (parsed.type === 'locations' && parsed.places) {
-          places = parsed.places;
-          cleanText = response.replace(jsonMatch[0], '').trim();
-        }
-      }
-      
-      if (!places) {
-        const plainJson = response.match(/\{[\s\S]*?"type"\s*:\s*"locations"[\s\S]*?\}/);
-        if (plainJson) {
-          const parsed = JSON.parse(plainJson[0].trim());
-          if (parsed.places) {
-            places = parsed.places;
-            cleanText = response.replace(plainJson[0], '').trim();
-          }
-        }
-      }
-    } catch (e) {
-      console.log('Failed to parse JSON from response');
-    }
-
-    cleanText = cleanText
-      .replace(/```json[\s\S]*?```/g, '')
-      .replace(/\{[\s\S]*?"type"\s*:\s*"locations"[\s\S]*?\}/g, '')
-      .trim();
-
-    if (places && places.length > 0) {
-      const matchedPlaces = [];
-      for (const place of places) {
-        // Trust AI's data first - use coordinates if provided
-        if (place.lat && place.lng) {
-          matchedPlaces.push({
-            name: place.name,
-            address: place.address,
-            latitude: parseFloat(place.lat),
-            longitude: parseFloat(place.lng)
-          });
-        } else {
-          // Fallback to DB match only if AI didn't provide coordinates
-          const matched = matchLocation(dbLocations, place.name);
-          if (matched) {
-            matchedPlaces.push(matched);
-          }
-        }
-      }
-
-      if (matchedPlaces.length === 0 && places.length > 0) {
-        cleanText = cleanText + "\n\nI couldn't find those locations. Try searching for a specific place.";
-        places = null;
-      } else {
-        places = matchedPlaces;
-      }
-    }
-
-    return { places, cleanText };
-  };
-
   return (
     <div className={`cassie-widget ${isOpen ? 'open' : ''}`}>
       {/* Chat Panel */}
@@ -251,7 +170,7 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
             </div>
             <div className="cassie-header-actions">
               <button onClick={handleClear} className="cassie-clear-btn" title="Clear chat">
-                <img src={saveIcon} alt="Clear" />
+                <img src={clearIcon} alt="Clear" />
               </button>
               <button onClick={() => setIsOpen(false)} className="cassie-close-btn">
                 <img src={closeIcon} alt="Close" />
@@ -305,7 +224,7 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyDown}
               placeholder="Ask Casie anything..."
               disabled={isLoading}
             />
