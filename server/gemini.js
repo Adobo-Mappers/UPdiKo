@@ -1,12 +1,44 @@
+/**
+ * This module handles the AI-powered chatbot for the UPdiKo location discovery app.
+ * It integrates with Google Gemini API to provide conversational location search
+ * and navigation assistance for the UPV Miagao campus area.
+ * 
+ * Architecture:
+ * - Express router handles /api/cassie endpoints
+ * - Gemini API with function calling for location searches
+ * - In-memory session management with auto-cleanup
+ * - Tool-based calls to search local SQLite database
+ * 
+ * @module server/gemini
+ * @requires express
+ * @requires crypto
+ * @requires @google/genai
+ * ============================================================================
+ */
+
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 
+// Configuration constants
+// API_BASE: Backend URL for location queries (configurable via environment)
+// SESSION_MAX_HISTORY: Maximum number of conversation turns to preserve per session
+// SESSION_CLEANUP_INTERVAL_MS: How often to remove abandoned sessions (15 minutes)
 const API_BASE = process.env.API_BASE || 'http://localhost:3000/api';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
 const SESSION_MAX_HISTORY = 20;
 const SESSION_CLEANUP_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
 
 let GoogleGenAI;
+
+/**
+ * Gets or creates the Google GenAI singleton instance
+ * Uses lazy loading pattern to defer module import until needed
+ * 
+ * @param {string} apiKey - Google Gemini API key
+ * @returns {Promise<Object>} GenAI client instance
+ * @async
+ */
 async function getGenAIInstance(apiKey) {
   if (!GoogleGenAI) {
     const mod = await import('@google/genai');
@@ -15,7 +47,22 @@ async function getGenAIInstance(apiKey) {
   return new GoogleGenAI({ apiKey });
 }
 
-// Updated System Prompt to handle out-of-scope queries strictly
+/**
+ * System Prompt for Casie AI Assistant
+ * 
+ * This prompt defines Casie's persona, behavior, and boundaries.
+ * It instructs the AI to:
+ * - Act as a local guide for UPV Miagao campus
+ * - Use conversational, brief responses (2-3 sentences max)
+ * - Use local Filipino terms naturally
+ * - Never invent information or use emojis
+ * - Use the search_locations tool for location queries
+ * - Only mention exact location names from search results
+ * - Strictly decline out-of-scope requests (code, math, essays, etc.)
+ * 
+ * @constant {string}
+ * @see https://ai.google.dev/docs/gemini-api-guide
+ */
 const CASIE_SYSTEM_PROMPT = `You are Casie, a digital navigator and trusted local guide for the UPdiKo location discovery app — built for students, faculty, staff, and visitors finding their way around the University of the Philippines Visayas (UPV) campus and the town of Miagao, Iloilo.
 
 ## Who you are
@@ -44,10 +91,30 @@ You combine the warmth of a kuya or ate who's been around campus for years with 
 - Never say "like Restaurant A or other places" - only use the exact names from the results.
 - The location cards on the screen will show the exact places found, so your text must match those exactly.`;
 
+/**
+ * Session Storage
+ * 
+ * Stores conversation history for each user session.
+ * - sessions: Map<sessionId, conversation[]>
+ * - sessionTimestamps: Map<sessionId, lastActiveTimestamp>
+ * 
+ * Used for:
+ * - Maintaining conversation context across messages
+ * - Tracking last active time for cleanup
+ * - Session continuity during navigation
+ */
 const sessions = new Map();
 const sessionTimestamps = new Map();
 
-// Cleanup old sessions periodically to prevent memory leaks
+/**
+ * Periodic Session Cleanup
+ * 
+ * Runs every 15 minutes to remove abandoned sessions
+ * and prevent memory leaks. Sessions without activity
+ * for 15 minutes are automatically deleted.
+ * 
+ * @interval
+ */
 setInterval(() => {
   const now = Date.now();
   for (const [sessionId, lastActive] of sessionTimestamps) {
@@ -58,6 +125,19 @@ setInterval(() => {
   }
 }, SESSION_CLEANUP_INTERVAL_MS);
 
+/**
+ * Tool Definition: search_locations
+ * 
+ * Defines the function schema for location searches.
+ * Gemini uses this to understand when and how to call
+ * the backend location database.
+ * 
+ * Parameters:
+ * - category: Type of place (restaurant, pharmacy, etc.)
+ * - keyword: Specific name to search for
+ * 
+ * @constant {Object}
+ */
 const searchLocationsTool = {
   name: "search_locations",
   description: "Searches the local database for places, businesses, or landmarks in Miagao. Use when user asks about finding places, getting directions, or any location-related queries.",
@@ -76,6 +156,26 @@ const searchLocationsTool = {
   }
 };
 
+/**
+ * Query Location Database
+ * 
+ * Called by Gemini when the AI needs to search for places.
+ * This is the bridge between the AI and local SQLite database.
+ * 
+ * Process:
+ * 1. Fetch all locations from API
+ * 2. Filter by category (e.g., "restaurant")
+ * 3. Filter by keyword (e.g., "Jollibee")
+ * 4. Calculate distance if user location provided (Haversine formula)
+ * 5. Return up to 10 matching locations with coordinates
+ * 
+ * @param {string|null} category - Place type to search for
+ * @param {string|null} keyword - Specific name to search for
+ * @param {number|null} userLat - User's current latitude
+ * @param {number|null} userLng - User's current longitude
+ * @returns {Promise<Array>} Array of location objects
+ * @async
+ */
 async function queryLocations(category, keyword, userLat, userLng) {
   try {
     const response = await fetch(`${API_BASE}/locations`);
@@ -118,6 +218,8 @@ async function queryLocations(category, keyword, userLat, userLng) {
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
           return { ...loc, distance: R * c };
         })
+        // TODO: Fix this - Math.random() sort is not truly random and has undefined behavior
+        // Use Fisher-Yates shuffle instead for proper randomization
         .sort(() => Math.random() - 0.5);
     }
     
@@ -181,7 +283,7 @@ router.post('/', async (req, res) => {
 
     // 2. Initial call to Gemini, providing the tools and full history
     const response = await genAI.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: GEMINI_MODEL,
       contents: userHistory,
       config: {
         systemInstruction: fullSystemInstruction,
@@ -200,8 +302,7 @@ router.post('/', async (req, res) => {
     if (functionCallParts.length > 0) {
       const funcCall = functionCallParts[0].functionCall;
       
-      // CRITICAL FIX: You must push the EXACT parts array returned by the model, 
-      // which includes the required 'thought_signature' and the 'functionCall'.
+      // Required by Gemini function calling protocol - push model's request to history
       userHistory.push({
         role: 'model',
         parts: parts 
@@ -215,7 +316,7 @@ router.post('/', async (req, res) => {
       // Execute local backend query
       const dbResults = await queryLocations(category, keyword, userLat, userLng);
       
-      // CRITICAL FIX: You MUST push the backend's response back to the history array as a user turn
+      // Push tool results back to Gemini - part of function calling protocol
       userHistory.push({ 
         role: 'user', 
         parts: [{ 
@@ -235,7 +336,7 @@ router.post('/', async (req, res) => {
 
       // 4. Second call to Gemini to synthesize the data into a natural response
       const synthesisResponse = await genAI.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: GEMINI_MODEL,
         contents: userHistory,
         config: {
           systemInstruction: synthesisInstruction,

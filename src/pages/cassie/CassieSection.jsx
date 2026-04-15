@@ -1,16 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import { sendToCasie, clearCasieHistory, resetSession } from '../../services/cassieService';
-import { getStaticLocations, matchLocation } from '../../services/locations.js';
 import LocationCards from '../../components/casie/LocationCards';
 import CasieModal from '../../components/casie/CasieModal';
 import chatIcon from '../../assets/images/icon/chatIcon.svg';
 import backIcon from '../../assets/images/icon/back-icon.png';
 import nextIcon from '../../assets/images/icon/next-icon.png';
-import saveIcon from '../../assets/images/icon/save-icon.png';
+import clearIcon from '../../assets/images/icon/broom.svg';
 import './CassieSection.css';
 
 const GREETING = "Hi! I'm Casie, your friendly guide to Miagao. How can I help you explore today?";
 const MAX_CARDS = parseInt(import.meta.env.VITE_CASIE_MAX_CARDS) || 3;
+
+// Rate limiting configuration
+const RATE_LIMIT_MS = 2000;          // 2 seconds between messages
+const DAILY_MESSAGE_LIMIT = 50;      // Max messages per day
+
+// Track rate limiting (in-memory)
+let lastMessageTime = 0;
+let messageCountToday = 0;
+let messageCountDate = new Date().toDateString();
 
 function CassieSection({ currentSection = 'HOME', selectedService = null, userLocation = null, onClose, onNavigateToLocation }) {
   const [messages, setMessages] = useState([
@@ -20,16 +28,11 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, userLo
   const [isLoading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
-  const [dbLocations, setDbLocations] = useState([]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  useEffect(() => {
-    getStaticLocations().then(setDbLocations);
-  }, []);
 
   const getContext = () => {
     const pageNames = {
@@ -62,107 +65,97 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, userLo
     return context;
   };
 
-  const parseResponse = (response) => {
-    let places = null;
-    let cleanText = response;
-
-    try {
-      const jsonMatch = response.match(/```json\s*([\s\S]*?)```/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[1].trim());
-        if (parsed.type === 'locations' && parsed.places) {
-          places = parsed.places;
-          cleanText = response.replace(jsonMatch[0], '').trim();
-        }
-      }
-      
-      if (!places) {
-        const plainJson = response.match(/\{[\s\S]*"type"\s*:\s*"locations"[\s\S]*\}/);
-        if (plainJson) {
-          const parsed = JSON.parse(plainJson[0].trim());
-          if (parsed.places) {
-            places = parsed.places;
-            cleanText = response.replace(plainJson[0], '').trim();
-          }
-        }
-      }
-
-      if (!places) {
-        const inlineJson = response.match(/"places"\s*:\s*\[([\s\S]*?)\]/);
-        if (inlineJson) {
-          try {
-            const parsed = JSON.parse('{"places": [' + inlineJson[1] + ']}');
-            if (parsed.places && parsed.places.length > 0) {
-              places = parsed.places;
-              cleanText = response.replace(inlineJson[0], '').trim();
-            }
-          } catch (err) {
-            console.log('Failed to parse inline JSON');
-          }
-        }
-      }
-    } catch (e) {
-      console.log('Failed to parse JSON from response');
+  /**
+   * Sanitize user input to prevent injection attacks
+   * - Limits length to 500 chars
+   * - Removes common injection patterns
+   * - Trims whitespace
+   * 
+   * @param {string} text - Raw user input
+   * @returns {string} Sanitized text
+   */
+  const sanitizeInput = (text) => {
+    if (!text) return '';
+    
+    let sanitized = text.trim();
+    
+    // Limit length
+    if (sanitized.length > 500) {
+      sanitized = sanitized.substring(0, 500);
     }
-
-    cleanText = cleanText
-      .replace(/```json[\s\S]*?```/g, '')
-      .replace(/\{[\s\S]*?"type"\s*:\s*"locations"[\s\S]*?\}/g, '')
-      .replace(/\{[\s\S]*?"places"\s*:\s*\[[\s\S]*?\]\}/g, '')
-      .trim();
-
-    if (places && places.length > 0) {
-      const matchedPlaces = [];
-      for (const place of places) {
-        // Trust AI's data first - use coordinates if provided
-        if (place.lat && place.lng) {
-          matchedPlaces.push({
-            name: place.name,
-            address: place.address,
-            latitude: parseFloat(place.lat),
-            longitude: parseFloat(place.lng)
-          });
-        } else {
-          // Fallback to DB match only if AI didn't provide coordinates
-          const matched = matchLocation(dbLocations, place.name);
-          if (matched) {
-            matchedPlaces.push(matched);
-          }
-        }
-      }
-
-      if (matchedPlaces.length === 0 && places.length > 0) {
-        cleanText = cleanText + "\n\nI couldn't find those locations. Try searching for a specific place.";
-        places = null;
-      } else {
-        places = matchedPlaces;
+    
+    // Block obvious prompt injection patterns
+    const injectionPatterns = [
+      /ignore\s+(previous|all|prior)/i,
+      /forget\s+(everything|all|previous)/i,
+      /disregard\s+(instructions|system)/i,
+      /system\s*:/i,
+      /you\s+are\s+(now|a)/i,
+      /act\s+as\s+if/i,
+      /pretend\s+(to|you)/i
+    ];
+    
+    for (const pattern of injectionPatterns) {
+      if (pattern.test(sanitized)) {
+        sanitized = sanitized.replace(pattern, '[ FILTERED ]');
       }
     }
-
-    return { places, cleanText };
+    
+    return sanitized;
   };
 
   const handleSend = async () => {
+    // Debug: log when handler is invoked to verify click events
+    try { console.log('[Casie] handleSend invoked', { input, isLoading }); } catch (e) {}
+    // Rate limiting: prevent spam
+    const now = Date.now();
+    
+    // Reset daily count at midnight
+    if (new Date().toDateString() !== messageCountDate) {
+      messageCountDate = new Date().toDateString();
+      messageCountToday = 0;
+    }
+    
+    // Check cooldown
+    if (now - lastMessageTime < RATE_LIMIT_MS) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "Please wait a moment before sending another message." 
+      }]);
+      return;
+    }
+    
+    // Check daily limit
+    if (messageCountToday >= DAILY_MESSAGE_LIMIT) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: "You've reached the daily message limit. Please try again tomorrow!" 
+      }]);
+      return;
+    }
+    
     if (!input.trim() || isLoading) return;
 
-    const userMessage = input.trim();
+    const userMessage = sanitizeInput(input.trim());
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
+    
+    // Update rate limit counters
+    lastMessageTime = now;
+    messageCountToday++;
 
     try {
-      const { response } = await sendToCasie(userMessage, getContext());
-      
-      const { places, cleanText } = parseResponse(response);
+      const { message, places } = await sendToCasie(userMessage, getContext());
       
       if (places && places.length > 0) {
         setMessages(prev => [...prev, { 
           role: 'assistant', 
-          content: cleanText,
+          content: message,
           locations: places
         }]);
       } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+        setMessages(prev => [...prev, { role: 'assistant', content: message }]);
       }
     } catch (error) {
       setMessages(prev => [...prev, { 
@@ -174,7 +167,7 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, userLo
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -224,7 +217,7 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, userLo
           </div>
         </div>
         <button onClick={handleClear} className="cassie-clear-btn" title="Clear chat">
-          <img src={saveIcon} alt="Clear" />
+          <img src={clearIcon} alt="Clear" />
         </button>
       </header>
 
@@ -260,7 +253,7 @@ function CassieSection({ currentSection = 'HOME', selectedService = null, userLo
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           placeholder="Ask Casie anything..."
           disabled={isLoading}
         />

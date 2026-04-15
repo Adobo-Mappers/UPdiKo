@@ -1,3 +1,26 @@
+/**
+ * A floating button that opens an inline chat with the Casie AI assistant.
+ * Used throughout the app for quick location queries and navigation help.
+ * 
+ * Features:
+ * - Floating toggle button (bottom-right corner)
+ * - Quick prompt buttons for common queries
+ * - Location cards display for search results
+ * - Auto-scroll to latest message
+ * - Session persistence via API
+ * 
+ * Props:
+ * - currentSection: Current app section (HOME, MAP, etc.)
+ * - selectedService: Currently selected location (if any)
+ * - userLocation: User's GPS coordinates for distance calculation
+ * - onNavigateToLocation: Callback when user selects a location
+ * 
+ * @component
+ * @requires casieService for API calls
+ * @requires locations.js for local database fallback
+ * ============================================================================
+ */
+
 import { useState, useRef, useEffect } from 'react';
 import { sendToCasie, clearCasieHistory, resetSession } from '../../services/cassieService';
 import { getStaticLocations, matchLocation } from '../../services/locations.js';
@@ -8,9 +31,37 @@ import nextIcon from '../../assets/images/icon/next-icon.png';
 import clearIcon from '../../assets/images/icon/broom.svg';
 import './CassieWidget.css';
 
+/**
+ * Initial greeting message shown when widget opens
+ * @constant {string}
+ */
 const GREETING = "Hi! I'm Casie, your friendly guide to Miagao. How can I help you explore today?";
+
+/**
+ * Maximum number of location cards to display
+ * @constant {number}
+ */
 const MAX_CARDS = 3;
 
+// Rate limiting configuration
+const RATE_LIMIT_MS = 2000;          // 2 seconds between messages (anti-spam)
+const DAILY_MESSAGE_LIMIT = 50;       // Max messages per day per user
+const MAX_CONCURRENT_REQUESTS = 1;           // Prevent parallel requests
+
+// Track rate limiting per session (in-memory)
+let lastMessageTime = 0;
+let messageCountToday = 0;
+let messageCountDate = new Date().toDateString();
+
+// TODO: Extract logic to shared hook to avoid duplication between CassieSection/CassieWidget
+// Duplicated: getContext(), GREETING, sanitizeInput(), processLocations()
+// Consider: createCustomHook('useCasie') or context provider
+
+/**
+ * Quick prompt buttons for common queries
+ * These are shown on first open to guide users
+ * @constant {string[]}
+ */
 const QUICK_PROMPTS = [
   "Where is the library?",
   "Find restaurants",
@@ -70,10 +121,138 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
     return context;
   };
 
-  const handleSend = async (overrideMessage = null) => {
+  /**
+   * Process AI response locations
+   * Merges AI-provided data with local DB fallback
+   * 
+   * @param {Array} placesData - Locations from AI response
+   * @returns {Array} Processed locations with coordinates
+   */
+  const processLocations = (placesData) => {
+    if (!placesData || placesData.length === 0) return [];
+    
+    const matchedPlaces = [];
+    for (const place of placesData) {
+      // Trust AI coordinates first, fallback to local DB
+      if (place.lat && place.lng) {
+        matchedPlaces.push({
+          name: place.name,
+          address: place.address,
+          latitude: place.lat,
+          longitude: place.lng
+        });
+      } else {
+        const matched = matchLocation(dbLocations, place.name);
+        if (matched) {
+          matchedPlaces.push({
+            ...matched,
+            latitude: matched.latitude || place.lat,
+            longitude: matched.longitude || place.lng
+          });
+        }
+      }
+    }
+    return matchedPlaces;
+  };
+
+  /**
+   * Add assistant message to chat
+   * Handles both text-only and location card responses
+   * 
+   * @param {string} content - AI response text
+   * @param {Array} locations - Optional array of location objects
+   */
+  const addAssistantMessage = (content, locations = []) => {
+    const message = { role: 'assistant', content };
+    if (locations.length > 0) {
+      message.locations = locations;
+    }
+    setMessages(prev => [...prev, message]);
+  };
+
+  /**
+ * Sanitize user input to prevent injection attacks
+ * - Limits length to 500 chars
+ * - Removes common injection patterns
+ * - Trims whitespace
+ * 
+ * @param {string} text - Raw user input
+ * @returns {string} Sanitized text
+ */
+const sanitizeInput = (text) => {
+  if (!text) return '';
+  
+  let sanitized = text.trim();
+  
+  // Limit length
+  if (sanitized.length > 500) {
+    sanitized = sanitized.substring(0, 500);
+  }
+  
+  // Block obvious prompt injection patterns
+  const injectionPatterns = [
+    /ignore\s+(previous|all|prior)/i,
+    /forget\s+(everything|all|previous)/i,
+    /disregard\s+(instructions|system)/i,
+    /system\s*:/i,
+    /you\s+are\s+(now|a)/i,
+    /act\s+as\s+if/i,
+    /pretend\s+(to|you)/i
+  ];
+  
+  for (const pattern of injectionPatterns) {
+    if (pattern.test(sanitized)) {
+      // Replace with placeholder but allow the message through with warning
+      sanitized = sanitized.replace(pattern, '[ FILTERED ]');
+    }
+  }
+  
+  return sanitized;
+};
+
+const handleSend = async (overrideMessageOrEvent = null) => {
+    const overrideMessage = typeof overrideMessageOrEvent === 'string' ? overrideMessageOrEvent : null;
+
+    // Ignore click/keyboard event objects passed by React handlers.
+    if (overrideMessageOrEvent && typeof overrideMessageOrEvent.preventDefault === 'function') {
+      overrideMessageOrEvent.preventDefault();
+    }
+
+    // Rate limiting: prevent spam
+    const now = Date.now();
+    
+    // Reset daily count at midnight
+    if (new Date().toDateString() !== messageCountDate) {
+      messageCountDate = new Date().toDateString();
+      messageCountToday = 0;
+    }
+    
+    // Check cooldown between messages
+    if (now - lastMessageTime < RATE_LIMIT_MS) {
+      addAssistantMessage("Please wait a moment before sending another message.");
+      return;
+    }
+    
+    // Check daily limit
+    if (messageCountToday >= DAILY_MESSAGE_LIMIT) {
+      addAssistantMessage("You've reached the daily message limit. Please try again tomorrow!");
+      return;
+    }
+    
+    // Check concurrent requests
+    if (isLoading) return;
+    
     const context = getContext();
-    const userMessage = overrideMessage || input.trim();
-    if (!userMessage || isLoading) return;
+    const rawMessage = overrideMessage || input.trim();
+    if (!rawMessage) return;
+
+    // Sanitize input
+    const userMessage = sanitizeInput(rawMessage);
+    if (!userMessage) return;
+    
+    // Update rate limit counters
+    lastMessageTime = now;
+    messageCountToday++;
 
     if (!overrideMessage) {
       setInput('');
@@ -83,48 +262,10 @@ function CassieWidget({ currentSection = 'HOME', selectedService = null, userLoc
   
     try {
       const { message, places: placesData } = await sendToCasie(userMessage, context);
-      
-      if (placesData && placesData.length > 0) {
-        const matchedPlaces = [];
-        for (const place of placesData) {
-          // Trust AI's data first - use coordinates if provided
-          if (place.lat && place.lng) {
-            matchedPlaces.push({
-              name: place.name,
-              address: place.address,
-              latitude: place.lat,
-              longitude: place.lng
-            });
-          } else {
-            // Fallback to DB match only if AI didn't provide coordinates
-            const matched = matchLocation(dbLocations, place.name);
-            if (matched) {
-              matchedPlaces.push({
-                ...matched,
-                latitude: matched.latitude || place.lat,
-                longitude: matched.longitude || place.lng
-              });
-            }
-          }
-        }
-
-        if (matchedPlaces.length > 0) {
-          setMessages(prev => [...prev, { 
-            role: 'assistant', 
-            content: message,
-            locations: matchedPlaces
-          }]);
-        } else {
-          setMessages(prev => [...prev, { role: 'assistant', content: message }]);
-        }
-      } else {
-        setMessages(prev => [...prev, { role: 'assistant', content: message }]);
-      }
+      const locations = processLocations(placesData);
+      addAssistantMessage(message, locations);
     } catch (error) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "Sorry, I encountered an error. Please try again!" 
-      }]);
+      addAssistantMessage("Sorry, I encountered an error. Please try again!");
     } finally {
       setIsLoading(false);
     }

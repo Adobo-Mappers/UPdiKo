@@ -164,7 +164,139 @@ const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 ## 3. API Endpoints
 
-### 3.1 GET /api/locations
+### 3.1 Casie AI Chatbot Endpoints
+
+The Casie AI chatbot provides conversational location search using Google Gemini.
+
+#### 3.1.1 POST /api/cassie
+
+Send a message to the Casie AI assistant.
+
+**Endpoint:**
+```
+POST http://localhost:3000/api/cassie
+```
+
+**Headers:**
+| Header | Required | Description |
+|--------|----------|-------------|
+| `Content-Type` | Yes | Must be `application/json` |
+| `X-Gemini-Key` | Yes | Google Gemini API key |
+
+**Request Body:**
+```json
+{
+  "message": "Find restaurants near the campus",
+  "context": {
+    "currentPage": "MAP",
+    "userLocation": {
+      "lat": 10.6419,
+      "lng": 122.0759
+    }
+  },
+  "sessionId": "optional-uuid-for-continuity"
+}
+```
+
+**Parameters:**
+| Field | Type | Required | Description |
+|------|------|----------|-------------|
+| `message` | string | Yes | User's input message |
+| `context` | object | No | Current app state |
+| `context.currentPage` | string | No | Current page (HOME, MAP, etc.) |
+| `context.selectedLocation` | object | No | Selected location |
+| `context.userLocation` | object | No | User's GPS coordinates |
+| `sessionId` | string | No | UUID for conversation continuity |
+
+**Response (200 OK):**
+```json
+{
+  "message": "I found some great restaurants near the campus! Here are a few options...",
+  "places": [
+    {
+      "name": "Kusina ni Co",
+      "address": "Miagao, Iloilo",
+      "lat": 10.6425,
+      "lng": 122.0762
+    }
+  ],
+  "sessionId": "uuid-continues-here"
+}
+```
+
+**Response Schema:**
+| Field | Type | Description |
+|------|------|-------------|
+| `message` | string | AI's conversational response |
+| `places` | array | Location results (if any) |
+| `places[].name` | string | Location name |
+| `places[].address` | string | Location address |
+| `places[].lat` | number | Latitude |
+| `places[].lng` | number | Longitude |
+| `sessionId` | string | Session ID for next message |
+
+**Error Responses:**
+- `400`: Missing message or API key
+- `500`: Gemini API error
+
+**Example cURL:**
+```bash
+curl -X POST http://localhost:3000/api/cassie \
+  -H "Content-Type: application/json" \
+  -H "X-Gemini-Key: YOUR_API_KEY" \
+  -d '{"message": "Where is the library?"}'
+```
+
+---
+
+#### 3.1.2 POST /api/cassie/clear
+
+Clear conversation history for a session.
+
+**Endpoint:**
+```
+POST http://localhost:3000/api/cassie/clear
+```
+
+**Request Body:**
+```json
+{
+  "sessionId": "uuid-to-clear"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Conversation cleared for session"
+}
+```
+
+---
+
+#### 3.1.3 GET /api/cassie/history
+
+Get conversation history for a session.
+
+**Endpoint:**
+```
+GET http://localhost:3000/api/cassie/history?sessionId=uuid
+```
+
+**Response (200 OK):**
+```json
+{
+  "history": [
+    { "role": "user", "parts": [{ "text": "Find restaurants" }] },
+    { "role": "model", "parts": [{ "text": "Here are some options..." }] }
+  ]
+}
+```
+
+---
+
+### 3.2 GET /api/locations
 
 Retrieve all locations from the SQLite database.
 
