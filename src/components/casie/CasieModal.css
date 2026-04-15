@@ -1,0 +1,109 @@
+.casie-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.casie-modal {
+  background: white;
+  border-radius: 16px;
+  padding: var(--pad-24);
+  width: calc(var(--screen-width) - var(--pad-48));
+  max-width: 350px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.casie-modal-header {
+  display: flex;
+  align-items: center;
+  gap: var(--mar-12);
+  margin-bottom: var(--mar-16);
+}
+
+.casie-modal-icon {
+  font-size: 32px;
+}
+
+.casie-modal-header h3 {
+  font-size: var(--fs-18);
+  font-weight: var(--fw-semi);
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.casie-modal-content {
+  margin-bottom: var(--mar-24);
+}
+
+.casie-modal-place-name {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-med);
+  color: #333;
+  margin: 0 0 var(--mar-4) 0;
+}
+
+.casie-modal-place-address {
+  font-size: var(--fs-14);
+  color: #666;
+  margin: 0;
+}
+
+.casie-modal-actions {
+  display: flex;
+  gap: var(--mar-12);
+}
+
+.casie-modal-btn {
+  flex: 1;
+  padding: var(--pad-12) var(--pad-16);
+  border-radius: 8px;
+  font-size: var(--fs-14);
+  font-weight: var(--fw-semi);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.casie-modal-btn-cancel {
+  background: white;
+  border: 1px solid #e0e0e0;
+  color: #666;
+}
+
+.casie-modal-btn-cancel:hover {
+  background: #f5f5f5;
+}
+
+.casie-modal-btn-confirm {
+  background: var(--color-primary);
+  border: none;
+  color: var(--color-accent-1);
+}
+
+.casie-modal-btn-confirm:hover {
+  opacity: 0.9;
+}

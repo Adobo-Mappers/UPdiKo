@@ -21,10 +21,8 @@ import customPinIcon from '../../assets/images/icon/6.png';
 
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../services/locations.js";
-
+// Getting Pinned Locations and supabase connection
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
-
-
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -231,7 +229,7 @@ function RotationController({ bearing, setBearing }) {
 }
 
 // // main map element
-function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange}) {
+function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded}) {
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
@@ -252,7 +250,7 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
 
   
   // Function to handle the marker click logic
-  const handleMarkerClick = (data, lat, lng) => {
+  const handleMarkerClick = (data, lat, lng, shouldRoute = false) => {
       // 1. Set the selected marker info panel
       setSelectedMarkerInfo(data);
       setTempLocation(null);
@@ -262,6 +260,11 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
       // We pass the desired zoom level (e.g., 17) along with the coordinates.
       if (onMarkerClick) {
           onMarkerClick(lat, lng, 17); 
+      }
+      
+      // 3. Calculate route if requested (e.g., from Cassie navigation)
+      if (shouldRoute) {
+        handleGetDirections(data);
       }
   };
 
@@ -311,7 +314,7 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   // Replaces static JSON imports — fetch all locations from Supabase static_locations table
   useEffect(() => {
     const fetchStaticLocations = async () => {
-      const data = await getStaticLocations();
+      const data = await getStaticLocations(supabase);
       const valid = data.filter(r => !isNaN(parseFloat(r.latitude)) && !isNaN(parseFloat(r.longitude)));
       console.log(`🗺 Total loaded: ${data.length} | Valid coords: ${valid.length} | Skipped: ${data.length - valid.length}`);
       setStaticLocations(data);
