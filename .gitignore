@@ -96,3 +96,6 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+AGENTS.md
+.opencode/*

@@ -1,0 +1,242 @@
+/* Access to global styles */
+@import url('./../../index.css');
+
+/* Cassie Section Page Styles */
+.cassie-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    width: var(--screen-width);
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-background);
+    animation: fadeSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.cassie-section .cassie-header {
+  display: flex;
+  align-items: center;
+  padding: var(--pad-16);
+  background-color: var(--color-primary);
+  gap: var(--mar-12);
+}
+
+.cassie-back-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.cassie-back-btn .back-icon-white {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.cassie-section .cassie-header-info {
+  display: flex;
+  align-items: center;
+  gap: var(--mar-8);
+  flex: 1;
+  color:white;
+}
+
+.cassie-section .cassie-avatar {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: invert(1) brightness(1.2);
+}
+
+.cassie-section .cassie-header-info h3 {
+  margin: 0;
+  font-size: var(--fs-18);
+  color: var(--color-accent-1);
+}
+
+.cassie-section .cassie-status {
+  font-size: var(--fs-12);
+  color: var(--color-accent-2);
+}
+
+.cassie-section .cassie-clear-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.cassie-section .cassie-clear-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1);
+}
+
+/* Messages */
+.cassie-section .cassie-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--pad-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mar-12);
+}
+
+.cassie-section .cassie-message {
+  display: flex;
+  animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cassie-section .cassie-message.user {
+  justify-content: flex-end;
+}
+
+.cassie-section .cassie-message.assistant {
+  justify-content: flex-start;
+}
+
+.cassie-section .cassie-message-bubble {
+  max-width: 80%;
+  padding: var(--pad-12) var(--pad-16);
+  border-radius: 16px;
+  font-size: var(--fs-14);
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.cassie-section .cassie-message.user .cassie-message-bubble {
+  background-color: var(--color-primary);
+  color: var(--color-accent-1);
+  border-bottom-right-radius: 4px;
+}
+
+.cassie-section .cassie-message.assistant .cassie-message-bubble {
+  background: white;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-bottom-left-radius: 4px;
+}
+
+/* Typing Indicator */
+.cassie-section .cassie-message-bubble.typing {
+  display: flex;
+  gap: 4px;
+  padding: var(--pad-12) var(--pad-16);
+  background: white;
+  border: 1px solid #e0e0e0;
+}
+
+.cassie-section .typing-dot {
+  animation: bounce 1.4s infinite ease-in-out;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+/* Input Area */
+.cassie-section .cassie-input-area {
+  display: flex;
+  gap: var(--mar-8);
+  padding: var(--pad-16);
+  background: white;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cassie-section .cassie-input-area input {
+  flex: 1;
+  padding: var(--pad-12) var(--pad-16);
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: var(--fs-14);
+  outline: none;
+}
+
+.cassie-section .cassie-input-area input:focus {
+  border-color: var(--color-primary);
+}
+
+.cassie-section .cassie-input-area input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.cassie-section .cassie-send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.cassie-section .cassie-send-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1) brightness(1.2);
+}
+
+.cassie-section .cassie-send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+.cassie-section .cassie-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

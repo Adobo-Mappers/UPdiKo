@@ -7,45 +7,59 @@ import RegisterSection from './pages/auth/RegisterSection.jsx';
 import AccountInfoSection from './pages/account/AccountInfoSection.jsx';
 import AccountUpdateSection from './pages/account/AccountUpdateSection.jsx';
 import PersonalPinSection from './pages/map/PersonalPinSection.jsx';
+import CassieSection from './pages/cassie/CassieSection.jsx';
 
 function App() {
-    /** 
-     *  This hook is a global state that keeps track of the current page the user is in.  
-     *  The pages are: HOME, MAP, ACCOUNT, LOGIN, & REGISTER  
-     */
     const [section, setSection] = useState("HOME");
     
-    
-    /**
-     * This hook is a global state that keeps track of the current service the user chose/searched 
-     * from HOME or MAP
-     * 
-     * The service state will be kept until the user exits MAP.  
-     * The service will be displayed in MAP.
-     */
-    const [service, setService] = useState(null); 
+    const [service, setService] = useState(null);
 
-    /**
-     * These are the routes or logic for the currently renderd page.
-     */
-    switch (section) {
-    case "HOME":
-        return <HomeSection setAppSection={setSection} setAppService={setService} />;
-    case "MAP":
-        return <MapSection setAppSection={setSection} service={service} setAppService={setService} />;
-    case "ACCOUNT":
-        return <AccountSection setAppSection={setSection} />;
-    case "ACCOUNT-UPDATE": 
-        return <AccountUpdateSection setAppSection={setSection} />;
-    case "LOGIN":
-        return <LoginSection setAppSection={setSection} />;
-    case "REGISTER":
-        return <RegisterSection setAppSection={setSection} />;
-    case "PERSONAL-PIN":
-        return <PersonalPinSection setAppSection={setSection} setAppService={setService} />;
-    default:
-        return <HomeSection setAppSection={setSection} setAppService={setService} />; // Fallback
-    }
+    const [showCasie, setShowCasie] = useState(false);
+
+    const [navigateToLocation, setNavigateToLocation] = useState(null);
+
+    const handleNavigateToLocation = (place) => {
+        setService(place);
+        setShowCasie(false);
+    };
+
+    return (
+        <>
+            {(() => {
+                switch (section) {
+                case "HOME":
+                    return <HomeSection setAppSection={setSection} setAppService={setService} />;
+                case "MAP":
+                    return <MapSection 
+                        setAppSection={setSection} 
+                        service={service} 
+                        setAppService={setService} 
+                        onOpenCasie={() => setShowCasie(true)}
+                    />;
+                case "ACCOUNT":
+                    return <AccountSection setAppSection={setSection} />;
+                case "ACCOUNT-UPDATE": 
+                    return <AccountUpdateSection setAppSection={setSection} />;
+                case "LOGIN":
+                    return <LoginSection setAppSection={setSection} />;
+                case "REGISTER":
+                    return <RegisterSection setAppSection={setSection} />;
+                case "PERSONAL-PIN":
+                    return <PersonalPinSection setAppSection={setSection} setAppService={setService} />;
+                default:
+                    return <HomeSection setAppSection={setSection} setAppService={setService} />;
+                }
+            })()}
+            {showCasie && (
+                <CassieSection 
+                    currentSection={section} 
+                    selectedService={service} 
+                    onClose={() => setShowCasie(false)}
+                    onNavigateToLocation={handleNavigateToLocation}
+                />
+            )}
+        </>
+    );
 }
 
 export default App;

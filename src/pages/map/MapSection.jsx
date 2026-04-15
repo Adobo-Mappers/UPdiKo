@@ -17,8 +17,9 @@ import { getCurrentUser, addPinnedLocationToDB, supabase } from '../../services/
 
 import React from "react";
 import MapView from "../../components/map/MapView.jsx";
+import CassieWidget from "../../components/cassie/CassieWidget.jsx";
 
-function MapSection({setAppSection, service, setAppService}) {
+function MapSection({setAppSection, service, setAppService, navigateTo, onNavigateComplete}) {
 
     /* Search Location Logic */
     const [searchQuery, setSearchQuery] = useState((service) ? service.name : "");
@@ -355,6 +356,15 @@ function MapSection({setAppSection, service, setAppService}) {
                 >
                     <img className="current-location-img" src={compassIcon}></img>
                 </button>
+                <CassieWidget 
+                    currentSection="MAP" 
+                    selectedService={service}
+                    userLocation={userCurrentLocation}
+                    onNavigateToLocation={(place) => {
+                        setAppService(place);
+                        handleCenterToPin(parseFloat(place.latitude), parseFloat(place.longitude));
+                    }}
+                />
             </section>
             <div className="rotation-test-controls">                
                 <button

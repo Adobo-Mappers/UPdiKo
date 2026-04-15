@@ -4,6 +4,25 @@ const STORE_NAME = "locations";
 const META_STORE = "metadata";
 const CACHE_DURATION_HOURS = 24;
 
+const toNumber = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const haversineDistanceKm = (lat1, lng1, lat2, lng2) => {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};
+
 // ============================================================
 // OPEN DATABASE
 // Opens (or creates) the IndexedDB database
@@ -171,6 +190,12 @@ export const getStaticLocations = async (supabase) => {
       return [];
     }
 
+    if (!supabase) {
+      console.warn("⚠️ No Supabase client provided — serving cache only");
+      const cached = await loadLocationsFromCache();
+      return cached;
+    }
+
     // Online and cache is stale or empty — fetch fresh data
     const locations = await fetchFromSupabase(supabase);
     await saveLocationsToCache(locations);
@@ -248,5 +273,103 @@ export const getCacheStatus = async () => {
     };
   } catch {
     return { cached: false, count: 0, lastSync: null, ageInHours: null, isFresh: false };
+  }
+};
+
+export const matchLocation = (locations, searchTerm) => {
+  const term = searchTerm.toLowerCase().trim();
+  if (!term || !locations.length) return null;
+  
+  return locations.find(loc => {
+    const name = (loc.name || '').toLowerCase();
+    const tags = (loc.tags || []).map(t => t.toLowerCase());
+    
+    if (name === term) return true;
+    if (name.includes(term)) return true;
+    if (tags.some(tag => tag.includes(term) || term.includes(tag))) return true;
+    return false;
+  }) || null;
+};
+
+export const queryLocations = (
+  locations,
+  { category = null, keyword = null, userLat = null, userLng = null, limit = 10 } = {}
+) => {
+  if (!Array.isArray(locations) || locations.length === 0) return [];
+
+  const categoryTerm = category ? String(category).toLowerCase().trim() : null;
+  const keywordTerm = keyword ? String(keyword).toLowerCase().trim() : null;
+  const hasUserCoords = toNumber(userLat) !== null && toNumber(userLng) !== null;
+
+  const results = locations
+    .filter((loc) => {
+      const name = String(loc.name || "").toLowerCase();
+      const tags = Array.isArray(loc.tags)
+        ? loc.tags.map((tag) => String(tag).toLowerCase())
+        : [];
+
+      const categoryOk =
+        !categoryTerm || tags.some((tag) => tag.includes(categoryTerm));
+
+      const keywordOk =
+        !keywordTerm ||
+        name.includes(keywordTerm) ||
+        tags.some((tag) => tag.includes(keywordTerm));
+
+      return categoryOk && keywordOk;
+    })
+    .map((loc) => {
+      if (!hasUserCoords) return loc;
+
+      const lat = toNumber(loc.latitude);
+      const lng = toNumber(loc.longitude);
+      if (lat === null || lng === null) return loc;
+
+      return {
+        ...loc,
+        distance: haversineDistanceKm(toNumber(userLat), toNumber(userLng), lat, lng),
+      };
+    });
+
+  if (hasUserCoords) {
+    results.sort((a, b) => {
+      const aDistance = typeof a.distance === "number" ? a.distance : Number.POSITIVE_INFINITY;
+      const bDistance = typeof b.distance === "number" ? b.distance : Number.POSITIVE_INFINITY;
+      return aDistance - bDistance;
+    });
+  }
+
+  return results.slice(0, limit);
+};
+
+export const getNearbyLocations = async (lat, lng, radius = 5, options = {}) => {
+  try {
+    const latNum = toNumber(lat);
+    const lngNum = toNumber(lng);
+    const radiusNum = toNumber(radius) ?? 5;
+
+    if (latNum === null || lngNum === null || radiusNum <= 0) return [];
+
+    let sourceLocations = Array.isArray(options.locations) ? options.locations : null;
+    if (!sourceLocations || sourceLocations.length === 0) {
+      sourceLocations = await getStaticLocations(options.supabase);
+    }
+
+    return sourceLocations
+      .map((loc) => {
+        const locLat = toNumber(loc.latitude);
+        const locLng = toNumber(loc.longitude);
+        if (locLat === null || locLng === null) return null;
+
+        const distance = haversineDistanceKm(latNum, lngNum, locLat, locLng);
+        if (distance > radiusNum) return null;
+
+        return { ...loc, distance };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.distance - b.distance);
+  } catch (error) {
+    console.error("Error computing nearby locations:", error);
+    return [];
   }
 };
