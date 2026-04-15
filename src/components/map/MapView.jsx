@@ -24,9 +24,6 @@ import { getStaticLocations, getRoute } from "../../services/locations.js";
 // Getting Pinned Locations and supabase connection
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
 
-
-
-
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
