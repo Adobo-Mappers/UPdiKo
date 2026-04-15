@@ -21,8 +21,9 @@ import customPinIcon from '../../assets/images/icon/6.png';
 
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../services/locations.js";
+// Getting Pinned Locations and supabase connection
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
 
-import { onAuthStateChangedListener, getPinnedLocationsFromDB } from "../../services/supabase.js";
 
 
 
@@ -316,7 +317,7 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   // Replaces static JSON imports — fetch all locations from Supabase static_locations table
   useEffect(() => {
     const fetchStaticLocations = async () => {
-      const data = await getStaticLocations();
+      const data = await getStaticLocations(supabase);
       const valid = data.filter(r => !isNaN(parseFloat(r.latitude)) && !isNaN(parseFloat(r.longitude)));
       console.log(`🗺 Total loaded: ${data.length} | Valid coords: ${valid.length} | Skipped: ${data.length - valid.length}`);
       setStaticLocations(data);

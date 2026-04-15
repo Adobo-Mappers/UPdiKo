@@ -11,56 +11,6 @@ app.use(express.json());
 // Mount Casie AI routes at /api/cassie
 app.use('/api/cassie', casieRoutes);
 
-// GET all locations
-app.get('/api/locations', (req, res) => {
-  const locations = db.prepare('SELECT * FROM openstreets_static_locations').all();
-  res.json(locations);
-});
-
-// GET nearby locations within radius (km)
-app.get('/api/locations/nearby', (req, res) => {
-  const { lat, lng, radius = 5 } = req.query;
-  
-  if (!lat || !lng) {
-    return res.status(400).json({ error: 'lat and lng are required' });
-  }
-  
-  const latNum = parseFloat(lat);
-  const lngNum = parseFloat(lng);
-  const radiusNum = parseFloat(radius);
-  
-  // Simple bounding box filter first (approximate)
-  const latDelta = radiusNum / 111; // 1 degree ≈ 111km
-  const lngDelta = radiusNum / (111 * Math.cos(latNum * Math.PI / 180));
-  
-  const locations = db.prepare(`
-    SELECT * FROM openstreets_static_locations 
-    WHERE latitude BETWEEN ? AND ?
-    AND longitude BETWEEN ? AND ?
-    AND name IS NOT NULL
-  `).all(
-    latNum - latDelta,
-    latNum + latDelta,
-    lngNum - lngDelta,
-    lngNum + lngDelta
-  );
-  
-  // Calculate actual distance and filter
-  const R = 6371; // km
-  const withDistance = locations.map(loc => {
-    const dLat = (loc.latitude - latNum) * Math.PI / 180;
-    const dLng = (loc.longitude - lngNum) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(latNum * Math.PI / 180) * Math.cos(loc.latitude * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return { ...loc, distance: R * c };
-  }).filter(loc => loc.distance <= radiusNum)
-    .sort((a, b) => a.distance - b.distance);
-  
-  res.json(withDistance);
-});
-
 // GET last sync info
 app.get('/api/sync/status', (req, res) => {
   const last = db.prepare(
