@@ -1,34 +1,35 @@
-// SearchBar.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { getStaticLocations } from "../../services/locationCache.js";
 import { supabase } from "../../services/supabase.js";
 
 export default function SearchBar({ onSelectLocation }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  const [allLocations, setAllLocations] = useState([]);
+  const [noResults, setNoResults] = useState(false);
 
-  const searchLocation = async (value) => {
+  // Load all locations from cache once on mount
+  useEffect(() => {
+    getStaticLocations(supabase).then(setAllLocations);
+  }, []);
+
+  const searchLocation = (value) => {
     setQuery(value);
 
     if (!value.trim()) {
       setResults([]);
+      setNoResults(false);
       return;
     }
 
-    // Search static_locations using Supabase's ILIKE — powered by the pg_trgm index.
-    // Searches both name and address fields, returns up to 8 results.
-    const { data, error } = await supabase
-      .from("static_locations")
-      .select("id, name, address, latitude, longitude, tags, location_type")
-      .or(`name.ilike.%${value}%,address.ilike.%${value}%`)
-      .limit(8);
+    const lower = value.toLowerCase();
+    const filtered = allLocations.filter(loc =>
+      loc.name?.toLowerCase().includes(lower) ||
+      loc.address?.toLowerCase().includes(lower)
+    ).slice(0, 8);
 
-    if (error) {
-      console.error("Error searching locations:", error);
-      setResults([]);
-      return;
-    }
-
-    setResults(data);
+    setResults(filtered);
+    setNoResults(filtered.length === 0);
   };
 
   return (
@@ -47,7 +48,7 @@ export default function SearchBar({ onSelectLocation }) {
         }}
       />
 
-      {results.length > 0 && (
+      {(results.length > 0 || noResults) && (
         <div
           style={{
             position: "absolute",
@@ -61,6 +62,12 @@ export default function SearchBar({ onSelectLocation }) {
             zIndex: 1000,
           }}
         >
+          {noResults && (
+            <div style={{ padding: "10px", color: "#888", fontSize: "14px", textAlign: "center" }}>
+              No results found for "{query}"
+            </div>
+          )}
+
           {results.map((place) => (
             <div
               key={place.id}
@@ -69,9 +76,9 @@ export default function SearchBar({ onSelectLocation }) {
                   lat: parseFloat(place.latitude),
                   lng: parseFloat(place.longitude),
                 });
-                // Show name in the search bar after selecting
                 setQuery(place.name);
                 setResults([]);
+                setNoResults(false);
               }}
               style={{
                 padding: "8px",
@@ -79,7 +86,6 @@ export default function SearchBar({ onSelectLocation }) {
                 borderBottom: "1px solid #eee",
               }}
             >
-              {/* Name as primary label, address as secondary hint */}
               <div style={{ fontWeight: 500 }}>{place.name}</div>
               {place.address && (
                 <div style={{ fontSize: "12px", color: "#888" }}>{place.address}</div>

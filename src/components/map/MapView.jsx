@@ -14,10 +14,11 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 // Custom Icons
 import closeIcon from '../../assets/images/icon/close-icon.png';
 import timeIcon from '../../assets/images/icon/time-icon.png';
-import userPinIcon from '../../assets/images/icon/5.png';
-import communityPinIcon from '../../assets/images/icon/3.png';
-import universityPinIcon from '../../assets/images/icon/4.png';
-import customPinIcon from '../../assets/images/icon/6.png';
+
+import userPinIcon from '../../assets/images/icon/save.png';
+import communityPinIcon from '../../assets/images/icon/community.png';
+import universityPinIcon from '../../assets/images/icon/upv.png';
+import customPinIcon from '../../assets/images/icon/save.png';
 
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../services/locations.js";
@@ -35,28 +36,28 @@ L.Icon.Default.mergeOptions({
 // Custom icon for the user's location (assuming a simple blue dot or custom image)
 const userIcon = new L.Icon({
     iconUrl: userPinIcon,
-    iconSize: [40, 40],
+    iconSize: [50, 50],
     iconAnchor: [10, 10], // Centered
     className: 'user-location-marker' 
 });
 
 const communityIcon = new L.Icon({
     iconUrl: communityPinIcon,
-    iconSize: [50, 50],
+    iconSize: [30, 30],
     iconAnchor: [10, 10], // Centered
     className: 'user-location-marker' 
 });
 
 const universityIcon = new L.Icon({
     iconUrl: universityPinIcon,
-    iconSize: [50, 50],
+    iconSize: [30, 30],
     iconAnchor: [10, 10], // Centered
     className: 'user-location-marker' 
 });
 
 const customIcon = new L.Icon({
     iconUrl: customPinIcon,
-    iconSize: [50, 50],
+    iconSize: [30, 30],
     iconAnchor: [10, 10], // Centered
     className: 'user-location-marker' 
 });
@@ -415,8 +416,8 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
         {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
-          // Light Mode: url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}        />
+          // url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
+          url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
           // NEW COMPONENT: Clamps the user only to Miagao
           minZoom={13}
           maxZoom={20}
