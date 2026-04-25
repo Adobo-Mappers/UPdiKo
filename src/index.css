@@ -8,16 +8,16 @@
     --color-accent-primary: #FFAE00;
 
     /* font-size */
-    --fs-caption: 11px;
-    --fs-text: 13px;
-    --fs-heading: 16px;
-    --fs-title: 24px;
+    --fs-caption: 13.2px;
+    --fs-text: 15.6px;
+    --fs-heading: 19.2px;
+    --fs-title: 28.8px;
 
     /* font-weight */
-    --fs-regular: 400;
-    --fs-medium: 500;
-    --fs-semi-bold: 600;
-    --fs-bold: 700;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semi-bold: 600;
+    --fw-bold: 700;
 
     /* spacing */
     --space-xsmall: 4px;
@@ -36,6 +36,10 @@
     margin: 0;
     box-sizing: border-box;
     font-family: 'Outfit', Arial, sans-serif;
+}
+
+em {
+    font-style: normal;
 }
 
 

@@ -1,0 +1,21 @@
+.emphasis {
+    font-weight: var(--fw-regular);
+    color: var(--color-text-main);
+
+    &.medium {
+        font-weight: var(--fw-medium);
+    }
+    &.semi-bold {
+        font-weight: var(--fw-semi-bold);
+    }   
+    &.bold {
+        font-weight: var(--fw-bold);
+    }
+
+    &.muted {
+        color: var(--color-text-muted);
+    }
+    &.accent {
+        color: var(--color-accent-primary);
+    }
+}
