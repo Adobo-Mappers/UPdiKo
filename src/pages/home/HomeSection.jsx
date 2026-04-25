@@ -15,6 +15,8 @@ import CalendarView from '../../components/calendar/Calendar.jsx';
 import WeatherView from '../../components/weather/Weather.jsx';
 import EventDisplay from '../../components/events/EventDisplay.jsx';
 
+console.log(supabase);
+
 function HomeSection({setAppSection, setAppService}) {
 
     /* For searching services through the search bar or filtering displayed services with tags */
