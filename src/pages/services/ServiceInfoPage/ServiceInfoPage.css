@@ -25,7 +25,41 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+    }
+
+    header, .info-section{
         padding: var(--space-medium);
+    }
+
+    .carousel-section {
+        background-image: url('./../../../assets/images/location/AK\ Sisig\ House/20251027_121356-min.jpg');
+        height: 250px;
+        background-repeat: no-repeat;
+        background-size: 100%;
+        margin-inline: var(--space-medium );
+        object-fit: cover;        
+        border-radius: 10px;
+    }
+    
+    .info-section-header {
+        display: flex;
+        justify-content: right;
+    }
+
+    .name-and-rating-container {
+        display: flex;
+        justify-content: space-between;
+        padding-block: var(--space-small);
+    }
+
+    .button-container {
+        display: flex;
+        gap: var(--space-small);
+        padding-block: var(--space-medium);
+    }
+
+    .more-information {
+        padding-block: var(--space-small);
     }
 }
 

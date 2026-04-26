@@ -1,0 +1,7 @@
+.tag {
+    width: fit-content;
+    padding: var(--space-small);
+    border-radius: var(--border-radius);
+    background-color: var(--color-component-bg);
+    color: var(--color-text-main);
+}

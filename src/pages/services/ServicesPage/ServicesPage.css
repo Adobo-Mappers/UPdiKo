@@ -2,7 +2,7 @@
     content: "";
     position: absolute;
     top: 0;
-    z-index: -1;
+    z-index: 0;
     width: inherit;
     height: inherit;
     background-image: url("./../../../assets/images/bg/upv-bg.jpg");
@@ -12,18 +12,23 @@
 }
 
 .services-page {
+    position:relative;
     background-size: cover;
     background-color: white;
     width: inherit;
     height: inherit;
 
+    *  {
+        z-index: 1;
+    }
+
     header {
         display: flex;
         justify-content: right;
         align-items: center;
-        padding: var(--space-medium);
     }
 
+    header,
     .greeting-section,
     .search-section, 
     .service-list-section  {

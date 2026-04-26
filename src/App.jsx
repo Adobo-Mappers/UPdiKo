@@ -21,7 +21,7 @@ export default function App() {
                 <Routes>
                     {/* default routing (routes to services page) */}
                     <Route path='/' element={<ServicesPage/>}/>
-
+                    
                     {/* service page routing*/}
                     <Route path='/services' element={<ServicesPage/>}/>
                     <Route path='/services/info' element={<ServicesInfoPage/>}/>

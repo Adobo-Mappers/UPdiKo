@@ -15,6 +15,10 @@
         font-weight: var(--fw-bold);
     }
 
+    
+    &.default {
+        color: var(--color-text-main);
+    }
     &.muted {
         color: var(--color-text-muted);
     }
@@ -22,6 +26,6 @@
         color: var(--color-accent-primary);
     } 
     &.white {
-        color: white !important;
+        color: white;
     }
 }

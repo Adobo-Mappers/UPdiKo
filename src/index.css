@@ -6,6 +6,7 @@
     --color-text-main: #3B3838;
     --color-text-muted: #757575;
     --color-accent-primary: #FFAE00;
+    --color-accent-secondary: #FFD271;
 
     /* font-size */
     --fs-caption: 12px;
@@ -47,9 +48,22 @@ em {
     font-style: normal;
 }
 
+a {
+    text-decoration: none;
+}
+
+img {
+    border-radius: 5px;
+}
+
 ::placeholder {
     color: var(--color-text-muted);
 }
+
+
+
+
+
 
 
 

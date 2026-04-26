@@ -1,0 +1,8 @@
+.button {
+    width: fit-content;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: var(--space-small) var(--space-medium);
+    background-color: var(--color-accent-secondary);
+    cursor: pointer;
+}
