@@ -8,10 +8,10 @@
     --color-accent-primary: #FFAE00;
 
     /* font-size */
-    --fs-caption: 13.2px;
-    --fs-text: 15.6px;
-    --fs-heading: 19.2px;
-    --fs-title: 28.8px;
+    --fs-caption: 12px;
+    --fs-text: 14px;
+    --fs-heading: 16px;
+    --fs-title: 24px;
 
     /* font-weight */
     --fw-regular: 400;
@@ -27,8 +27,9 @@
     --space-xlarge: 32px;
 
     /* display variables */
+    --border-radius: 30px;
     --screen-width: 430px;
-    --screen-height: 100dvh;;
+    --screen-height: 100dvh;
 }
 
 * {
@@ -38,10 +39,17 @@
     font-family: 'Outfit', Arial, sans-serif;
 }
 
+body {
+    background-color: black;
+}
+
 em {
     font-style: normal;
 }
 
+::placeholder {
+    color: var(--color-text-muted);
+}
 
 
 

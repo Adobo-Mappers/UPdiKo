@@ -1,0 +1,36 @@
+.app {
+    position: relative;
+    margin: auto;
+    width: var(--screen-width);
+    height: var(--screen-height);
+
+    .navbar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-around;
+        padding: var(--space-small);
+        background-color: var(--color-text-main);
+
+        a {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            opacity: 60%;
+
+            &.active {
+                opacity: 100%;
+            }
+        }
+        
+        img {
+            width: 20px;
+            height: 20px;
+        }
+    }
+}

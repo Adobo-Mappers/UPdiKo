@@ -1,0 +1,34 @@
+.search-bar {
+    position: relative;
+    width: 100%;
+
+    input {
+        width: inherit;
+        padding: var(--space-medium);
+        border: none;
+        border-radius: var(--border-radius);
+
+        text-indent: 32px;
+        font-weight: var(--fw-regular);
+        font-size: var(--fs-text);
+
+        background-color: var(--color-component-bg);        
+        color: var(--color-text-main);
+    }
+}
+
+.search-bar::before {    
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: var(--space-large);
+    z-index: 1;
+    transform: translateY(-50%);
+    background-image: url("./../../../assets/images/icon/search-icon.png");
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    filter: brightness(0) saturate(100%) invert(46%) sepia(1%) saturate(1681%) hue-rotate(315deg) brightness(96%) contrast(78%); 
+}
+

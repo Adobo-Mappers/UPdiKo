@@ -1,6 +1,6 @@
 import "./Emphasis.css"
 
-export default function Emphasis({weight="regular", type="default", children}) {
+export default function Emphasis({weight="", type="", children}) {
     /**
      * Edits color and font weight of typography components
      * 

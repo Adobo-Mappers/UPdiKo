@@ -1,0 +1,45 @@
+.services-page::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    z-index: -1;
+    width: inherit;
+    height: inherit;
+    background-image: url("./../../../assets/images/bg/upv-bg.jpg");
+    background-position: center;
+    background-size: cover;
+    opacity: 0.05;
+}
+
+.services-page {
+    background-size: cover;
+    background-color: white;
+    width: inherit;
+    height: inherit;
+
+    header {
+        display: flex;
+        justify-content: right;
+        align-items: center;
+        padding: var(--space-medium);
+    }
+
+    .greeting-section,
+    .search-section, 
+    .service-list-section  {
+        padding: var(--space-medium);
+    }
+
+    .service-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; 
+    }
+    
+    .service-list-body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-medium);
+    }
+}
+

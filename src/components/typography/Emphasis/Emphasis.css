@@ -1,7 +1,10 @@
 .emphasis {
-    font-weight: var(--fw-regular);
-    color: var(--color-text-main);
+    font-weight: inherit;
+    color: inherit;
 
+    &.regular {
+        font-weight: var(--fw-regular);
+    }
     &.medium {
         font-weight: var(--fw-medium);
     }
