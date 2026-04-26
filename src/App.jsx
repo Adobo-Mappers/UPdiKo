@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import Caption from './components/typography/Caption/Caption';
 
+import Icon from './components/ui/Icon/Icon';
 import ServicesPage from './pages/services/ServicesPage/ServicesPage';
 import ServicesInfoPage from './pages/services/ServiceInfoPage/ServiceInfoPage';
 import MapPage from './pages/map/MapPage/MapPage';
@@ -10,8 +11,8 @@ import AccountPage from './pages/account/AccountPage/AccountPage';
 
 import servicesLinkIcon from './assets/images/icon/services-nav-icon.png';
 import mapLinkIcon from './assets/images/icon/map-nav-icon.png';
-import accountinkIcon from './assets/images/icon/account-nav-icon.png';
-
+import accountLinkIcon from './assets/images/icon/account-nav-icon.png';
+import Emphasis from './components/typography/Emphasis/Emphasis';
 
 export default function App() {
     return (
@@ -34,16 +35,16 @@ export default function App() {
 
                 <nav className='navbar'>
                     <NavLink to="/services" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <img src={servicesLinkIcon}></img>
-                        <Caption>Services</Caption>
+                        <Icon src={servicesLinkIcon} size="large"/>
+                        <Caption><Emphasis type='white'>Services</Emphasis></Caption>
                     </NavLink>
                     <NavLink to="/map" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <img src={mapLinkIcon}></img>
-                        <Caption>Map</Caption>
+                        <Icon src={mapLinkIcon} size="large"/>
+                        <Caption><Emphasis type='white'>Map</Emphasis></Caption>
                     </NavLink>
                     <NavLink to="/account" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                        <img src={accountinkIcon}></img>
-                        <Caption>Account</Caption>
+                        <Icon src={accountLinkIcon} size="large"/>
+                        <Caption><Emphasis type='white'>Account</Emphasis></Caption>
                     </NavLink>
                 </nav>
             </BrowserRouter>

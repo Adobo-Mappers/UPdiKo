@@ -6,7 +6,7 @@ export default function Emphasis({weight="", type="", children}) {
      * 
      * Emphasis property types
      * weight: "regular" | "medium" | "semi-bold" | "bold"
-     * type: "muted" | "accent" | "default"
+     * type: "muted" | "accent" | "default" | "white"
      */
     
     return <em className={`emphasis ${weight} ${type}`}>

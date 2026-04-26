@@ -20,5 +20,8 @@
     }
     &.accent {
         color: var(--color-accent-primary);
+    } 
+    &.white {
+        color: white !important;
     }
 }

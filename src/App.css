@@ -18,19 +18,13 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
-            color: white;
+            align-items: center;            
             text-decoration: none;
             opacity: 60%;
 
             &.active {
                 opacity: 100%;
             }
-        }
-        
-        img {
-            width: 20px;
-            height: 20px;
         }
     }
 }

@@ -1,4 +1,15 @@
 .icon {
-    width: 16px;
     aspect-ratio: 1/1;
+
+    &.small {
+        width: 14px;
+    }
+    
+    &.medium {
+        width: 16px;
+    }
+
+    &.large{
+        width: 20px;
+    }
 }
