@@ -1,7 +1,9 @@
 import './Button.css';
 
-export default function Button({children }) {
+export function Button({ toggled, children, className=""}) {
     return (
-        <button className='button'>{children}</button>
+        <button className={`button ${toggled ? 'toggled' : ''} ${className}`}>
+            {children}
+        </button>
     );
 }

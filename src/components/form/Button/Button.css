@@ -1,8 +1,11 @@
 .button {
     width: fit-content;
-    border: none;
-    border-radius: var(--border-radius);
+    border: none;    
     padding: var(--space-small) var(--space-medium);
-    background-color: var(--color-accent-secondary);
     cursor: pointer;
+    background-color: var(--color-accent-secondary);
+ 
+    &.toggled {
+        background-color: var(--color-component-bg);
+    }
 }
