@@ -1,0 +1,16 @@
+.tab {
+    display: flex;
+    justify-content: flex-start;
+    gap: 2rem;
+    overflow-x: auto;
+
+    button {
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+    }
+
+}
+.tab::-webkit-scrollbar {
+    display: none;
+}
