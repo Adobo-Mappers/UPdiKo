@@ -1,7 +1,0 @@
-.label {
-    display: grid;
-    align-items: center;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-xsmall);
-    color: var(--color-text-main);
-}

@@ -1,5 +1,0 @@
-.card {
-    display: flex;
-    align-items: start;
-    gap: var(--space-medium);
-}

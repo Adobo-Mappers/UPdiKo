@@ -1,0 +1,26 @@
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: var(--space-small);
+    background-color: var(--color-text-main);
+    z-index: 100;
+}
+
+nav {
+    display: flex;
+    justify-content: space-around;
+
+    a {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;    
+        opacity: 60%;
+        color: white;
+    }
+    a.active {
+        opacity: 100%;
+    }
+} 
