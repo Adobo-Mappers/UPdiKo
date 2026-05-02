@@ -6,10 +6,10 @@
     }
     
     &.medium {
-        width: 16px;
+        width: 18px;
     }
 
     &.large{
-        width: 20px;
+        width: 24px;
     }
 }

@@ -1,5 +1,5 @@
 import "./Title.css"
 
-export default function Title({children}) {
-    return <p className="title">{children}</p>
+export function Title({children, className=""}) {
+    return <p className={`title ${className}`}>{children}</p>
 }

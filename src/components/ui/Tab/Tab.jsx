@@ -1,9 +1,24 @@
+import { useState } from 'react';
 import './Tab.css';
 
-export default function Tab( {children} ) {
+
+// Note: for util classes, check index.css for the list :>
+export function Tab({ value = "", options = [], activeUtilClass="fw-bold", inactiveUtilClass="", className="" }) {
+    const [activeOption, setActiveOption] = useState(value);   
+
     return (
-        <div className='tab'>
-            {children}
+        <div className={`tab ${className}`}>
+        {
+             options.map(element => (
+                <div
+                    key={element}
+                    className={`tab-link ${ (element === activeOption) ? `active ${activeUtilClass}` : `inactive ${inactiveUtilClass}`}`}
+                    onClick={() => setActiveOption(element)}
+                >
+                {element}
+                </div>
+            ))
+        }
         </div>
     )
 }

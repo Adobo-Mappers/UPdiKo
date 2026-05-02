@@ -1,5 +1,5 @@
 import "./Heading.css"
 
-export default function Heading({children}) {
-    return <p className="heading">{children}</p>
+export function Heading({children, className=""}) {
+    return <p className={`heading ${className}`}>{children}</p>
 }

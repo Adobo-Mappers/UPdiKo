@@ -1,4 +1,4 @@
-.service-info-page::before {
+/* .service-info-page::before {
     content: "";
     position: absolute;
     top: 0;
@@ -62,4 +62,4 @@
         padding-block: var(--space-small);
     }
 }
-
+ */
