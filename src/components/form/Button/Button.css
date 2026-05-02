@@ -1,8 +1,9 @@
 .button {
-    width: fit-content;
+    display: inline-block;
+    height: 40px;
     border: none;   
     border-radius: 30px; 
-    padding: var(--space-small) var(--space-medium);
+    padding-inline: var(--space-large);
     cursor: pointer;
     background-color: var(--color-accent-secondary);
  

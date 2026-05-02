@@ -10,9 +10,9 @@
     --color-accent-tertiary: #FFE5A0;
 
     /* font-size */
-    --fs-caption: 12px;
-    --fs-text: 14px;
-    --fs-heading: 18px;
+    --fs-caption: 11px;
+    --fs-text: 13px;
+    --fs-heading: 16px;
     --fs-title: 24px;
 
     /* font-weight */
@@ -26,7 +26,7 @@
     --space-small: 8px;
     --space-medium: 16px;
     --space-large: 24px;
-    --space-xlarge: 32px;
+    --space-xlarge: 48px;
 
     /* display variables */
     --screen-width: 430px;
@@ -51,8 +51,13 @@ em {
 
 a {
     text-decoration: none;
+    font-weight: var(--fw-bold);
     color: var(--color-text-main)
 }
+a > * {
+    font-weight: var(--fw-bold);    
+}
+
 
 p, h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-main);
@@ -151,6 +156,11 @@ p, h1, h2, h3, h4, h5, h6 {
 .row-gap-medium { row-gap: var(--space-medium) }
 .row-gap-large  { row-gap: var(--space-large) }
 .row-gap-xlarge { row-gap: var(--space-xlarge) }
+
+/* width */
+.w-200 {
+    width: 200px;
+}
 
 /* border radius */
 .border-circlify  { border-radius: 9999px }

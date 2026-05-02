@@ -15,11 +15,11 @@ export default function ServicesPage() {
 
     return (
         <div className="services-page">
-            <header className='flex justify-end p-medium'>
+            <header className='flex justify-end px-large py-medium '>
                 <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>
             </header>
 
-            <section className='p-medium'>
+            <section className='px-large py-medium '>
                 <Title>Good Day, <span className='text-accent'>Yu!</span></Title>
                 <Heading>What services do you want to find today?</Heading>
                 <InputField className='border-roundify py-medium' icon="search" placeholder="Search for services..." />
