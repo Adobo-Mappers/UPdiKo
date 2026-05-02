@@ -1,9 +1,10 @@
 .service-info-page {
-    position:relative;
+    position: relative;
     background-size: cover;
     background-color: white;
     width: inherit;
-    height: inherit;
+    min-height: 100vh;
+    padding-bottom: var(--footer-height);
 
     &::before {
         content: "";
@@ -17,8 +18,8 @@
         background-size: cover;
         opacity: 0.05;
     }
-    
-    *  {
+
+    * {
         position: relative;
         z-index: 2;
     }

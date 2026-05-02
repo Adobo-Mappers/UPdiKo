@@ -1,6 +1,6 @@
 import './LoginPage.css';
 import { Link } from 'react-router-dom';
-import { Button, InputField } from '../../../components/form';
+import { Button, InputField, PasswordField } from '../../../components/form';
 import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading, Title } from './../../../components/typography'
 import Yu from './../../../assets/images/profile/profile.jpg';
@@ -16,8 +16,12 @@ export default function LoginPage() {
                 <Heading>Access personalized features like <em className='fw-bold'>bookmarking pins</em> and <em className='fw-bold'>creating custom pins. </em></Heading>
 
                 <form className='my-large'>
-                    <InputField className='border-roundify my-medium' icon="mail" placeholder="Email" />
-                    <InputField className='border-roundify my-medium' icon="password" placeholder="Password" type="password"/>
+                    <div className='my-medium'>
+                        <InputField className='border-roundify py-medium' icon="mail" placeholder="Email" />
+                    </div>
+                    <div className='my-medium'>
+                        <PasswordField className='border-roundify py-medium' placeholder="Password" />
+                    </div>
                     <div className='flex justify-end'>
                         <Link to="/account/forgot-password" className='text-decoration-none'>
                             <Text><u>Forgot Password</u></Text>

@@ -1,6 +1,6 @@
 import './App.css';
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Footer } from './components/ui';
 import ServicesPage from './pages/services/ServicesPage/ServicesPage';
 import ServiceInfoPage from './pages/services/ServiceInfoPage/ServiceInfoPage';
@@ -10,16 +10,13 @@ import LoginPage from './pages/account/LoginPage/LoginPage';
 import RegisterPage from './pages/account/RegisterPage/RegisterPage';
 import ForgotPasswordPage from './pages/account/ForgotPasswordPage/ForgotPasswordPage';
 
-
-
 export default function App() {
     return (
         <div className="app">
             <BrowserRouter>
                 <Routes>
                     {/* default routing (routes to services page) */}
-                    <Route path='/' element={<ServicesPage/>}/>
-                    
+                    <Route path='/' element={<Navigate to='/service/' />} />
                     <Route path='/service/' element={<ServicesPage/>}/>
                     
                     <Route path='/service/info' element={<ServiceInfoPage/>}/>

@@ -7,7 +7,7 @@ import Yu from './../../../assets/images/profile/profile.jpg';
 
 
 export default function ServicesPage() {
-    const SERVICE_CATEGORIES = ["All", "Restaurant", "Cafe", "Hospitals", "Pharmacy", "Grocery", "Salon", "Spa", "Gym"];
+    const SERVICE_CATEGORIES = ["All", "Restaurant", "Cafe", "Hospital", "Pharmacy", "Grocery", "Salon", "Spa", "Gym"];
     const FILTER_OPTIONS = ["Sort By Nearest", "Sort By Rating", "Open Now"];
 
     const [activeTab, setActiveTab] = useState(SERVICE_CATEGORIES[0]);
@@ -22,8 +22,10 @@ export default function ServicesPage() {
             <section className='px-large py-medium '>
                 <Title>Good Day, <span className='text-accent'>Yu!</span></Title>
                 <Heading>What services do you want to find today?</Heading>
-                <InputField className='border-roundify py-medium' icon="search" placeholder="Search for services..." />
-                <Tab className='py-medium'
+                <div className='my-medium'>
+                    <InputField className='border-roundify py-medium' icon="search" placeholder="Search for services..." />
+                </div>
+                <Tab className='py-small'
                     value={activeTab}
                     options={SERVICE_CATEGORIES} 
                     onChange={setActiveTab} 

@@ -15,6 +15,7 @@ import mailIcon from "../../../assets/images/icon/mail-icon.png";
 import mapIcon from "../../../assets/images/icon/maps-icon.png";
 import mapNavlinkIcon from "../../../assets/images/icon/map-navlink-icon.png";
 import openHoursIcon from "../../../assets/images/icon/open-hours-icon.png";
+import passwordIcon from "../../../assets/images/icon/password-icon.png";
 import phoneIcon from "../../../assets/images/icon/phone-icon.png";
 import saveIcon from "../../../assets/images/icon/save-icon.png";
 import savePng from "../../../assets/images/icon/save.png";
@@ -44,6 +45,7 @@ export const iconMap = {
   logout: logoutIcon,
   mail: mailIcon,  
   map: mapIcon,
+  password: passwordIcon,
   phone: phoneIcon,
   save: saveIcon,
   search: searchIcon,
@@ -51,7 +53,7 @@ export const iconMap = {
   user: userIcon,
 };
 
-export function Icon({ name="", size="medium", alt="alt-text", className=""}) {
+export function Icon({ name="", size="medium", alt="alt-text", className="", ...otherProps }) {
     /**
      * Icon property types
      * name: name of the icon (use keys from iconMap)
@@ -63,6 +65,6 @@ export function Icon({ name="", size="medium", alt="alt-text", className=""}) {
     const iconSrc = iconMap[name] || name;
 
     return (
-        <img className={`icon ${size} ${className}`} src={iconSrc} alt={alt} />
+        <img className={`icon ${size} ${className}`} src={iconSrc} alt={alt} {...otherProps} />
     );
 }

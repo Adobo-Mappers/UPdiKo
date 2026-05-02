@@ -1,5 +1,6 @@
 .dropdown {
     border: none;
+    background-color: transparent;
     font-weight: var(--fw-bold);
     font-size: var(--fs-text);
     cursor: pointer;

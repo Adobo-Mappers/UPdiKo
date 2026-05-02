@@ -23,8 +23,9 @@ export default function ForgotPassword() {
                 <Heading>Enter your <em className='fw-bold'>email address</em> to receive a password reset link.</Heading>
 
                 <form className='my-large'>
-                    <InputField className='border-roundify my-medium' icon="mail" placeholder="Email" />
-
+                    <div className='my-medium'>
+                        <InputField className='border-roundify py-medium' icon="mail" placeholder="Email" />
+                    </div>
                     <div className='flex justify-center my-large'>
                         <Link to="/account">
                             <Button className='w-200'>Send Reset Link</Button>

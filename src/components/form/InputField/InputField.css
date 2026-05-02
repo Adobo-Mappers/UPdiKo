@@ -13,12 +13,10 @@
     input {
         display: flex;
         width: inherit;
-        padding: var(--space-medium);
+        padding-inline: var(--space-medium);
         border: none;
         text-indent: 32px;
-        font-weight: var(--fw-regular);
-        font-size: var(--fs-text);
-
+        font-weight: var(--fw-bold);
         background-color: var(--color-component-bg);        
         color: var(--color-text-main);
     }
