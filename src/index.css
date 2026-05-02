@@ -31,6 +31,7 @@
     /* display variables */
     --screen-width: 430px;
     --screen-height: 100dvh;
+    --footer-height: 60px;
 }
 
 * {

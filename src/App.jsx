@@ -9,7 +9,7 @@ import AccountPage from './pages/account/AccountPage/AccountPage';
 
 export default function App() {
     return (
-        <div className="app">            
+        <div className="app">
             <BrowserRouter>
                 <Routes>
                     {/* default routing (routes to services page) */}
@@ -24,8 +24,7 @@ export default function App() {
                     
                     {/* account page routing*/}
                     <Route path='/account' element={<AccountPage/>}/>
-                </Routes>
-                
+                </Routes>                
                 <Footer/>
             </BrowserRouter>
         </div>
