@@ -1,11 +1,10 @@
-.button {
+.circular-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 40px;
     border: none;   
-    border-radius: 30px; 
-    padding-inline: var(--space-large);
+    border-radius: 50%;    
+    padding: var(--space-medium);
     cursor: pointer;
     background-color: var(--color-accent-secondary);
  

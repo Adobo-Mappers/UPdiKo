@@ -1,0 +1,14 @@
+.map-page {
+    position:relative;
+    background-size: cover;
+    background-color: white;
+    width: inherit;
+    height: inherit;
+
+    .map-utils {
+        position: absolute;
+        bottom: 100px;
+        right: var(--space-large);
+    }
+}
+
