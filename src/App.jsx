@@ -8,6 +8,8 @@ import MapPage from './pages/map/MapPage/MapPage';
 import AccountPage from './pages/account/AccountPage/AccountPage';
 import LoginPage from './pages/account/LoginPage/LoginPage';
 import RegisterPage from './pages/account/RegisterPage/RegisterPage';
+import ForgotPasswordPage from './pages/account/ForgotPasswordPage/ForgotPasswordPage';
+
 
 
 export default function App() {
@@ -29,7 +31,7 @@ export default function App() {
                     <Route path='/account' element={<AccountPage/>}/>
                     <Route path='/account/login' element={<LoginPage/>}/>
                     <Route path='/account/register' element={<RegisterPage/>}/>
-
+                    <Route path='/account/forgot-password' element={<ForgotPasswordPage/>}/>
                 </Routes>                
                 <Footer/>
             </BrowserRouter>

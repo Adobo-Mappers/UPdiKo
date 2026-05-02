@@ -19,7 +19,7 @@ export default function LoginPage() {
                     <InputField className='border-roundify my-medium' icon="mail" placeholder="Email" />
                     <InputField className='border-roundify my-medium' icon="password" placeholder="Password" type="password"/>
                     <div className='flex justify-end'>
-                        <Link to="/account" className='text-decoration-none'>
+                        <Link to="/account/forgot-password" className='text-decoration-none'>
                             <Text><u>Forgot Password</u></Text>
                         </Link>
                     </div>
