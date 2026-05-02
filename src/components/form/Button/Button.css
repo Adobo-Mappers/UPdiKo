@@ -1,6 +1,7 @@
 .button {
     width: fit-content;
-    border: none;    
+    border: none;   
+    border-radius: 30px; 
     padding: var(--space-small) var(--space-medium);
     cursor: pointer;
     background-color: var(--color-accent-secondary);

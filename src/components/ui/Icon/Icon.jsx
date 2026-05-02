@@ -15,6 +15,7 @@ import mailIcon from "../../../assets/images/icon/mail-icon.png";
 import mapIcon from "../../../assets/images/icon/maps-icon.png";
 import mapNavlinkIcon from "../../../assets/images/icon/map-navlink-icon.png";
 import openHoursIcon from "../../../assets/images/icon/open-hours-icon.png";
+import phoneIcon from "../../../assets/images/icon/phone-icon.png";
 import saveIcon from "../../../assets/images/icon/save-icon.png";
 import savePng from "../../../assets/images/icon/save.png";
 import searchIcon from "../../../assets/images/icon/search-icon.png";
@@ -43,6 +44,7 @@ export const iconMap = {
   logout: logoutIcon,
   mail: mailIcon,  
   map: mapIcon,
+  phone: phoneIcon,
   save: saveIcon,
   search: searchIcon,
   star: starIcon,

@@ -192,3 +192,8 @@ p, h1, h2, h3, h4, h5, h6 {
 .text-muted      { color: var(--color-text-muted) !important }
 .text-accent     { color: var(--color-accent-primary) !important }
 .text-accent-soft{ color: var(--color-accent-secondary) !important }
+
+/* text-indent */
+.text-indent {
+    text-indent: 4ch;
+}

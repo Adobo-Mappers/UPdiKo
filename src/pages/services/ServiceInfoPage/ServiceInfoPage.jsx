@@ -1,5 +1,6 @@
 import './ServiceInfoPage.css'
 import { Link } from 'react-router-dom';
+import { Button } from '../../../components/form';
 import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
 import Yu from './../../../assets/images/profile/profile.jpg';
@@ -32,6 +33,27 @@ export default function ServicesInfoPage() {
                     <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>University Dorm Area</Text></div>
                     <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>10:00 AM - 5:00 PM (Monday)</Text></div>
                 </div>
+                <div className='flex gap-small my-medium'>
+                    <Link to="/map">
+                        <Button className="flex items-center gap-xsmall">
+                            <Icon name='direction'/>
+                            <Caption><em className='fw-bold'>Get Directions</em></Caption>
+                        </Button>
+                    </Link>
+                    <Link to="/map">
+                        <Button className="flex items-center gap-xsmall">
+                            <Icon name='map'/>
+                            <Caption><em className='fw-bold'>View in Map</em></Caption>
+                        </Button>
+                    </Link>
+                </div>
+            </section>
+            <section className='px-medium'>
+                <Text className='text-muted text-indent'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id turpis ligula. Morbi dignissim efficitur tellus, a vehicula dui imperdiet vitae. Morbi pharetra diam urna, at feugiat velit eleifend vel. Nulla vitae felis et justo fringilla posuere. Vestibulum semper nec magna nec vehicula. Etiam vulputate lacus vel mattis laoreet.</Text>
+            </section>
+            <section className='p-medium'>
+                <div className='flex items-center gap-small my-xsmall'><Icon name='mail'/><Text><em className='text-muted'>Email</em></Text></div>
+                <div className='flex items-center gap-small my-xsmall'><Icon name='phone'/><Text><em className='text-muted'>Phone</em></Text></div>  
             </section>
         </div>
     )
