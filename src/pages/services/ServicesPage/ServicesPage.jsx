@@ -1,6 +1,6 @@
 import './ServicesPage.css';
 import { act, useEffect, useState } from 'react';
-import { Button, InputField } from './../../../components/form/';
+import { Button, InputField, Dropdown } from './../../../components/form/';
 import { Caption, Heading, Text, Title } from './../../../components/typography/';
 import { Icon, Tab } from './../../../components/ui/';
 import Yu from './../../../assets/images/profile/profile.jpg';
@@ -33,12 +33,9 @@ export default function ServicesPage() {
 
             <section className='px-medium flex justify-between'>
                 <Heading><em className='fw-bold'>{activeTab} Services</em></Heading>
-                {/* <Dropdown value={activeFilter} onChange={setActiveFilter} options={FILTER_OPTIONS}/> */}
+                <Dropdown value={activeFilter} onChange={setActiveFilter} options={FILTER_OPTIONS}/> 
             </section>
             
-            {/* 
-            <section className='px-medium'>
-            </section> */}        
         </div>
     );
 }

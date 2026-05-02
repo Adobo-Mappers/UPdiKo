@@ -1,0 +1,6 @@
+.dropdown {
+    border: none;
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-caption);
+    cursor: pointer;
+}

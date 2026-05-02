@@ -1,25 +1,25 @@
-// import './ServiceInfoPage.css'
-// import { BrowserRouter, Link} from 'react-router-dom';
+import './ServiceInfoPage.css'
+import { Link } from 'react-router-dom';
+import { Icon, Carousel } from './../../../components/ui';
+import { Text, Caption } from './../../../components/typography'
+import Yu from './../../../assets/images/profile/profile.jpg';
 
-// import Icon from '../../../components/ui/Icon/Icon';
-// import Heading from '../../../components/typography/Heading/Heading';
-// import Text from '../../../components/typography/Text/Text';
-// import Tag from './../../../components/ui/Tag/Tag';
-// import Caption from './../../../components/typography/Caption/Caption';
-// import Label from '../../../components/ui/Label/Label';
-// import Profile from "../../../components/ui/Profile/Profile";
-// import Emphasis from '../../../components/typography/Emphasis/Emphasis';
-
-// import phoneIcon from '../../../assets/images/icon/phone-icon.png';
-// import mailIcon from '../../../assets/images/icon/mail-icon.png';
-// import openHoursIcon from '../../../assets/images/icon/open-hours-icon.png';
-// import mapRedirectIcon from '../../../assets/images/icon/maps-pin-solid-icon.png';
-// import directionIcon from '../../../assets/images/icon/directions-icon.png';
-// import locationIcon from '../../../assets/images/icon/location-icon.png';
-// import starIcon from '../../../assets/images/icon/star-icon.png';
-// import backIcon from './../../../assets/images/icon/back-to-icon.png';
-// import userProfileImg from '../../../assets/images/profile/profile.jpg';
-// import Button from '../../../components/form/Button/Button';
+export default function ServicesInfoPage() {
+    return (
+        <div className="service-info-page">
+            <header className='p-medium flex justify-between'>
+                <Link to="/service" className='flex items-center gap-small'>
+                    <Icon name="back" size='small'/>
+                    <Text><em className='fw-bold'>Back</em></Text>
+                </Link>
+                <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>
+            </header> 
+            <section className='px-medium'>
+                <Carousel imageUrls={[Yu, Yu]}/>   
+            </section>
+        </div>
+    )
+}
 
 // export default function ServicesInfoPage() {
 //     return(
