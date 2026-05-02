@@ -12,7 +12,7 @@
     /* font-size */
     --fs-caption: 12px;
     --fs-text: 14px;
-    --fs-heading: 16px;
+    --fs-heading: 18px;
     --fs-title: 24px;
 
     /* font-weight */
@@ -51,6 +51,10 @@ em {
 a {
     text-decoration: none;
     color: var(--color-text-main)
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-main);
 }
 
 ::placeholder {
@@ -184,7 +188,7 @@ a {
 .bg-accent-soft  { background-color: var(--color-accent-secondary) }
 
 /* text color */
-.text-main       { color: var(--color-text-main) }
-.text-muted      { color: var(--color-text-muted) }
-.text-accent     { color: var(--color-accent-primary) }
-.text-accent-soft{ color: var(--color-accent-secondary) }
+.text-main       { color: var(--color-text-main) !important }
+.text-muted      { color: var(--color-text-muted) !important }
+.text-accent     { color: var(--color-accent-primary) !important }
+.text-accent-soft{ color: var(--color-accent-secondary) !important }

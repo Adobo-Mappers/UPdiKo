@@ -1,7 +1,7 @@
 import './ServiceInfoPage.css'
 import { Link } from 'react-router-dom';
-import { Icon, Carousel } from './../../../components/ui';
-import { Text, Caption } from './../../../components/typography'
+import { Icon, Carousel, Tag } from './../../../components/ui';
+import { Text, Caption, Heading } from './../../../components/typography'
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function ServicesInfoPage() {
@@ -16,6 +16,22 @@ export default function ServicesInfoPage() {
             </header> 
             <section className='px-medium'>
                 <Carousel imageUrls={[Yu, Yu]}/>   
+            </section>
+            <section className='p-medium'>
+                <div className='flex justify-end'>
+                    <Tag>Category</Tag>
+                </div>
+                <div className='py-small flex justify-between'>
+                    <Heading><em className='fw-bold'>Balay Kanlaon</em></Heading>
+                    <div className='flex items-center gap-small'>
+                        <Icon name='star' size='small'/>
+                        <Text>4.5 <em className="text-muted">(243 reviews)</em></Text>
+                    </div>                    
+                </div>
+                <div className='flex-col'>
+                    <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>University Dorm Area</Text></div>
+                    <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>10:00 AM - 5:00 PM (Monday)</Text></div>
+                </div>
             </section>
         </div>
     )

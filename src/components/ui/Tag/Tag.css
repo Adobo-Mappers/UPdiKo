@@ -1,0 +1,9 @@
+.tag {
+    width: fit-content;
+    padding:  var(--space-xsmall) var(--space-medium);
+    border-radius: 30px;
+    background-color: var(--color-component-bg);
+    color: var(--color-text-main);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-caption);
+}
