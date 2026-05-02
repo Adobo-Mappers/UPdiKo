@@ -1,11 +1,80 @@
 import './ServiceInfoPage.css'
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../../components/form';
 import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
+import { supabase } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
-export default function ServicesInfoPage() {
+export default function ServiceInfoPage() {
+    const { id } = useParams();
+    const [service, setService] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadService() {
+            if (!id) return;
+            const { data, error } = await supabase
+                .from('static_locations')
+                .select('id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error('Error loading service:', error);
+            }
+            setService(data || null);
+            setLoading(false);
+        }
+
+        loadService();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="service-info-page px-large py-medium">
+                <div className='py-medium'>
+                    <Heading ><em className='fw-bold'>Loading Data</em></Heading>
+                    <Text>This page is currently getting the service's information...</Text>
+                </div>
+            </div>
+        );
+    }
+
+    if (!service) {
+        return (
+            <div className="service-info-page px-large py-medium">
+                <Link to="/service" className='flex items-center gap-small'>
+                    <Icon name="back" size='small'/>
+                    <Text>Back</Text>
+                </Link>
+                <div className='py-medium'>
+                    <Heading ><em className='fw-bold'>Service not found</em></Heading>
+                    <Text>This page does not contain any services.</Text>
+                </div>
+            </div>
+        );
+    }
+
+    function parseContactInfo (infoArray) {
+        if (!Array.isArray(infoArray)) return { email: null, phone: null };
+        
+        const result = { email: null, phone: null };
+        
+        infoArray.forEach((info) => {
+            if (typeof info === 'string') {
+                if (info.toLowerCase().startsWith('email:')) {
+                    result.email = info.replace(/^email:\s*/i, '').trim();
+                } else if (info.toLowerCase().startsWith('phone:')) {
+                    result.phone = info.replace(/^phone:\s*/i, '').trim();
+                }
+            }
+        });
+        
+        return result;
+    };
+
     return (
         <div className="service-info-page">
             <header className='px-large py-medium  flex justify-between'>
@@ -16,17 +85,19 @@ export default function ServicesInfoPage() {
                 <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>
             </header> 
 
-            <section className='px-medium'>
-                <Carousel imageUrls={[Yu, Yu]}/>   
+            <section className='px-medium'>  
+                {
+                    service.images.length > 0 ? (<Carousel imageUrls={service.images}/>) : ""  
+                }   
             </section>
 
             <main className='px-large py-medium '>
                 <div className='flex justify-end'>
-                    <Tag>Category</Tag>
+                    <Tag>{service.tags[0]}</Tag>
                 </div>
 
                 <div className='py-small flex justify-between'>
-                    <Heading><em className='fw-bold'>Balay Kanlaon</em></Heading>
+                    <Heading><em className='fw-bold'>{service.name}</em></Heading>
                     <div className='flex items-center gap-small'>
                         <Icon name='star' size='small'/>
                         <Text>4.5 <em className="text-muted">(243 reviews)</em></Text>
@@ -34,8 +105,8 @@ export default function ServicesInfoPage() {
                 </div>
 
                 <div className='flex-col'>
-                    <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>University Dorm Area</Text></div>
-                    <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>10:00 AM - 5:00 PM (Monday)</Text></div>
+                    <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>{service.address}</Text></div>
+                    <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>{service.opening_hours[0]}</Text></div>
                 </div>
                 <div className='flex gap-small my-medium'>
                     <Link to="/map">
@@ -54,11 +125,36 @@ export default function ServicesInfoPage() {
 
 
                 <div>
-                    <Text className='text-muted text-indent'>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id turpis ligula. Morbi dignissim efficitur tellus, a vehicula dui imperdiet vitae. Morbi pharetra diam urna, at feugiat velit eleifend vel. Nulla vitae felis et justo fringilla posuere. Vestibulum semper nec magna nec vehicula. Etiam vulputate lacus vel mattis laoreet.</Text>
+                    { service.additional_info.text_based.length > 0 && 
+                        <Heading><em className='fw-bold'>Additional Information</em></Heading>}
+                    { service.additional_info.text_based.length > 0 && 
+                        (service.additional_info.text_based.map((info) =>                         
+                        <Text className='text-muted my-xsmall'>
+                            {info}   
+                        </Text>
+                        ))
+                    }
                 </div>
                 <div className='py-medium '>
-                    <div className='flex items-center gap-small my-xsmall'><Icon name='mail'/><Text><em className='text-muted'>Email</em></Text></div>
-                    <div className='flex items-center gap-small my-xsmall'><Icon name='phone'/><Text><em className='text-muted'>Phone</em></Text></div>  
+                    {service.contact_info && (() => {
+                        const { email, phone } = parseContactInfo(service.contact_info);
+                        return (
+                            <>
+                                {email && (
+                                    <div className='flex items-center gap-small my-xsmall'>
+                                        <Icon name='mail' size='small'/>
+                                        <Text><em className='text-muted'>{email}</em></Text>
+                                    </div>
+                                )}
+                                {phone && (
+                                    <div className='flex items-center gap-small my-xsmall'>
+                                        <Icon name='phone' size='small'/>
+                                        <Text><em className='text-muted'>{phone}</em></Text>
+                                    </div>
+                                )}
+                            </>
+                        );
+                    })()}
                 </div>
             </main>
 

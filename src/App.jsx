@@ -19,7 +19,7 @@ export default function App() {
                     <Route path='/' element={<Navigate to='/service/' />} />
                     <Route path='/service/' element={<ServicesPage/>}/>
                     
-                    <Route path='/service/info' element={<ServiceInfoPage/>}/>
+                    <Route path='/service/info/:id' element={<ServiceInfoPage/>}/>
 
                     {/* map page routing*/}
                     <Route path='/map' element={<MapPage/>}/>

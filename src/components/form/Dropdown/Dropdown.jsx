@@ -2,7 +2,7 @@ import './Dropdown.css';
 
 export function Dropdown({ options=[], value, onChange, className=""}) {
     return (
-        <select className={`dropdown ${className}`} value={value} onChange={() => onChange(event.target.value)}>
+        <select className={`dropdown ${className}`} value={value} onChange={(event) => onChange(event.target.value)}>
             {options.map((option) => (
                 <option key={option} value={option}>
                     {option}
@@ -10,4 +10,4 @@ export function Dropdown({ options=[], value, onChange, className=""}) {
             ))}
         </select>
     )
-} 
+}
