@@ -7,6 +7,8 @@ import ServiceInfoPage from './pages/services/ServiceInfoPage/ServiceInfoPage';
 import MapPage from './pages/map/MapPage/MapPage';
 import AccountPage from './pages/account/AccountPage/AccountPage';
 import LoginPage from './pages/account/LoginPage/LoginPage';
+import RegisterPage from './pages/account/RegisterPage/RegisterPage';
+
 
 export default function App() {
     return (
@@ -26,6 +28,8 @@ export default function App() {
                     {/* account page routing*/}
                     <Route path='/account' element={<AccountPage/>}/>
                     <Route path='/account/login' element={<LoginPage/>}/>
+                    <Route path='/account/register' element={<RegisterPage/>}/>
+
                 </Routes>                
                 <Footer/>
             </BrowserRouter>
