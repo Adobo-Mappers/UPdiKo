@@ -7,6 +7,7 @@
     border-radius: 30px; 
     padding-inline: var(--space-large);
     cursor: pointer;
+    font-weight: var(--fw-bold);
     background-color: var(--color-accent-secondary);
  
     &.toggled {

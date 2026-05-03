@@ -4,16 +4,20 @@ import { Link } from 'react-router-dom';
 import { InputField, Dropdown } from './../../../components/form/';
 import { Caption, Heading, Text, Title } from './../../../components/typography/';
 import { Icon, Tab, Card } from './../../../components/ui/';
+import { getCurrentUser } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 import { supabase } from './../../../services/supabase.js';
 
 export default function ServicesPage() {
-    const [services, setServices] = useState([]);
-    const [activeTag, setActiveTag] = useState('All');
-    const [activeFilter, setActiveFilter] = useState('Nearest Location');
-    const [searchQuery, setSearchQuery] = useState('');
+    // check user auth
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        getCurrentUser().then(setUser);
+    }, []);
 
+    // fetch service and set all tags and filters
+    const [services, setServices] = useState([]);
     useEffect(() => {
         async function fetchServices() {
             const { data, error } = await supabase
@@ -28,14 +32,15 @@ export default function ServicesPage() {
 
         fetchServices();
     }, []);
-
     const SERVICE_TAGS = ['All', ...new Set(services.flatMap(service => service.tags ?? []))];
     const FILTER_OPTIONS = ['Nearest Location', 'Top Rated', 'Open Now'];
+    
+    // states 
+    const [activeTag, setActiveTag] = useState('All');
+    const [activeFilter, setActiveFilter] = useState('Nearest Location');
+    const [searchQuery, setSearchQuery] = useState('');
 
-    const handleSearchChange = (event) => {
-        setSearchQuery(event.target.value);
-    };
-
+    // filtered services to be displayed 
     const filteredServices = services.filter((service) => {
         const matchesTag = activeTag === 'All' || (service.tags ?? []).includes(activeTag);
         const matchesSearch = service.name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -57,7 +62,7 @@ export default function ServicesPage() {
                         icon='search'
                         placeholder='Search for services...'
                         value={searchQuery}
-                        onChange={handleSearchChange}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
                 <Tab

@@ -197,6 +197,8 @@ p, h1, h2, h3, h4, h5, h6 {
 .bg-component    { background-color: var(--color-component-bg) }
 .bg-accent       { background-color: var(--color-accent-primary) }
 .bg-accent-soft  { background-color: var(--color-accent-secondary) }
+.bg-accent-softer  { background-color: var(--color-accent-tertiary) }
+
 
 /* text color */
 .text-main       { color: var(--color-text-main) !important }

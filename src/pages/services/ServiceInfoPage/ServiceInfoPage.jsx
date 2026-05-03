@@ -8,10 +8,13 @@ import { supabase } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function ServiceInfoPage() {
+    // TODO: Cache data or make sure that data does not have to be requested again from the server
+    // get service id 
     const { id } = useParams();
+    
+    // fetching service
     const [service, setService] = useState(null);
     const [loading, setLoading] = useState(true);
-
     useEffect(() => {
         async function loadService() {
             if (!id) return;
@@ -27,10 +30,10 @@ export default function ServiceInfoPage() {
             setService(data || null);
             setLoading(false);
         }
-
         loadService();
     }, [id]);
 
+    // view when loading
     if (loading) {
         return (
             <div className="service-info-page px-large py-medium">
@@ -42,6 +45,7 @@ export default function ServiceInfoPage() {
         );
     }
 
+    // view when service is not found
     if (!service) {
         return (
             <div className="service-info-page px-large py-medium">
@@ -57,6 +61,7 @@ export default function ServiceInfoPage() {
         );
     }
 
+    // for parsing service contact info
     function parseContactInfo (infoArray) {
         if (!Array.isArray(infoArray)) return { email: null, phone: null };
         
