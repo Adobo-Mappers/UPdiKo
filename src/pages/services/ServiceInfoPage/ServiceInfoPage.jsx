@@ -2,13 +2,20 @@ import './ServiceInfoPage.css'
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag } from './../../../components/ui';
+import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
-import { supabase } from './../../../services/supabase.js';
+import { supabase, getCurrentUser } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function ServiceInfoPage() {
     // TODO: Cache data or make sure that data does not have to be requested again from the server
+    // check user auth
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        getCurrentUser().then(setUser);
+    }, []);
+    
+
     // get service id 
     const { id } = useParams();
     
@@ -87,17 +94,14 @@ export default function ServiceInfoPage() {
                     <Icon name="back" size='small'/>
                     <Text>Back</Text>
                 </Link>
-                <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>
+                <Profile user={user}/>
             </header> 
 
-            <section className='px-medium'>  
-                {
-                    service.images.length > 0 ? (<Carousel imageUrls={service.images}/>) : ""  
-                }   
-            </section>
-
+            
             <main className='px-large py-medium '>
-                <div className='flex justify-end'>
+                {service.images.length > 0 ? (<Carousel imageUrls={service.images}/>) : ""}   
+
+                <div className='flex justify-end my-medium'>
                     <Tag>{service.tags[0]}</Tag>
                 </div>
 

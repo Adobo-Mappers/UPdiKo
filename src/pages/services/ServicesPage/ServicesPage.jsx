@@ -15,6 +15,7 @@ export default function ServicesPage() {
     }, []);
 
     // fetch service and set all tags and filters
+    // TODO: Cached Servies locally (through sessionStorage or localStorage)
     const [services, setServices] = useState([]);
     useEffect(() => {
         async function fetchServices() {
