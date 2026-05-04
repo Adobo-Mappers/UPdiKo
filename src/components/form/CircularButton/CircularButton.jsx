@@ -1,8 +1,8 @@
 import './CircularButton.css';
 
-export function CircularButton({ toggled, children, className=""}) {
+export function CircularButton({ children, className=""}) {
     return (
-        <button className={`circular-button ${toggled ? 'toggled' : ''} ${className}`}>
+        <button className={`circular-button ${className}`} style={{"width": width}}>
             {children}
         </button>
     );

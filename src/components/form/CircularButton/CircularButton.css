@@ -1,14 +1,11 @@
 .circular-button {
+    aspect-ratio: 1/1;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;   
-    border-radius: 50%;    
-    padding: var(--space-medium);
+    border-radius: var(--border-circlify);    
+    padding: var(--space-medium); 
     cursor: pointer;
     background-color: var(--color-accent-secondary);
- 
-    &.toggled {
-        background-color: var(--color-component-bg);
-    }
 }

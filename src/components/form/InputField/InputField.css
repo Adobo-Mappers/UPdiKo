@@ -13,8 +13,9 @@
     input {
         display: flex;
         width: inherit;
-        padding-inline: var(--space-medium);
+        padding: var(--space-medium);
         border: none;
+        border-radius: var(--border-roundify);
         text-indent: 32px;
         font-weight: var(--fw-bold);
         cursor: pointer;
@@ -22,19 +23,3 @@
         color: var(--color-text-main);
     }
 }
-
-/* .search-bar::before {    
-    content: "";
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    top: 50%;
-    left: var(--space-large);
-    z-index: 1;
-    transform: translateY(-50%);
-    background-image: url("./../../../assets/images/icon/search-icon.png");
-    background-repeat: no-repeat;
-    background-size: 16px 16px;
-    filter: brightness(0) saturate(100%) invert(46%) sepia(1%) saturate(1681%) hue-rotate(315deg) brightness(96%) contrast(78%); 
-} */
-
