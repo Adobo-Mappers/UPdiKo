@@ -36,6 +36,7 @@
     /* display variables */
     --screen-width: 430px;
     --screen-height: 100dvh;
+    --header-height: 60px;
     --footer-height: 60px;
 }
 

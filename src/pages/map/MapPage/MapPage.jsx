@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Button, CircularButton, InputField, Dropdown } from './../../../components/form/';
 import { Caption, Heading, Text, Title } from './../../../components/typography/';
-import { Icon, Tab, MapView } from './../../../components/ui/';
+import { Icon, MapView } from './../../../components/ui/';
 import { supabase, getCurrentUser } from './../../../services/supabase.js';
 
 import Yu from './../../../assets/images/profile/profile.jpg';

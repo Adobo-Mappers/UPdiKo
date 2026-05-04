@@ -1,11 +1,40 @@
 .services-page {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 100%;
+    grid-template-rows: var(--header-height) 1fr var(--footer-height);
+    width: inherit;     
+    height: inherit;
+    overflow: hidden;
     background-size: cover;
     background-color: white;
-    width: inherit;
-    height: inherit;
+
+    main {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    #category-tab {
+        > * { 
+            font-size: var(--fs-text);
+            margin-right: var(--space-xlarge); 
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .active {
+            font-weight: var(--fw-bold);
+        }
+
+    }
+
+    #service-list {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
 }
 
 .services-page::before {
@@ -20,6 +49,7 @@
     background-size: cover;
     opacity: 0.05;
 }
+
 
 .services-page * {
     position: relative;

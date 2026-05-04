@@ -1,7 +1,7 @@
 import './Lab.css'
 
 import { Button, InputField, PasswordField } from '../../components/form';
-import { Icon, Carousel, Tab } from '../../components/ui';
+import { Icon, Carousel} from '../../components/ui';
 import { Text } from '../../components/typography';
 import { useState } from 'react';
 

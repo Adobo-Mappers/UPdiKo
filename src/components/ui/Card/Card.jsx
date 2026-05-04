@@ -22,7 +22,7 @@ export function Card({service, className, ...otherProps}) {
                 <Text><em className='fw-bold'>{service.name}</em></Text>
                 <div className='flex gap-xsmall my-small'>
                     <Icon name='address' size='small' />
-                    <Text><em className='fw-regular'>s{service.address}</em></Text>
+                    <Text><em className='fw-regular'>{service.address}</em></Text>
                 </div>
                 {/* <Tag className="my-medium">{service.tags[0]}</Tag> */}
             </div>

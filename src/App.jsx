@@ -17,14 +17,13 @@ export default function App() {
         <div className="app">
             <BrowserRouter>
                 <Routes>
+                    {/* Test Route: <Route path='/' element={<LabPage/>}/> */}
+
                     {/* default routing (routes to services page) */}
-                    <Route path='/' element={<LabPage/>}/>
-
-                    {/* <Route path='/' element={<Navigate to='/service/' />} /> */}
+                    <Route path='/' element={<Navigate to='/service/' />} />
                     
-
-                    {/* <Route path='/service/' element={<ServicesPage/>}/> */}
-                    
+                    <Route path='/service/' element={<ServicesPage/>}/>                
+                
                     {/* <Route path='/service/info/:id' element={<ServiceInfoPage/>}/> */}
 
                     {/* map page routing*/}
