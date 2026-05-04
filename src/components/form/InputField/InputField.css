@@ -17,6 +17,7 @@
         border: none;
         text-indent: 32px;
         font-weight: var(--fw-bold);
+        cursor: pointer;
         background-color: var(--color-component-bg);        
         color: var(--color-text-main);
     }

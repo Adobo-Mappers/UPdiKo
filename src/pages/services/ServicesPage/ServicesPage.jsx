@@ -74,7 +74,7 @@ export default function ServicesPage() {
                 />
             </section>
 
-            <section className='px-large py-medium'>
+            <section className='px-large py-medium flex-col'>
                 <div className='flex justify-between items-center gap-medium'>
                     <div>
                         <Heading>Services</Heading>
@@ -88,14 +88,13 @@ export default function ServicesPage() {
                     />
                 </div>
                 <hr/>
-                <div className='flex-col overflow-y-auto max-h-list gap-medium'>
+                <div className='gap-medium' style={{"overflow" : "auto", "height" : "350px"}}>
                     {filteredServices.length > 0 && filteredServices.map((service) => (
                         <Link key={service.id} to={`/service/info/${service.id}`} className='text-inherit'>
                             <Card service={service} className="my-medium"/>
                         </Link>
                     ))}
                 </div>
-
             </section>
         </div>
     );

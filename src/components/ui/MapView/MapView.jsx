@@ -12,18 +12,18 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Custom Icons
-import closeIcon from '../../assets/images/icon/close-icon.png';
-import timeIcon from '../../assets/images/icon/time-icon.png';
+import closeIcon from '../../../assets/images/icon/close-icon.png';
+import timeIcon from '../../../assets/images/icon/open-hours-icon.png';
 
-import userPinIcon from '../../assets/images/icon/save.png';
-import communityPinIcon from '../../assets/images/icon/community.png';
-import universityPinIcon from '../../assets/images/icon/upv.png';
-import customPinIcon from '../../assets/images/icon/save.png';
+import userPinIcon from '../../../assets/images/icon/save.png';
+import communityPinIcon from '../../../assets/images/icon/community.png';
+import universityPinIcon from '../../../assets/images/icon/upv.png';
+import customPinIcon from '../../../assets/images/icon/save.png';
 
 // Getting Static Locations and Routing
-import { getStaticLocations, getRoute } from "../../services/locations.js";
+import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../services/supabase.js";
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../../services/supabase.js";
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -230,7 +230,7 @@ function RotationController({ bearing, setBearing }) {
 }
 
 // // main map element
-function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded}) {
+export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded}) {
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
@@ -576,4 +576,3 @@ function MapView({ userLocation, currentCoords, trackingEnabled, selectedService
   )
 };
 
-export default MapView;

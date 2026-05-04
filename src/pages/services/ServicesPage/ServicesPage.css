@@ -1,5 +1,7 @@
 .services-page {
     position: relative;
+    display: flex;
+    flex-direction: column;
     background-size: cover;
     background-color: white;
     width: inherit;
@@ -22,55 +24,5 @@
 .services-page * {
     position: relative;
     z-index: 2;
-}
-
-.services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-
-.service-card {
-    min-height: 320px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.service-card-media {
-    width: 100%;
-    height: 180px;
-    overflow: hidden;
-    background-color: #f5f4f2;
-}
-
-.service-card-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.service-card-placeholder {
-    width: 100%;
-    height: 100%;
-    background-color: #ececec;
-}
-
-.service-card-title {
-    font-size: 1rem;
-    line-height: 1.3;
-}
-
-.service-card-meta {
-    color: var(--color-text-muted);
-}
-
-.service-tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.3rem 0.9rem;
-    border-radius: 9999px;
-    background-color: var(--color-accent-secondary);
 }
 

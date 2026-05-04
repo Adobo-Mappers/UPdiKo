@@ -4,6 +4,29 @@
     background-color: white;
     width: inherit;
     height: inherit;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+
+    header {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+    } 
+
+    .search-overlay {
+        width: 100%;
+        height: inherit;
+        position: absolute;
+        top: 0px;
+        z-index: 500;
+        background-color: white;
+    }
+
+    .search-div {
+        position: relative;
+        z-index: 501;
+    }
 
     .map-utils {
         position: absolute;
