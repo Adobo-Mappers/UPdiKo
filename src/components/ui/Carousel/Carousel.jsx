@@ -2,7 +2,6 @@ import './Carousel.css'
 import { useEffect, useState } from 'react';
 import { Icon } from './../index';
 
-
 export function Carousel({ imageUrls = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slideCount = imageUrls.length;
@@ -13,7 +12,7 @@ export function Carousel({ imageUrls = [] }) {
     }
   }, [currentSlide, slideCount]);
 
-  const moveBy = (index) => () => {
+  function moveBy(index) {
     if (slideCount === 0) return;
     setCurrentSlide((prev) => (prev + index + slideCount) % slideCount);
   };
@@ -35,26 +34,33 @@ export function Carousel({ imageUrls = [] }) {
         ))}
       </div>
 
-      <div className="buttons">
-        <button type="button" onClick={moveBy(-1)} aria-label="Previous slide">
-          <Icon className='prev-button' name="back" size="small"/>
-        </button>
-        <button type="button" onClick={moveBy(1)} aria-label="Next slide">
-          <Icon className='next-button' name="back" size="small"/>
-        </button>
-      </div>
+      {imageUrls.length > 1 && 
+        (<div className="buttons">
+          <button type="button" onClick={() => moveBy(-1)} aria-label="Previous slide">
+            <Icon className='prev-button' name="back" size="small"/>
+          </button>
+          <button type="button" onClick={() => moveBy(1)} aria-label="Next slide">
+            <Icon className='next-button' name="back" size="small"/>
+          </button>
+        </div>
+        )
+      }
+    
+      {imageUrls.length > 1 && 
+       (<div className="dots">
+           {imageUrls.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`dot ${index === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+        )
+      }
 
-      <div className="dots">
-        {imageUrls.map((_, index) => (
-          <button
-            key={index}
-            type="button"
-            className={`dot ${index === currentSlide ? 'active' : ''}`}
-            onClick={() => setCurrentSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
     </div>
   );
 }
