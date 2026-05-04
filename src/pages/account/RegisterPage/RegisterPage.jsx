@@ -5,7 +5,6 @@ import { Button, InputField, PasswordField } from '../../../components/form';
 import { Icon, Carousel, Tag } from '../../../components/ui';
 import { Text, Caption, Heading, Title } from '../../../components/typography'
 import { signUp, saveUserDataToDB } from "../../../services/supabase.js";
-import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function RegisterPage() {
     // URL redirect hook
@@ -60,10 +59,7 @@ export default function RegisterPage() {
 
     return (
         <div className="register-page">
-            <header className="py-medium px-large flex justify-end">
-                <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>
-            </header> 
-            <main className='px-large py-medium'>
+            <main className='flex flex-col justify-center px-large py-medium'>
                 <div className='py-medium'>
                     <Link to="/account/login" className='flex items-center gap-small'>
                         <Icon name="back" size='small'/>
@@ -78,44 +74,47 @@ export default function RegisterPage() {
                     </div>
                 )}
 
-                <form className='my-large'>
+                <form>
                     <div className='my-medium'>
                         <InputField 
                             className='border-roundify py-medium' 
                             icon="user" 
                             placeholder="Username" 
                             value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            onChange={setUsername}
                         />
                     </div>
+
                     <div className='my-medium'>
                         <InputField 
                             className='border-roundify py-medium' 
                             icon="mail" 
                             placeholder="Email" 
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={setEmail}
                         />
                     </div>
+                    
                     <div className='my-medium'>
                         <PasswordField 
                             className='border-roundify py-medium' 
                             placeholder="Password" 
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={setPassword}
                         />
                     </div>
+                    
                     <div className='my-medium'>
                         <PasswordField 
                             className='border-roundify py-medium' 
                             placeholder="Confirm Password" 
                             value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onChange={setConfirmPassword}
                         />
                     </div>
         
                     <div className='flex justify-center my-large'>
-                        <Button type="button" className='w-200' onClick = {() => handleRegister()}>Register</Button>
+                        <Button type="button" className='py-medium' width='200px' onClick = {() => handleRegister()}>Register</Button>
                     </div>
                     
                     <div className='flex justify-center my-large'>

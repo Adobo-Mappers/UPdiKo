@@ -14,6 +14,7 @@ export default function ServicesPage() {
         getCurrentUser().then(setUser);
     }, []);
 
+
     // fetch service and set all tags and filters
     // TODO: Cached Servies locally (through sessionStorage or localStorage)
     const [services, setServices] = useState([]);
@@ -39,8 +40,6 @@ export default function ServicesPage() {
     const [activeFilter, setActiveFilter] = useState('Nearest Location');
     const [searchQuery, setSearchQuery] = useState('');
 
-    console.log(activeTag);
-
     // filtered services to be displayed 
     const filteredServices = services.filter((service) => {
         const matchesTag = activeTag === 'All' || (service.tags ?? []).includes(activeTag);
@@ -54,7 +53,7 @@ export default function ServicesPage() {
                 <Profile user={user}/>
             </header>
             <main className='p-large'>
-                <Title>Good Day, <span className='text-accent'>Yu!</span></Title>
+                <Title>Good Day <span className='text-accent'>{( (user) ? "Yu!" : "" )}</span></Title>
                 <Heading>What services do you want to find today?</Heading>
                 
                 <div className='my-medium'>

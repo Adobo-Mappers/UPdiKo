@@ -6,8 +6,6 @@ import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading, Title } from './../../../components/typography'
 import { logIn } from './../../../services/supabase.js';
 
-import Yu from './../../../assets/images/profile/profile.jpg';
-
 export default function LoginPage() {
     // URL redirect hook
     const navigate = useNavigate();
@@ -29,11 +27,8 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="login-page">
-            <header className="py-medium px-large flex justify-end">
-                <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>
-            </header> 
-            <main className='px-large py-medium'>
+        <div className="login-page"> 
+            <main className='flex flex-col justify-center px-large py-medium'>
                 <Title>User <em className='text-accent'>Login</em></Title>
                 <Heading>Access personalized features like <em className='fw-bold'>bookmarking pins</em> and <em className='fw-bold'>creating custom pins. </em></Heading>
 
@@ -43,33 +38,37 @@ export default function LoginPage() {
                     </div>
                 )}
 
-                <form className='my-large'>
+                <form>
                     <div className='my-medium'>
                         <InputField 
                             className='border-roundify py-medium email' 
                             icon="mail" 
                             placeholder="Email"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={setEmail}
                         />
                     </div>
+
                     <div className='my-medium'>
                         <PasswordField 
                             className='border-roundify py-medium password' 
                             placeholder="Password"
                             name="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={setPassword}
                     />
                     </div>
+                    
                     <div className='flex justify-end'>
                         <Link to="/account/forgot-password" className='text-decoration-none'>
                             <Text><u>Forgot Password</u></Text>
                         </Link>
                     </div>
+                    
                     <div className='flex justify-center my-large'>
-                        <Button type="button" className='w-200' onClick = {() => handleLogin()}>Login</Button>
+                        <Button type="button" className='py-medium' width='200px' onClick = {() => handleLogin()}>Login</Button>
                     </div>
+                    
                     <div className='flex justify-center my-large'>
                         <Text>Don't have an account? <Link to="/account/register" className='text-decoration-none'><u>Sign up here</u></Link></Text>
                     </div>

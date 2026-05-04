@@ -1,4 +1,6 @@
 .register-page {
+    display: grid;
+    grid-template-rows: 1fr var(--footer-height);
     position:relative;
     background-size: cover;
     background-color: white;

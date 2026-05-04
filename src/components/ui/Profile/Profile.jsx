@@ -1,4 +1,5 @@
 import './Profile.css'
+import Yu from './../../../assets/images/profile/profile.jpg'
 
 export function Profile({ user, width='36px', height='36px', className='', ...rest}) {
     return (
