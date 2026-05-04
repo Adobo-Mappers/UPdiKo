@@ -2,15 +2,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 40px;
+    gap: var(--space-small);
     border: none;   
-    border-radius: 30px; 
-    padding-inline: var(--space-large);
-    cursor: pointer;
-    font-weight: var(--fw-bold);
+    border-radius: var(--border-roundify); 
+    padding: var(--space-small) var(--space-large);
     background-color: var(--color-accent-secondary);
- 
-    &.toggled {
-        background-color: var(--color-component-bg);
-    }
+    font-weight: var(--fw-bold);
+    color: var(--color-text-main);
+    cursor: pointer;
 }
