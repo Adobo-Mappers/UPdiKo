@@ -10,25 +10,31 @@ import LoginPage from './pages/account/LoginPage/LoginPage';
 import RegisterPage from './pages/account/RegisterPage/RegisterPage';
 import ForgotPasswordPage from './pages/account/ForgotPasswordPage/ForgotPasswordPage';
 
+import LabPage from './pages/lab/Lab'
+
 export default function App() {
     return (
         <div className="app">
             <BrowserRouter>
                 <Routes>
                     {/* default routing (routes to services page) */}
-                    <Route path='/' element={<Navigate to='/service/' />} />
-                    <Route path='/service/' element={<ServicesPage/>}/>
+                    <Route path='/' element={<LabPage/>}/>
+
+                    {/* <Route path='/' element={<Navigate to='/service/' />} /> */}
                     
-                    <Route path='/service/info/:id' element={<ServiceInfoPage/>}/>
+
+                    {/* <Route path='/service/' element={<ServicesPage/>}/> */}
+                    
+                    {/* <Route path='/service/info/:id' element={<ServiceInfoPage/>}/> */}
 
                     {/* map page routing*/}
-                    <Route path='/map' element={<MapPage/>}/>
+                    {/* <Route path='/map' element={<MapPage/>}/> */}
                     
                     {/* account page routing*/}
-                    <Route path='/account' element={<AccountPage/>}/>
-                    <Route path='/account/login' element={<LoginPage/>}/>
-                    <Route path='/account/register' element={<RegisterPage/>}/>
-                    <Route path='/account/forgot-password' element={<ForgotPasswordPage/>}/>
+                    {/* <Route path='/account' element={<AccountPage/>}/> */}
+                    {/* <Route path='/account/login' element={<LoginPage/>}/> */}
+                    {/* <Route path='/account/register' element={<RegisterPage/>}/> */}
+                    {/* <Route path='/account/forgot-password' element={<ForgotPasswordPage/>}/> */}
                 </Routes>                
                 <Footer/>
             </BrowserRouter>
