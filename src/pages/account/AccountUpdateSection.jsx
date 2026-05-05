@@ -5,7 +5,6 @@ import mapIcon from '../../assets/images/icon/map-pin-icon.png'
 import accountIcon from '../../assets/images/icon/user-icon.png'
 import showPassIcon from '../../assets/images/icon/view-pass-icon.png'
 import hidePassIcon from '../../assets/images/icon/hide-pass-icon.png'
-import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
 import logoutIcon from '../../assets/images/icon/logout-icon.png'
 import backIcon from '../../assets/images/icon/back-icon-2.png'
 import closeIcon from '../../assets/images/icon/close-icon.png'
@@ -20,7 +19,7 @@ import {
 
 import { useEffect, useState } from "react";
 
-function AccountUpdateSection({ setAppSection, redirect, setAppRedirectBody }) {
+function AccountUpdateSection({ setAppSection, _redirect, _setAppRedirectBody }) {
   /* See Password */
   const [isVisible, setVisible] = useState(false);
   function togglePasswordVisibility() {

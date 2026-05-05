@@ -4,13 +4,12 @@ import mascot from '../../assets/images/logo/logo.png'
 import homeIcon from '../../assets/images/icon/home-icon.png'
 import mapIcon from '../../assets/images/icon/map-pin-icon.png'
 import accountIcon from '../../assets/images/icon/user-icon.png'
-import bookmarkIcon from '../../assets/images/icon/saved-icon.png'
 import logoutIcon from '../../assets/images/icon/logout-icon.png'
 import backIcon from '../../assets/images/icon/back-icon-2.png'
 
 import { useState, useEffect } from 'react';
 
-import { getCurrentUser, logOut, getPinnedLocationsFromDB, deletePinnedLocationFromDB } from '../../services/supabase.js';
+import { getCurrentUser, logOut, getPinnedLocationsFromDB } from '../../services/supabase.js';
 
 function PersonalPinSection({setAppSection, setAppService}) {
 
@@ -33,14 +32,6 @@ function PersonalPinSection({setAppSection, setAppService}) {
         }
         fetchPinnedLocations();
     }, [user]); // re-runs when user is set
-
-    async function deletePinnedLocation(locationID) {
-        if (!user) return;
-        // Fix: use the correct parameter names (was incorrectly using location.id)
-        await deletePinnedLocationFromDB(user.id, locationID);
-        // Refresh the list after deletion
-        setPinnedLocations(prev => prev.filter(loc => loc.id !== locationID));
-    }
 
     async function userLogOut() {
         await logOut();

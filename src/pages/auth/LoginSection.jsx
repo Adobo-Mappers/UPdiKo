@@ -24,7 +24,7 @@ function LoginSection({ setAppSection }) {
         try {
             await logIn(email, password);
             setAppSection("HOME");  // Push user back home
-        } catch (e) {
+        } catch {
             setErrorMessage("Invalid Email or Password Found.")
             return;   
         }   
