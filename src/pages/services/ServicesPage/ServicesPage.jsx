@@ -6,6 +6,7 @@ import { Caption, Heading, Text, Title } from './../../../components/typography/
 import { Icon, Card, Profile } from './../../../components/ui/';
 import { getCurrentUser } from './../../../services/supabase.js';
 import { supabase } from './../../../services/supabase.js';
+import { hasServiceCache, fetchServices, getAllServices } from './../../../services/service-handler.js';
 
 export default function ServicesPage() {
     // check user auth
@@ -16,22 +17,19 @@ export default function ServicesPage() {
 
 
     // fetch service and set all tags and filters
-    // TODO: Cache servies locally after fetch (through sessionStorage or localStorage)
     const [services, setServices] = useState([]);
     useEffect(() => {
-        async function fetchServices() {
-            const { data, error } = await supabase
-                .from('static_locations')
-                .select('id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type');
-            if (error) {
-                console.error('Error fetching services:', error);
-                return;
+        async function loadServices() {
+            if (!hasServiceCache()) {
+                const data = await fetchServices();
+                setServices(data || []);
+            } else {
+                setServices(getAllServices());  
             }
-            setServices(data || []);
         }
-
-        fetchServices();
+        loadServices();
     }, []);
+
     const SERVICE_TAGS = ['All', ...new Set(services.flatMap(service => service.tags ?? []))];
     const FILTER_OPTIONS = ['Nearest Location', 'Top Rated', 'Open Now'];
     

@@ -5,6 +5,7 @@ import { Button } from '../../../components/form';
 import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
 import { supabase, getCurrentUser } from './../../../services/supabase.js';
+import { getService, fetchServices } from './../../../services/service-handler.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function ServiceInfoPage() {
@@ -17,7 +18,6 @@ export default function ServiceInfoPage() {
 
     // get service id 
     const { id } = useParams();
-    // TODO: Extension of ServicesPage TODO. Get it from localStorage or sessionStorage instead of fetching from the data. If data does not exist, fetch from db
     
     // fetching service
     const [service, setService] = useState(null);
@@ -25,21 +25,25 @@ export default function ServiceInfoPage() {
     useEffect(() => {
         async function loadService() {
             if (!id) return;
-            const { data, error } = await supabase
-                .from('static_locations')
-                .select('id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type')
-                .eq('id', id)
-                .single();
+            
+            // Try to get from cache first
+            let cachedService = getService(id);
+            if (cachedService) {
+                setService(cachedService);
+                setLoading(false);
+                console.log(cachedService);
+                return;
+            }            
 
-            if (error) {
-                console.error('Error loading service:', error);
-            }
-            setService(data || null);
+            // If not in cache, fetch all services and cache them
+            await fetchServices();
+            cachedService = getService(id);
+            setService(cachedService);
             setLoading(false);
         }
         loadService();
     }, [id]);
-
+    
     // view when loading
     if (loading) {
         return (
@@ -118,18 +122,14 @@ export default function ServiceInfoPage() {
                     <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>{service.opening_hours[0]}</Text></div>
                 </div>
                 <div className='flex gap-small my-medium'>
-                    <Link to="/map">
-                        <Button className="flex items-center gap-small">
-                            <Icon name='direction'/>
-                            <Caption>Get Directions</Caption>
-                        </Button>
-                    </Link>
-                    <Link to="/map">
-                        <Button className="items-center gap-small">
-                            <Icon name='map'/>
-                            <Caption>View in Map</Caption>
-                        </Button>
-                    </Link>
+                    <Button href={`/map/${id}`} className="flex items-center gap-small">
+                        <Icon name='direction'/>
+                        <Caption>Get Directions</Caption>
+                    </Button>
+                    <Button href={`/map/${id}`} className="items-center gap-small">
+                        <Icon name='map'/>
+                        <Caption>View in Map</Caption>
+                    </Button>
                 </div>
 
 

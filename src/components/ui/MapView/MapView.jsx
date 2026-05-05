@@ -6,6 +6,11 @@ import L, { map, marker } from "leaflet";
 import "./MapView.css";
 import "leaflet-rotate";
 
+import { Link } from 'react-router-dom';
+import { Button } from '../../../components/form';
+import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
+import { Text, Caption, Heading } from './../../../components/typography'
+
 // Placeholder Icons from Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -490,87 +495,112 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       </MapContainer>
       
       {selectedMarkerInfo && (
-        <div className="marker-info-panel">
-
-          <div className="panel-handle">
-          <h2>{selectedMarkerInfo.name}</h2>
-          <span className="close-btn btn" onClick={() => setSelectedMarkerInfo(null)}><img src={closeIcon}></img></span>
-          </div>
-        
-          <div className="directions-container">
-            <button
-              className="directions-btn btn"
-              onClick={() => handleGetDirections(selectedMarkerInfo)}
-              disabled={isLoadingRoute}
-            >
-              {isLoadingRoute ? "Loading route..." : "Get Directions"}
-            </button>
-
-            {routeInfo && (
-              <div className="route-info">
-                <span> 🚗 {routeInfo.distance}</span>
-                <span> ⏱ {routeInfo.duration}</span>
-                <button className="clear-route-btn btn" onClick={handleClearRoute}>
-                  Clear
-                </button>
-              </div>
-            )}
-          </div>
-
-          <hr className="separator"></hr>
-
-          <div className="marker-info-header">
-            <span className={"header-btn btn " + ((selectedPanelTab == "About") ? "active" : " ")} onClick={() => setSelectedPanelTab("About")}>About</span>
-            <span className={"header-btn btn " + ((selectedPanelTab == "Photos") ? "active" : " ")}  onClick={() => setSelectedPanelTab("Photos")}>Photos</span>
-          </div>
-
-          {selectedPanelTab === "About" && (
-            <div className="marker-info-container">
-              <div className="marker-description">
-                <p>{selectedMarkerInfo?.tags?.join(", ") ?? ""}</p>
-                <p>{selectedMarkerInfo.address}</p>                       
-                {selectedMarkerInfo.opening_hours && selectedMarkerInfo.opening_hours.length > 0 && (
-                  <div>
-                    <br></br>
-                    <h3>Opening Hours</h3>
-                    <ul>
-                      {selectedMarkerInfo.opening_hours.map((hour, index) => (
-                        <li key={index}>{hour}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )} 
-
-                {selectedMarkerInfo.contact_info && selectedMarkerInfo.contact_info.length > 0 && (
-                  <div>
-                    <br></br>
-                    <h3>Contact Information</h3>
-                    <ul>
-                      {selectedMarkerInfo.contact_info.map((info, index) => (
-                        <li key={index}>{info}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}     
-              </div>
+        <div className="marker-info p-large" >
+            <div className="flex justify-between  gap-xlarge">
+              <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
+              <Icon name="close" size="small"/>
             </div>
-          )}
           
-          {selectedPanelTab === "Photos" && selectedMarkerInfo.images && selectedMarkerInfo.images.length > 0 && (
-            <div className="image-container">
-              <div className="image-gallery">
-                {selectedMarkerInfo.images.map((imgUrl, index) => (
-                  <img key={index} className="image" src={imgUrl} alt={`Image ${index + 1}`} />
-                ))}
+            <div className="flex my-medium justify-between">
+              <div>
+                <div className='flex items-center gap-small'><Icon name='star' size='small'/><Text>4.5 <em className="text-muted">(243 reviews)</em></Text></div>                    
+                <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>{selectedMarkerInfo.address}</Text></div>
+                <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>{selectedMarkerInfo.opening_hours[0]}</Text></div>  
               </div>
+              <Tag>Category</Tag>
             </div>
-          )}
-          {selectedPanelTab === "Photos" && (selectedMarkerInfo.images == null || (selectedMarkerInfo.images && selectedMarkerInfo.images.length <= 0)) && (
-            <div className="image-container">
-              <p>No photos available.</p>
+
+            <div className="flex">
+              <Button href="/map">
+                <Icon name='direction'/>
+                <Caption>Get Directions</Caption>
+              </Button>
+
+              <></>
             </div>
-          )}
         </div>
+
+        // <div className="marker-info-panel">
+
+        //   <div className="panel-handle">
+        //   <h2>{selectedMarkerInfo.name}</h2>
+        //   <span className="close-btn btn" onClick={() => setSelectedMarkerInfo(null)}><img src={closeIcon}></img></span>
+        //   </div>
+        
+        //   <div className="directions-container">
+        //     <button
+        //       className="directions-btn btn"
+        //       onClick={() => handleGetDirections(selectedMarkerInfo)}
+        //       disabled={isLoadingRoute}
+        //     >
+        //       {isLoadingRoute ? "Loading route..." : "Get Directions"}
+        //     </button>
+
+        //     {routeInfo && (
+        //       <div className="route-info">
+        //         <span> 🚗 {routeInfo.distance}</span>
+        //         <span> ⏱ {routeInfo.duration}</span>
+        //         <button className="clear-route-btn btn" onClick={handleClearRoute}>
+        //           Clear
+        //         </button>
+        //       </div>
+        //     )}
+        //   </div>
+
+        //   <hr className="separator"></hr>
+
+        //   <div className="marker-info-header">
+        //     <span className={"header-btn btn " + ((selectedPanelTab == "About") ? "active" : " ")} onClick={() => setSelectedPanelTab("About")}>About</span>
+        //     <span className={"header-btn btn " + ((selectedPanelTab == "Photos") ? "active" : " ")}  onClick={() => setSelectedPanelTab("Photos")}>Photos</span>
+        //   </div>
+
+        //   {selectedPanelTab === "About" && (
+        //     <div className="marker-info-container">
+        //       <div className="marker-description">
+        //         <p>{selectedMarkerInfo?.tags?.join(", ") ?? ""}</p>
+        //         <p>{selectedMarkerInfo.address}</p>                       
+        //         {selectedMarkerInfo.opening_hours && selectedMarkerInfo.opening_hours.length > 0 && (
+        //           <div>
+        //             <br></br>
+        //             <h3>Opening Hours</h3>
+        //             <ul>
+        //               {selectedMarkerInfo.opening_hours.map((hour, index) => (
+        //                 <li key={index}>{hour}</li>
+        //               ))}
+        //             </ul>
+        //           </div>
+        //         )} 
+
+        //         {selectedMarkerInfo.contact_info && selectedMarkerInfo.contact_info.length > 0 && (
+        //           <div>
+        //             <br></br>
+        //             <h3>Contact Information</h3>
+        //             <ul>
+        //               {selectedMarkerInfo.contact_info.map((info, index) => (
+        //                 <li key={index}>{info}</li>
+        //               ))}
+        //             </ul>
+        //           </div>
+        //         )}     
+        //       </div>
+        //     </div>
+        //   )}
+          
+        //   {selectedPanelTab === "Photos" && selectedMarkerInfo.images && selectedMarkerInfo.images.length > 0 && (
+        //     <div className="image-container">
+        //       <div className="image-gallery">
+        //         {selectedMarkerInfo.images.map((imgUrl, index) => (
+        //           <img key={index} className="image" src={imgUrl} alt={`Image ${index + 1}`} />
+        //         ))}
+        //       </div>
+        //     </div>
+        //   )}
+        //   {selectedPanelTab === "Photos" && (selectedMarkerInfo.images == null || (selectedMarkerInfo.images && selectedMarkerInfo.images.length <= 0)) && (
+        //     <div className="image-container">
+        //       <p>No photos available.</p>
+        //     </div>
+        //   )}
+        // </div>
       )}
     </div>
   )

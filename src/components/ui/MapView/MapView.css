@@ -6,8 +6,17 @@
 }
 
 /* MAIN GROUP: LOADING SCREEN */
-.marker-info-panel {
-  padding: var(--pad-32);
+.marker-info {
+  height: 50dvh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top-left-radius: var(--border-roundify);
+  border-top-right-radius: var(--border-roundify);
+  background-color: white;  
+}
+  /* padding: var(--pad-32);
   background: var(--color-primary);
   border-radius: 12px;
   position: absolute;
@@ -31,7 +40,7 @@
   z-index: -1;
   background-image: url('./../assets/images/bg/pin-info-ng.png');
   background-size: cover;
-}
+} */
 
 .map-loading {
   display: flex;
@@ -60,7 +69,7 @@
 
 
 
-/* IMAGE STYLES */
+/* IMAGE STYLES
 .image{
   max-height: 100%;
   width: auto;
@@ -157,4 +166,4 @@
 .marker-description h3, .marker-description p, .image-container{
   font-weight: var(--fw-semi);
   font-size: var(--fs-14);
-}
+} */

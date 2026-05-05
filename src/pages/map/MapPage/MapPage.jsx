@@ -9,11 +9,11 @@ import { supabase, getCurrentUser } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function MapPage() {
-    // TODO: 1. Make sure that pressing a pin or any location is centered on the screen.
-    // TODO: 2. Make sure that the pressing the bottom right "black bg with a white compass icon" circular button focuses on user current location .
-    // TODO: 3. Make sure that pressing a service from the search immediately focuses to that location in the map
+    // TODO: Map recentering (the compass) requires two presses to recenter (the first tap will recenter, but succeding recenters need two taps :<)
+    
 
-    // For all of these TODOs, they are already integrated from the previous UPDI Ko! implementation. Copy it here :>
+    //  get searched service id
+    const { id } = useParams();
 
     // check user auth
     const [user, setUser] = useState(null);
@@ -89,7 +89,28 @@ export default function MapPage() {
         };
     }, [trackingEnabled]);
 
+    // map centering logic
+    function handleCenterToPin(lat, lng, zoomLevel = 17) {
+        setTrackingEnabled(false);
+        setMapCenter({ lat, lng, zoom: zoomLevel });
+    };
     
+    // map recenter to user logic
+    function handleRecenter() {
+        const newTrackingState = !trackingEnabled;
+        setTrackingEnabled(newTrackingState);
+
+        if (newTrackingState && userCurrentLocation) {
+            console.log(newTrackingState);
+            setMapCenter(userCurrentLocation);
+        } else if (!userCurrentLocation) {
+            alert("User location is not available.");
+            setTrackingEnabled(false);
+        }
+    };
+
+
+
     // map rotation logic
     const rotateIntervalRef = useRef(null);
     const [mapBearing, setMapBearing] = useState(0);
@@ -139,6 +160,7 @@ export default function MapPage() {
                 userLocation={mapCenter}
                 currentCoords={userCurrentLocation}
                 trackingEnabled={trackingEnabled}
+                onMapClickForPin={handleCenterToPin}
                 bearing={mapBearing}
                 onBearingChange={setMapBearing}    
             />
@@ -211,7 +233,7 @@ export default function MapPage() {
                     ><strong className='text-white'>↻</strong></CircularButton>
                 </div>
                 <div className='main-controls'>
-                    <CircularButton width='55px' className='bg-component-dark'>
+                    <CircularButton width='55px' className='bg-component-dark' onClick={handleRecenter}>
                         <Icon name='compass' size='large'/>    
                     </CircularButton>
                 </div>
