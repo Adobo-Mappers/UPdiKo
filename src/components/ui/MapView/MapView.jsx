@@ -276,8 +276,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   }
 
   function onDragEnd() {
+    setSelectedMarkerInfo(null);
       if (dragY.current > 200) {
-          setSelectedMarkerInfo(null);
       } else {
           panelRef.current.style.transition = 'transform 0.3s ease';
           panelRef.current.style.transform = 'translateY(0)';
@@ -553,7 +553,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             </div>
 
             <div className="flex">
-              <Button href="/map">
+              <Button href="/map" onClick={() => handleGetDirections(selectedMarkerInfo)}>
                 <Icon name='direction'/>
                 <Caption>Get Directions</Caption>
               </Button>
