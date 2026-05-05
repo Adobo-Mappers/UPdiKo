@@ -6,7 +6,7 @@ import { Caption, Heading, Text, Title } from './../../../components/typography/
 import { Icon, Card, Profile } from './../../../components/ui/';
 import { getCurrentUser } from './../../../services/supabase.js';
 import { supabase } from './../../../services/supabase.js';
-import { hasServiceCache, fetchServices, getAllServices } from './../../../services/service-handler.js';
+import { hasServiceCache, fetchServicesFromServer, getAllServicesFromCache } from './../../../services/service-handler.js';
 
 export default function ServicesPage() {
     // check user auth
@@ -21,10 +21,10 @@ export default function ServicesPage() {
     useEffect(() => {
         async function loadServices() {
             if (!hasServiceCache()) {
-                const data = await fetchServices();
+                const data = fetchServicesFromServer();
                 setServices(data || []);
             } else {
-                setServices(getAllServices());  
+                setServices(getAllServicesFromCache());  
             }
         }
         loadServices();

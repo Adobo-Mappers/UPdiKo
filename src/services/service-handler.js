@@ -4,11 +4,11 @@ export function hasServiceCache() {
     return (sessionStorage.getItem("services")? true : false);
 }
 
-export function getAllServices() {
+export function getAllServicesFromCache() {
     return JSON.parse(sessionStorage.getItem("services") || "[]");
 }
 
-export function getService(id) {
+export function getServiceFromCache(id) {
     const services = JSON.parse(sessionStorage.getItem("services") || "[]");
     for (let service of services) {
         if (service.id == id) {
@@ -18,7 +18,7 @@ export function getService(id) {
     return null;
 }
 
-export async function fetchServices() {
+export async function fetchServicesFromServer() {
     try {
         const { data, error } = await supabase
             .from('static_locations')

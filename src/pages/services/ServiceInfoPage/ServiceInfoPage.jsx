@@ -5,7 +5,7 @@ import { Button } from '../../../components/form';
 import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
 import { supabase, getCurrentUser } from './../../../services/supabase.js';
-import { getService, fetchServices } from './../../../services/service-handler.js';
+import { getServiceFromCache, fetchServicesFromServer, hasServiceCache } from './../../../services/service-handler.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function ServiceInfoPage() {
@@ -15,7 +15,6 @@ export default function ServiceInfoPage() {
         getCurrentUser().then(setUser);
     }, []);
     
-
     // get service id 
     const { id } = useParams();
     
@@ -25,20 +24,10 @@ export default function ServiceInfoPage() {
     useEffect(() => {
         async function loadService() {
             if (!id) return;
-            
-            // Try to get from cache first
-            let cachedService = getService(id);
-            if (cachedService) {
-                setService(cachedService);
-                setLoading(false);
-                console.log(cachedService);
-                return;
-            }            
-
-            // If not in cache, fetch all services and cache them
-            await fetchServices();
-            cachedService = getService(id);
-            setService(cachedService);
+            if (!hasServiceCache) {
+                fetchServicesFromServer();
+            } 
+            setService(getServiceFromCache(id));
             setLoading(false);
         }
         loadService();
