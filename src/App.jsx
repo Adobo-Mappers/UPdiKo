@@ -36,7 +36,7 @@ export default function App() {
                     <Route path='/service/info/:id' element={<ServiceInfoPage/>}/>
 
                     {/* map page routing*/}
-                    {/* <Route path='/map' element={<MapPage/>}/> */}
+                    <Route path='/map' element={<MapPage/>}/>
                     
                     {/* account page routing*/}
                     <Route path='/account' element={<Navigate to={(user) ? '/account' : '/account/login'} />}/>

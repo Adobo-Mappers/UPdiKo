@@ -180,12 +180,14 @@ p, h1, h2, h3, h4, h5, h6 {
 /* background color */
 .bg-white    { background-color: white !important}
 .bg-component    { background-color: var(--color-component-bg) !important}
+.bg-component-dark { background-color: var(--color-text-main) !important;}
 .bg-accent       { background-color: var(--color-accent-primary) !important}
 .bg-accent-soft  { background-color: var(--color-accent-secondary) !important}
 .bg-accent-softer  { background-color: var(--color-accent-tertiary) !important}
 
 
 /* text color */
+.text-white      { color: white !important;}
 .text-main       { color: var(--color-text-main) !important }
 .text-muted      { color: var(--color-text-muted) !important }
 .text-accent     { color: var(--color-accent-primary) !important }

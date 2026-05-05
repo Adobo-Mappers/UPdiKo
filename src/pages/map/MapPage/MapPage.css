@@ -28,9 +28,21 @@
         z-index: 501;
     }
 
-    .map-utils {
+    .rotation-controls {
         position: absolute;
-        bottom: 100px;
+        top: calc(var(--header-height) + 50px);
+        right: var(--space-large);
+        
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-small);
+        
+
+    }
+
+    .main-controls {
+        position: absolute;
+        bottom: calc(var(--footer-height) + 20px); 
         right: var(--space-large);
     }
 }
