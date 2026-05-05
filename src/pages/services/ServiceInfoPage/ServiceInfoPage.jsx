@@ -8,7 +8,6 @@ import { supabase, getCurrentUser } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function ServiceInfoPage() {
-    // TODO: Cache data or make sure that data does not have to be requested again from the server
     // check user auth
     const [user, setUser] = useState(null);
     useEffect(() => {
@@ -18,6 +17,7 @@ export default function ServiceInfoPage() {
 
     // get service id 
     const { id } = useParams();
+    // TODO: Extension of ServicesPage TODO. Get it from localStorage or sessionStorage instead of fetching from the data. If data does not exist, fetch from db
     
     // fetching service
     const [service, setService] = useState(null);

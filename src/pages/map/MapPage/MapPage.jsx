@@ -9,6 +9,12 @@ import { supabase, getCurrentUser } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function MapPage() {
+    // TODO: 1. Make sure that pressing a pin or any location is centered on the screen.
+    // TODO: 2. Make sure that the pressing the bottom right "black bg with a white compass icon" circular button focuses on user current location .
+    // TODO: 3. Make sure that pressing a service from the search immediately focuses to that location in the map
+
+    // For all of these TODOs, they are already integrated from the previous UPDI Ko! implementation. Copy it here :>
+
     // check user auth
     const [user, setUser] = useState(null);
     useEffect(() => {
