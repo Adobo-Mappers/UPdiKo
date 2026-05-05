@@ -25,7 +25,7 @@ export default function ServiceInfoPage() {
         async function loadService() {
             if (!id) return;
             if (!hasServiceCache) {
-                fetchServicesFromServer();
+                await fetchServicesFromServer();
             } 
             setService(getServiceFromCache(id));
             setLoading(false);

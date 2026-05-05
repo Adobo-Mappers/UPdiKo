@@ -12,6 +12,6 @@
     cursor: pointer;
 
     &.toggled {
-        background-color: var(--color-component-bg);
+        background-color: var(--color-component-bg); 
     }
 }

@@ -21,11 +21,9 @@ export default function ServicesPage() {
     useEffect(() => {
         async function loadServices() {
             if (!hasServiceCache()) {
-                const data = fetchServicesFromServer();
-                setServices(data || []);
-            } else {
-                setServices(getAllServicesFromCache());  
-            }
+                const data = await fetchServicesFromServer();
+            } 
+            setServices(getAllServicesFromCache());  
         }
         loadServices();
     }, []);

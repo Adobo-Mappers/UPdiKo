@@ -28,7 +28,7 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../../services/supabase.js";
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
 import Yu from './../../../assets/images/profile/profile.jpg'
 
 // fixes icon
@@ -248,11 +248,25 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [selectedPanelTab, setSelectedPanelTab] = useState("About");
   const [tempLocation, setTempLocation] = useState(null);
 
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+      getCurrentUser().then(setUser);
+  }, []);
+
+
   // States for PostGIS directions using Leaflet
   const [routeCoords, setRouteCoords] = useState([]);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeDestination, setRouteDestination] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
+
+  // States for saving
+  
+  const [isSaved, setSaved] = useState(false);  // supposedly if service saved by user 
+  function toggleSaveButton() {
+      setSaved(!isSaved);
+  }
+
 
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
   const mapZoom = userLocation?.zoom || 16;
@@ -540,7 +554,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             />
             <div className="flex justify-between  gap-xlarge">
               <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
-              <Icon name="close" size="small" onClick={() => setSelectedMarkerInfo(null)}/>
+              <Icon name="close" size="small" clsssName="cursor-pointer" onClick={() => setSelectedMarkerInfo(null)}/>
             </div>
           
             <div className="flex my-medium justify-between">
@@ -552,11 +566,26 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               <Tag>Category</Tag>
             </div>
 
-            <div className="flex">
+            <div className="flex gap-small">
               <Button href="/map" onClick={() => handleGetDirections(selectedMarkerInfo)}>
                 <Icon name='direction'/>
                 <Caption>Get Directions</Caption>
               </Button>
+              {user && (
+                  <Button className="flex items-center gap-small" toggled={isSaved} onClick={() => toggleSaveButton()}>
+                      <Icon name='save'/>
+                      <Caption>{(isSaved) ? "Saved" : "Save"}</Caption>
+                  </Button>
+                )
+              }
+              {user && (
+                  <div className="flex items-center gap-small px-small cursor-pointer">
+                      <Icon name='darkstar'/>
+                      <Caption><strong>Rate</strong></Caption>
+                  </div>
+                )
+              }
+
             </div>
 
             <div className="flex flex-no-wrap gap-medium overflow-x py-medium">
