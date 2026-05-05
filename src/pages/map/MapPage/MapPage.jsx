@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button, CircularButton, InputField, Dropdown } from './../../../components/form/';
 import { Caption, Heading, Text, Title } from './../../../components/typography/';
 import { Icon, MapView } from './../../../components/ui/';
-import { supabase, getCurrentUser } from './../../../services/supabase.js';
+import { supabase, getCurrentUser, logOut } from './../../../services/supabase.js';
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
 
 import Yu from './../../../assets/images/profile/profile.jpg';
@@ -28,11 +28,13 @@ export default function MapPage() {
         }
         loadServices();
     }, []);
+
     const SERVICE_TAGS = ['All', ...new Set(services.flatMap(service => service.tags ?? []))];
     const FILTER_OPTIONS = ['Nearest Location', 'Top Rated', 'Open Now'];
-
+    
     // searching services logic
     const [activeTab, setActiveTab] = useState(SERVICE_TAGS[0]);
+    const [activeTag, setActiveTag] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setSearching] = useState(false);
     const filteredServices = services.filter((service) => {
@@ -43,13 +45,17 @@ export default function MapPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const id = searchParams.get('id');
     const [selectedService, setSelectedService] = useState(getServiceFromCache(id));
-    
+
     // map tracking logic 
     const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
     const [mapCenter, setMapCenter] = useState(defaultCenter);                  
     const [userCurrentLocation, setUserCurrentLocation] = useState(null);       // user's latest GPS coordinate
     const watchIdRef = useRef(null);                                            // ref to hold the watchPosition ID so we can clear it later
     const [trackingEnabled, setTrackingEnabled] = useState(false);              // controls whether the map should automatically pan to the user's location
+
+    // modal logic 
+    const [rating, setRating] = useState(0);
+    const [isRating, setRatingAction] = useState(false);
 
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -174,6 +180,9 @@ export default function MapPage() {
                 onClosePinForm={handleClosePinForm}       // FIX: was missing — lets MapView close the pin form
                 bearing={mapBearing}
                 onBearingChange={setMapBearing}    
+                setRatingSession={setRatingAction}
+                isRating={isRating}
+                activeTag={activeTag}
             />
         
             { isSearching && 
@@ -199,9 +208,26 @@ export default function MapPage() {
                 </div>
             </section> 
             }
+
+            { isRating && 
+            <section className='rating-modal'>
+                <Heading><strong>How was your experience?</strong></Heading>
+                <div className='flex justify-center gap-large py-medium'>
+                    <Icon name={`${(rating >= 1) ? "star" : "darkstar"}`} size='large' onClick={() => setRating(1)}/>
+                    <Icon name={`${(rating >= 2) ? "star" : "darkstar"}`} size='large' onClick={() => setRating(2)}/>
+                    <Icon name={`${(rating >= 3) ? "star" : "darkstar"}`} size='large' onClick={() => setRating(3)}/>
+                    <Icon name={`${(rating >= 4) ? "star" : "darkstar"}`} size='large' onClick={() => setRating(4)}/>
+                    <Icon name={`${(rating >= 5) ? "star" : "darkstar"}`} size='large' onClick={() => setRating(5)}/>
+                </div>
+                <div className='flex justify-end items-center'>
+                    <div className='flex px-medium' onClick={() => setRatingAction(false)}><strong>Cancel</strong></div>
+                    <Button><Icon name='darkstar'/>Rate</Button>
+                </div>
+            </section>
+            }
     
-            <header>
-                <div className='flex items-center gap-medium px-large py-medium search-div'>
+            <header className='px-large'>
+                <div className='flex items-center gap-medium py-small search-div'>
                     {(isSearching) && 
                         <div 
                             className='flex items-center gap-xsmall cursor-pointer'
@@ -219,6 +245,17 @@ export default function MapPage() {
                         onChange = {setSearchQuery}
                     />
                     {(!isSearching) && <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>}
+                </div>
+                
+                <div id="category-tab" className="flex overflow-x">
+                    {SERVICE_TAGS.map((tag) => (
+                        <div 
+                            className={`${(activeTag === tag) ? "active" : ""} flex bg-white px-small py-xsmall border-roundify`}
+                            onClick= {() => setActiveTag(tag)}
+                        >
+                        {tag}
+                        </div>
+                    ))}
                 </div>
             </header>
             <main className='map-utils'>

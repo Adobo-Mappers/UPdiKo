@@ -33,6 +33,36 @@
         z-index: 501;
     }
 
+    .rating-modal { 
+        position: absolute;
+        width: 400px;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%);
+        z-index: 1000;
+        padding: var(--space-large) var(--space-large) ;
+        border-radius: var(--border-rounded);
+        background-color: white;
+
+    }
+
+    #category-tab {
+        > * { 
+            font-size: var(--fs-text);
+            margin-right: var(--space-large); 
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .active {
+            font-weight: var(--fw-bold);
+            background-color: var(--color-accent-tertiary) !important;
+        }
+        
+
+    }
+
+
     .rotation-controls {
         position: absolute;
         top: calc(var(--header-height) + 50px);

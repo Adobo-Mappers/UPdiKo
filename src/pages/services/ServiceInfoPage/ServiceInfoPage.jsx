@@ -116,7 +116,7 @@ export default function ServiceInfoPage() {
                     <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>{service.opening_hours[0]}</Text></div>
                 </div>
                 <div className='flex gap-small my-medium'>
-                    <Button href={`/map/${id}`} className="items-center gap-small">
+                    <Button href={`/map?id=${id}`} className="items-center gap-small">
                         <Icon name='map'/>
                         <Caption>View in Map</Caption>
                     </Button>

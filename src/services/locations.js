@@ -151,7 +151,7 @@ const fetchFromSupabase = async (supabase) => {
   console.log("🌐 Fetching locations from Supabase...");
 
   const { data, error } = await supabase
-    .from("openstreets_static_locations")
+    .from("static_locations")
     .select("id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type");
 
   if (error) throw new Error(`Supabase fetch failed: ${error.message}`);

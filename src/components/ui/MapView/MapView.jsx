@@ -1,5 +1,5 @@
 // Important Dependencies
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, act } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
@@ -238,7 +238,7 @@ function RotationController({ bearing, setBearing }) {
 
 
 // // main map element
-export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded}) {
+export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded, setRatingSession, isRating, setRating, activeTag}) {
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
@@ -351,6 +351,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             name: pin.locationName,
             latitude: pin.latitude,
             longitude: pin.longitude,
+            tags: pin.tags || [],
             type: "Pinned",
             address: pin.address,
             description: pin.description,
@@ -358,12 +359,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             opening_hours: pin.opening_hours || [],
           }))
         );
+
       } else {
         setPinnedLocations([]);
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [activeTag]);
   // Replaces static JSON imports — fetch all locations from Supabase static_locations table
   useEffect(() => {
     const fetchStaticLocations = async () => {
@@ -513,7 +515,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           </Marker>
         ))}
         {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
-        {staticLocations
+        {staticLocations.filter(pin => (activeTag === "All") || (pin.tags || []).includes(activeTag))
           .filter(shouldShowMarker)
           .filter(facility => {
             const lat = parseFloat(facility.latitude);
@@ -579,7 +581,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                 )
               }
               {user && (
-                  <div className="flex items-center gap-small px-small cursor-pointer">
+                  <div className="flex items-center gap-small px-small cursor-pointer" onClick={() => setRatingSession(true)}>
                       <Icon name='darkstar'/>
                       <Caption><strong>Rate</strong></Caption>
                   </div>

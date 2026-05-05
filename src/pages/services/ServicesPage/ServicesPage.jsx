@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { InputField, Dropdown } from './../../../components/form/';
 import { Caption, Heading, Text, Title } from './../../../components/typography/';
 import { Icon, Card, Profile } from './../../../components/ui/';
-import { getCurrentUser } from './../../../services/supabase.js';
+import { getCurrentUser, logOut } from './../../../services/supabase.js';
 import { supabase } from './../../../services/supabase.js';
 import { hasServiceCache, fetchServicesFromServer, getAllServicesFromCache } from './../../../services/service-handler.js';
 

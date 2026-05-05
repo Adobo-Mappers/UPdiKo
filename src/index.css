@@ -79,6 +79,10 @@ p, h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-muted);
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
+
 /** Util Classes **/
 /* flex display */
 .flex         { display: flex !important}

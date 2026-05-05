@@ -34,7 +34,7 @@ export async function addPinnedLocationToDB(uid, locationName, address, latitude
 export async function getPinnedLocationsFromDB(uid) {
   const { data, error } = await supabase
     .from("user_locations")
-    .select("*")
+    .select("*")  
     .eq("user_id", uid);
 
   if (error) {
