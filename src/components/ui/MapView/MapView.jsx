@@ -235,6 +235,8 @@ function RotationController({ bearing, setBearing }) {
   return null;
 }
 
+
+
 // // main map element
 export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded}) {
   const defaultCenter = [10.641944, 122.235556];
@@ -254,6 +256,36 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
   const mapZoom = userLocation?.zoom || 16;
+
+  // for dragging
+  const dragY = useRef(0);
+  const startY = useRef(null);
+  const panelRef = useRef(null);
+
+  function onDragStart(e) {
+      startY.current = e.touches?.[0]?.clientY ?? e.clientY;
+      panelRef.current.style.transition = 'none';
+  }
+
+  function onDragMove(e) {
+      if (startY.current === null) return;
+      const delta = (e.touches?.[0]?.clientY ?? e.clientY) - startY.current;
+      if (delta < 0) return; // block dragging up
+      dragY.current = delta;
+      panelRef.current.style.transform = `translateY(${delta}px)`;
+  }
+
+  function onDragEnd() {
+      if (dragY.current > 200) {
+          setSelectedMarkerInfo(null);
+      } else {
+          panelRef.current.style.transition = 'transform 0.3s ease';
+          panelRef.current.style.transform = 'translateY(0)';
+      }
+      dragY.current = 0;
+      startY.current = null;
+  }
+
 
   
   // Function to handle the marker click logic
@@ -496,10 +528,19 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       </MapContainer>
       
       {selectedMarkerInfo && (
-        <div className="marker-info p-large" >
+        <div className="marker-info p-large"  ref={panelRef}>
+            <div
+              className="drag-handle"
+              onMouseDown={onDragStart}
+              onMouseMove={onDragMove}
+              onMouseUp={onDragEnd}
+              onTouchStart={onDragStart}
+              onTouchMove={onDragMove}
+              onTouchEnd={onDragEnd}
+            />
             <div className="flex justify-between  gap-xlarge">
               <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
-              <Icon name="close" size="small"/>
+              <Icon name="close" size="small" onClick={() => setSelectedMarkerInfo(null)}/>
             </div>
           
             <div className="flex my-medium justify-between">

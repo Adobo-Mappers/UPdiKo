@@ -44,127 +44,127 @@ export default function MapPage() {
 
 
     
-    // // map tracking logic 
-    // const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
-    // const [mapCenter, setMapCenter] = useState(defaultCenter);                  
-    // const [userCurrentLocation, setUserCurrentLocation] = useState(null);       // user's latest GPS coordinate
-    // const watchIdRef = useRef(null);                                            // ref to hold the watchPosition ID so we can clear it later
-    // const [trackingEnabled, setTrackingEnabled] = useState(false);              // controls whether the map should automatically pan to the user's location
+    // map tracking logic 
+    const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
+    const [mapCenter, setMapCenter] = useState(defaultCenter);                  
+    const [userCurrentLocation, setUserCurrentLocation] = useState(null);       // user's latest GPS coordinate
+    const watchIdRef = useRef(null);                                            // ref to hold the watchPosition ID so we can clear it later
+    const [trackingEnabled, setTrackingEnabled] = useState(false);              // controls whether the map should automatically pan to the user's location
 
-    // useEffect(() => {
-    //     if ("geolocation" in navigator) {
-    //         const successHandler = (position) => {
-    //             const location = {
-    //                 lat: position.coords.latitude,
-    //                 lng: position.coords.longitude,
-    //             };
-    //             setUserCurrentLocation(location);
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            const successHandler = (position) => {
+                const location = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+                setUserCurrentLocation(location);
 
-    //             if (trackingEnabled) {
-    //                 setMapCenter(location);
-    //             }
-    //         };
+                if (trackingEnabled) {
+                    setMapCenter(location);
+                }
+            };
 
-    //         const errorHandler = (error) => {
-    //             console.error("Error getting user location:", error);
-    //         };
+            const errorHandler = (error) => {
+                console.error("Error getting user location:", error);
+            };
 
-    //         watchIdRef.current = navigator.geolocation.watchPosition(
-    //             successHandler,
-    //             errorHandler,
-    //             { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    //         );
-    //     } else {
-    //         console.log("Geolocation is not supported by this browser.");
-    //     }
+            watchIdRef.current = navigator.geolocation.watchPosition(
+                successHandler,
+                errorHandler,
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
 
-    //     return () => {
-    //         if (watchIdRef.current) {
-    //             navigator.geolocation.clearWatch(watchIdRef.current);
-    //         }
-    //     };
-    // }, [trackingEnabled]);
+        return () => {
+            if (watchIdRef.current) {
+                navigator.geolocation.clearWatch(watchIdRef.current);
+            }
+        };
+    }, [trackingEnabled]);
 
-    // // map centering logic — also passed to MapView as onMarkerClick
-    // function handleCenterToPin(lat, lng, zoomLevel = 17) {
-    //     setTrackingEnabled(false);
-    //     setMapCenter({ lat, lng, zoom: zoomLevel });
-    // };
+    // map centering logic — also passed to MapView as onMarkerClick
+    function handleCenterToPin(lat, lng, zoomLevel = 17) {
+        setTrackingEnabled(false);
+        setMapCenter({ lat, lng, zoom: zoomLevel });
+    };
     
-    // // map recenter to user logic
-    // function handleRecenter() {
-    //     const newTrackingState = !trackingEnabled;
-    //     setTrackingEnabled(newTrackingState);
+    // map recenter to user logic
+    function handleRecenter() {
+        const newTrackingState = !trackingEnabled;
+        setTrackingEnabled(newTrackingState);
 
-    //     if (newTrackingState && userCurrentLocation) {
-    //         console.log(newTrackingState);
-    //         setMapCenter(userCurrentLocation);
-    //     } else if (!userCurrentLocation) {
-    //         alert("User location is not available.");
-    //         setTrackingEnabled(false);
-    //     }
-    // };
+        if (newTrackingState && userCurrentLocation) {
+            console.log(newTrackingState);
+            setMapCenter(userCurrentLocation);
+        } else if (!userCurrentLocation) {
+            alert("User location is not available.");
+            setTrackingEnabled(false);
+        }
+    };
 
-    // // pin form state — opened when user taps the map to drop a temp pin
-    // const [isPinFormOpen, setIsPinFormOpen] = useState(false);
-    // const [pinFormCoords, setPinFormCoords] = useState(null);
+    // pin form state — opened when user taps the map to drop a temp pin
+    const [isPinFormOpen, setIsPinFormOpen] = useState(false);
+    const [pinFormCoords, setPinFormCoords] = useState(null);
 
-    // function handleMapClickForPin({ lat, lng }) {
-    //     setPinFormCoords({ lat, lng });
-    //     setIsPinFormOpen(true);
-    // }
+    function handleMapClickForPin({ lat, lng }) {
+        setPinFormCoords({ lat, lng });
+        setIsPinFormOpen(true);
+    }
 
-    // function handleClosePinForm() {
-    //     setIsPinFormOpen(false);
-    //     setPinFormCoords(null);
-    // }
+    function handleClosePinForm() {
+        setIsPinFormOpen(false);
+        setPinFormCoords(null);
+    }
 
-    // // map rotation logic
-    // const rotateIntervalRef = useRef(null);
-    // const [mapBearing, setMapBearing] = useState(0);
+    // map rotation logic
+    const rotateIntervalRef = useRef(null);
+    const [mapBearing, setMapBearing] = useState(0);
     
-    // function startRotating(direction) {
-    //     rotateIntervalRef.current = setInterval(() => {
-    //         setMapBearing(prev => prev + (direction === "left" ? -2 : 2));
-    //     }, 16); // ~60fps
-    // };
+    function startRotating(direction) {
+        rotateIntervalRef.current = setInterval(() => {
+            setMapBearing(prev => prev + (direction === "left" ? -2 : 2));
+        }, 16); // ~60fps
+    };
     
-    // function stopRotating() {
-    //     if (rotateIntervalRef.current) {
-    //         clearInterval(rotateIntervalRef.current);
-    //         rotateIntervalRef.current = null;
-    //     }
-    // };
+    function stopRotating() {
+        if (rotateIntervalRef.current) {
+            clearInterval(rotateIntervalRef.current);
+            rotateIntervalRef.current = null;
+        }
+    };
 
-    // function smoothResetBearing () {
-    //     const animationRef = { current: null };
+    function smoothResetBearing () {
+        const animationRef = { current: null };
 
-    //     const animate = () => {
-    //         setMapBearing(prev => {
-    //         // Normalize bearing to -180 to 180 range for shortest path
-    //         let current = prev % 360;
-    //         if (current > 180) current -= 360;
-    //         if (current < -180) current += 360;
+        const animate = () => {
+            setMapBearing(prev => {
+            // Normalize bearing to -180 to 180 range for shortest path
+            let current = prev % 360;
+            if (current > 180) current -= 360;
+            if (current < -180) current += 360;
 
-    //         // If close enough to 0, snap to 0 and stop
-    //         if (Math.abs(current) < 0.5) {
-    //             cancelAnimationFrame(animationRef.current);
-    //             return 0;
-    //         }
+            // If close enough to 0, snap to 0 and stop
+            if (Math.abs(current) < 0.5) {
+                cancelAnimationFrame(animationRef.current);
+                return 0;
+            }
 
-    //         // Ease towards 0 — multiply by 0.85 each frame for smooth deceleration
-    //         return current * 0.85;
-    //         });
+            // Ease towards 0 — multiply by 0.85 each frame for smooth deceleration
+            return current * 0.85;
+            });
 
-    //         animationRef.current = requestAnimationFrame(animate);
-    //     };
+            animationRef.current = requestAnimationFrame(animate);
+        };
 
-    //     animationRef.current = requestAnimationFrame(animate);
-    // };
+        animationRef.current = requestAnimationFrame(animate);
+    };
 
     return (
         <div className="map-page">
-            {/* <MapView 
+            <MapView 
                 userLocation={mapCenter}
                 currentCoords={userCurrentLocation}
                 trackingEnabled={trackingEnabled}
@@ -173,7 +173,7 @@ export default function MapPage() {
                 onClosePinForm={handleClosePinForm}       // FIX: was missing — lets MapView close the pin form
                 bearing={mapBearing}
                 onBearingChange={setMapBearing}    
-            /> */}
+            />
         
             { isSearching && 
             <section className='search-overlay'>  
@@ -213,7 +213,7 @@ export default function MapPage() {
                     {(!isSearching) && <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>}
                 </div>
             </header>
-            {/* <main className='map-utils'>
+            <main className='map-utils'>
                 <div className="rotation-controls">                
                     <CircularButton
                         className="rotate-btn bg-component-dark"
@@ -241,7 +241,7 @@ export default function MapPage() {
                         <Icon name='compass' size='large'/>    
                     </CircularButton>
                 </div>
-            </main> */}
+            </main>
         </div>
     );
 }
