@@ -16,6 +16,8 @@
     } 
 
     .search-overlay {
+        display: grid;
+        grid-template-rows: var(--header-height) 1fr;
         width: 100%;
         height: inherit;
         position: absolute;
@@ -23,7 +25,9 @@
         z-index: 500;
         background-color: white;
     }
-
+    .search-list {
+        overflow-y: auto;
+    }
     .search-div {
         position: relative;
         z-index: 501;

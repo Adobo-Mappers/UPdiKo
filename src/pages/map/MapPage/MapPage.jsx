@@ -9,8 +9,7 @@ import { supabase, getCurrentUser } from './../../../services/supabase.js';
 import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function MapPage() {
-    // TODO: Map recentering (the compass) requires two presses to recenter (the first tap will recenter, but succeding recenters need two taps :<)
-    
+    // TODO: Map recenterings (the compass) requires two presses to recenter (the first tap will recenter, but succeding recenters need two taps :<)
 
     //  get searched service id
     const { id } = useParams();
@@ -89,7 +88,7 @@ export default function MapPage() {
         };
     }, [trackingEnabled]);
 
-    // map centering logic
+    // map centering logic — also passed to MapView as onMarkerClick
     function handleCenterToPin(lat, lng, zoomLevel = 17) {
         setTrackingEnabled(false);
         setMapCenter({ lat, lng, zoom: zoomLevel });
@@ -109,7 +108,19 @@ export default function MapPage() {
         }
     };
 
+    // pin form state — opened when user taps the map to drop a temp pin
+    const [isPinFormOpen, setIsPinFormOpen] = useState(false);
+    const [pinFormCoords, setPinFormCoords] = useState(null);
 
+    function handleMapClickForPin({ lat, lng }) {
+        setPinFormCoords({ lat, lng });
+        setIsPinFormOpen(true);
+    }
+
+    function handleClosePinForm() {
+        setIsPinFormOpen(false);
+        setPinFormCoords(null);
+    }
 
     // map rotation logic
     const rotateIntervalRef = useRef(null);
@@ -160,14 +171,17 @@ export default function MapPage() {
                 userLocation={mapCenter}
                 currentCoords={userCurrentLocation}
                 trackingEnabled={trackingEnabled}
-                onMapClickForPin={handleCenterToPin}
+                onMapClickForPin={handleMapClickForPin}   // FIX: was passing handleCenterToPin (wrong fn)
+                onMarkerClick={handleCenterToPin}         // FIX: was missing — centers map when a pin is clicked
+                onClosePinForm={handleClosePinForm}       // FIX: was missing — lets MapView close the pin form
                 bearing={mapBearing}
                 onBearingChange={setMapBearing}    
             />
         
             { isSearching && 
-            <section className='search-overlay'>                
-                <div className='px-large py-xlarge'>
+            <section className='search-overlay'>  
+                <div></div>
+                <div className='px-large py-medium search-list'>
                     {filteredServices.map((service) => 
                         <div className='flex gap-large py-medium'>
                             <div><Icon name='map' size="large"/></div>
@@ -201,13 +215,6 @@ export default function MapPage() {
                     />
                     {(!isSearching) && <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>}
                 </div>
-                {/* <Tab className='px-large'
-                    value={activeTab}
-                    options=s{SERVICE_TAGS} 
-                    onChange={setActiveTab} 
-                    defaultClassName='bg-white px-medium py-xsmall border-roundify'
-                    activeClassName='fw-bold bg-accent-soft px-medium py-xsmall border-roundify'
-                />   */}
             </header>
             <main className='map-utils'>
                 <div className="rotation-controls">                
@@ -240,4 +247,4 @@ export default function MapPage() {
             </main>
         </div>
     );
-}   
+}

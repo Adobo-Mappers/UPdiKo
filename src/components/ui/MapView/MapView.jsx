@@ -29,6 +29,7 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase } from "../../../services/supabase.js";
+import Yu from './../../../assets/images/profile/profile.jpg'
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -505,7 +506,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               <div>
                 <div className='flex items-center gap-small'><Icon name='star' size='small'/><Text>4.5 <em className="text-muted">(243 reviews)</em></Text></div>                    
                 <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>{selectedMarkerInfo.address}</Text></div>
-                <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>{selectedMarkerInfo.opening_hours[0]}</Text></div>  
+                <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>Opening Hours</Text></div>  
               </div>
               <Tag>Category</Tag>
             </div>
@@ -515,10 +516,30 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                 <Icon name='direction'/>
                 <Caption>Get Directions</Caption>
               </Button>
-
-              <></>
             </div>
+
+            <div className="flex flex-no-wrap gap-medium overflow-x py-medium">
+              <img src={Yu} className="border-rounded" width="300px" height="200px"/>
+              <img src={Yu} className="border-rounded" width="300px" height="200px"/>
+            </div>
+
+            <div className="py-medium">
+              <Text>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tincidunt egestas ante et bibendum. Etiam eget magna pharetra, tempus ante vel, volutpat tellus. Praesent feugiat tempus tellus. Duis ut egestas magna. Maecenas ultricies urna sit amet enim fermentum tempus. Mauris non blandit sem. In eu elit lobortis, sagittis ante quis, pharetra velit. Nam ut odio feugiat, tristique est a, suscipit libero. Integer placerat ultrices sem vitae consequat. Quisque eu magna nec nulla placerat auctor in id nisi.
+              </Text>
+            </div>
+
+            <div className='flex items-center gap-small my-xsmall'>
+                <Icon name='mail' size='small'/>
+                <Text><em className='text-muted'>Email</em></Text>
+            </div>        
+            <div className='flex items-center gap-small my-xsmall'>
+                <Icon name='phone' size='small'/>
+                <Text><em className='text-muted'>Phone</em></Text>
+            </div>
+  
         </div>
+
 
         // <div className="marker-info-panel">
 
