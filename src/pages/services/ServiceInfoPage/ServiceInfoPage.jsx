@@ -32,7 +32,12 @@ export default function ServiceInfoPage() {
         }
         loadService();
     }, [id]);
-    
+
+    const [isSaved, setSaved] = useState(false);  // supposedly if service saved by user 
+    function toggleSaveButton() {
+        setSaved(!isSaved);
+    }
+
     // view when loading
     if (loading) {
         return (
@@ -111,14 +116,16 @@ export default function ServiceInfoPage() {
                     <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>{service.opening_hours[0]}</Text></div>
                 </div>
                 <div className='flex gap-small my-medium'>
-                    <Button href={`/map/${id}`} className="flex items-center gap-small">
-                        <Icon name='direction'/>
-                        <Caption>Get Directions</Caption>
-                    </Button>
                     <Button href={`/map/${id}`} className="items-center gap-small">
                         <Icon name='map'/>
                         <Caption>View in Map</Caption>
                     </Button>
+                    {user && 
+                        <Button className="items-center gap-small" toggled={isSaved} onClick={() => toggleSaveButton()}>
+                            <Icon name='save'/>
+                            <Caption>{(isSaved) ? "Saved" : "Save"}</Caption>
+                        </Button>
+                    }
                 </div>
 
 
@@ -131,7 +138,7 @@ export default function ServiceInfoPage() {
                             {info}   
                         </Text>
                         ))
-                    }
+                    } 
                 </div>
                 <div className='py-medium '>
                     {service.contact_info && (() => {

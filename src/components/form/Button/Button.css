@@ -10,4 +10,8 @@
     font-weight: var(--fw-bold);
     color: var(--color-text-main);
     cursor: pointer;
+
+    &.toggled {
+        background-color: var(--color-component-bg);
+    }
 }

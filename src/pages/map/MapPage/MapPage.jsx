@@ -1,11 +1,11 @@
 import './MapPage.css';
-import { useParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { Button, CircularButton, InputField, Dropdown } from './../../../components/form/';
 import { Caption, Heading, Text, Title } from './../../../components/typography/';
 import { Icon, MapView } from './../../../components/ui/';
 import { supabase, getCurrentUser } from './../../../services/supabase.js';
-import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer } from '../../../services/service-handler.js';
+import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
 
 import Yu from './../../../assets/images/profile/profile.jpg';
 
@@ -16,9 +16,6 @@ export default function MapPage() {
     useEffect(() => {
         getCurrentUser().then(setUser);
     }, []);
-
-    // get service id from url
-    const { id } = useParams();  
 
     // fetch service and set all tags and filters
     const [services, setServices] = useState([]);
@@ -42,7 +39,10 @@ export default function MapPage() {
         return service.name?.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
-
+    // get service id from url
+    const [searchParams, setSearchParams] = useSearchParams();
+    const id = searchParams.get('id');
+    const [selectedService, setSelectedService] = useState(getServiceFromCache(id));
     
     // map tracking logic 
     const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
@@ -168,6 +168,7 @@ export default function MapPage() {
                 userLocation={mapCenter}
                 currentCoords={userCurrentLocation}
                 trackingEnabled={trackingEnabled}
+                selectedService={selectedService}
                 onMapClickForPin={handleMapClickForPin}   // FIX: was passing handleCenterToPin (wrong fn)
                 onMarkerClick={handleCenterToPin}         // FIX: was missing — centers map when a pin is clicked
                 onClosePinForm={handleClosePinForm}       // FIX: was missing — lets MapView close the pin form
@@ -180,7 +181,14 @@ export default function MapPage() {
                 <div></div>
                 <div className='px-large py-medium search-list'>
                     {filteredServices.map((service) => 
-                        <div className='flex gap-large py-medium'>
+                        <div 
+                            className='flex gap-large py-medium'
+                             onClick={() => {
+                                setSearchParams({ id: service.id });
+                                setSelectedService(service);
+                                setSearching(false);
+                            }}
+                        >
                             <div><Icon name='map' size="large"/></div>
                             <div>
                                 <Heading>{service.name}</Heading>
@@ -206,7 +214,7 @@ export default function MapPage() {
                         className='py-medium border-roundify' 
                         icon="search"
                         placeholder="Search for services..."
-                        onFocus = {() => setSearching(true)}
+                        onFocus = {() => {setSearching(true); setSelectedService("");}}
                         value={searchQuery}
                         onChange = {setSearchQuery}
                     />
