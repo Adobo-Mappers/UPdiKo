@@ -8,9 +8,7 @@ import { supabase, getCurrentUser } from './../../../services/supabase.js';
 
 import Yu from './../../../assets/images/profile/profile.jpg';
 
-
 export default function MapPage() {
-
     // check user auth
     const [user, setUser] = useState(null);
     useEffect(() => {
@@ -44,7 +42,49 @@ export default function MapPage() {
         return service.name?.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
-    // map rotation logig
+    // map tracking logic 
+    const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
+    const [mapCenter, setMapCenter] = useState(defaultCenter);                  
+    const [userCurrentLocation, setUserCurrentLocation] = useState(null);       // user's latest GPS coordinate
+    const watchIdRef = useRef(null);                                            // ref to hold the watchPosition ID so we can clear it later
+    const [trackingEnabled, setTrackingEnabled] = useState(false);              // controls whether the map should automatically pan to the user's location
+
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            const successHandler = (position) => {
+                const location = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+                setUserCurrentLocation(location);
+
+                if (trackingEnabled) {
+                    setMapCenter(location);
+                }
+            };
+
+            const errorHandler = (error) => {
+                console.error("Error getting user location:", error);
+            };
+
+            watchIdRef.current = navigator.geolocation.watchPosition(
+                successHandler,
+                errorHandler,
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
+
+        return () => {
+            if (watchIdRef.current) {
+                navigator.geolocation.clearWatch(watchIdRef.current);
+            }
+        };
+    }, [trackingEnabled]);
+
+    
+    // map rotation logic
     const rotateIntervalRef = useRef(null);
     const [mapBearing, setMapBearing] = useState(0);
     
@@ -90,10 +130,13 @@ export default function MapPage() {
     return (
         <div className="map-page">
             <MapView 
+                userLocation={mapCenter}
+                currentCoords={userCurrentLocation}
+                trackingEnabled={trackingEnabled}
                 bearing={mapBearing}
                 onBearingChange={setMapBearing}    
             />
-        {/* 
+        
             { isSearching && 
             <section className='search-overlay'>                
                 <div className='px-large py-xlarge'>
@@ -108,7 +151,7 @@ export default function MapPage() {
                     )}
                 </div>
             </section> 
-            } */}
+            }
     
             <header>
                 <div className='flex items-center gap-medium px-large py-medium search-div'>
@@ -126,7 +169,7 @@ export default function MapPage() {
                         placeholder="Search for services..."
                         onFocus = {() => setSearching(true)}
                         value={searchQuery}
-                        onChange = {(e) => setSearchQuery(e.target.value)}
+                        onChange = {setSearchQuery}
                     />
                     {(!isSearching) && <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px"/>}
                 </div>
