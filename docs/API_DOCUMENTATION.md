@@ -87,7 +87,7 @@ Frontend (React + Vite)
 ├── Images            → storageService.js → Supabase Storage
 │
 ├── Casie AI          → cassieService.js → POST /api/cassie → Gemini API
-├── Directions        → locations.js (getRoute) → POST /api/directions → Supabase RPC
+├── Directions        → locations.js (getRoute) → OSRM public API (no backend needed)
 └── Geocoding         → geocoding.js → Nominatim (OpenStreetMap)
 ```
 
@@ -229,7 +229,7 @@ These are frontend service functions that talk directly to Supabase (not via the
 | Function | Description |
 |----------|-------------|
 | `getStaticLocations(supabase)` | Fetch public locations with IndexedDB cache (24h TTL) |
-| `getRoute(start, end)` | Request pedestrian directions from Express backend |
+| `getRoute(startLat, startLng, endLat, endLng)` | Fetch driving route coordinates from OSRM; returns `[lat, lng][]` for the polyline |
 | `getCacheStatus()` | Debug info about the IndexedDB cache |
 | `matchLocation(locations, searchTerm)` | Find a location by name/tag |
 | `queryLocations(locations, options)` | Filter + sort by category, keyword, distance |
