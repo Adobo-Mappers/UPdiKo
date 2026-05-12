@@ -406,7 +406,7 @@ export default function MapPage() {
             </header>
 
             <main className='map-utils'>
-                <div className="rotation-controls">
+                {/* <div className="rotation-controls">
                     <CircularButton
                         className="rotate-btn bg-component-dark"
                         onMouseDown={() => startRotating("left")}
@@ -427,7 +427,7 @@ export default function MapPage() {
                         onTouchStart={() => startRotating("right")}
                         onTouchEnd={stopRotating}
                     ><strong className='text-white'>↻</strong></CircularButton>
-                </div>
+                </div> */}
                 <div className='main-controls flex flex-col gap-small'>
                     <CircularButton width='55px' className='bg-component-dark' onClick={handleRecenter}>
                         <Icon name='compass' size='large' />

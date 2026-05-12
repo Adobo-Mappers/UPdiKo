@@ -635,19 +635,30 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           />
 
           {/* Name + close */}
+          
           <div className="flex justify-between gap-xlarge my-small">
             <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
             <Icon name="close" size="small" className="cursor-pointer" onClick={() => setSelectedMarkerInfo(null)} />
           </div>
 
-          {/* Get Directions */}
-          <div className="my-small">
-            <Button onClick={() => handleGetDirections(selectedMarkerInfo)} style={{width:"100%", justifyContent:"center"}}>
-              <Icon name="direction" size="small" />
-              <Caption>{isLoadingRoute ? "Loading..." : "Get Directions"}</Caption>
-            </Button>
+          <div className="flex gap-small">
+            {/* Get Directions & Save Buttons*/}
+            <div className="my-small">
+              <Button onClick={() => handleGetDirections(selectedMarkerInfo)}>
+                <Icon name="direction" size="small" />
+                <Caption>{isLoadingRoute ? "Loading..." : "Get Directions"}</Caption>
+              </Button>
+            </div>
+            
+            {user && (
+                <div className="my-small">w
+                  <Button toggled={isSaved} onClick={toggleSaveButton} disabled={isSavingPin} className="items-center gap-small">
+                    <Icon name="save" size="small" />
+                    <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>
+                  </Button>
+                </div>
+            )}
           </div>
-
           {routeInfo && (
             <div className="flex items-center gap-medium my-xsmall">
               <Caption className="text-muted">🚗 {routeInfo.distance}</Caption>
@@ -712,14 +723,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                   return <div key={i} className="flex items-center gap-small my-xsmall"><Icon name="phone" size="small"/><Text><em className="text-muted">{info.replace("phone:", "").replace("Phone:", "").trim()}</em></Text></div>;
                 return null;
               })}
-              {user && (
-                <div className="my-medium">
-                  <Button toggled={isSaved} onClick={toggleSaveButton} disabled={isSavingPin} className="items-center gap-small">
-                    <Icon name="save" size="small" />
-                    <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>
-                  </Button>
-                </div>
-              )}
             </div>
           )}
 
