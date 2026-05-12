@@ -21,7 +21,6 @@ export default function ServiceInfoPage() {
     }, []);
 
 
-    console.log(user);
     // get service id
     const { id } = useParams();
 
@@ -68,6 +67,7 @@ export default function ServiceInfoPage() {
 
     // B2: reviews
     const [reviews, setReviews] = useState([]);
+    const [savedRating, setSavedRating] = useState(0);
     const [reviewRating, setReviewRating] = useState(0);
     const [reviewComment, setReviewComment] = useState('');
     const [reviewTab, setReviewTab] = useState('info'); // 'info' | 'reviews'
@@ -83,9 +83,21 @@ export default function ServiceInfoPage() {
     useEffect(() => {
         if (!user) return;
         getLocationReviewOfUser(id, user.id)
-            .then(setReviewRating)
-            .catch(() => setReviewRating(0));
+            .then(data => { 
+                setReviewRating(data); 
+                setSavedRating(data); 
+            })
+            .catch(() => {
+                setReviewRating(0);
+                setSavedRating(0);
+            });
     }, [authLoading])
+
+    useEffect(() => {
+        if (reviewTab != 'reviews') {
+            setReviewRating(savedRating);
+        }
+    }, [reviewTab])
 
     async function handleSubmitReview() {
         if (!user || reviewRating === 0) return;
@@ -100,7 +112,7 @@ export default function ServiceInfoPage() {
             });
             const updated = await getLocationReviews(Number(id));
             setReviews(updated);
-            setReviewRating(0);
+            setSavedRating(reviewRating);
             setReviewComment('');
         } catch (e) {
             console.error('Review submit failed:', e);
@@ -252,7 +264,7 @@ export default function ServiceInfoPage() {
                 {/* B2: Reviews tab */}
                 {reviewTab === 'reviews' && (
                     <div className='my-medium'>
-                        {!authLoading && <div>Loading Reviews...</div>}
+                        {authLoading && <div>Loading Reviews...</div>}
                         {(user) && (
                             <div className='flex flex-col gap-small p-medium bg-component border-rounded my-medium'>
                                 <Text><em className='fw-bold'>Leave a Review</em></Text>
