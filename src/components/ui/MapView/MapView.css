@@ -58,6 +58,27 @@
   background-size: cover;
 } */
 
+.review-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.review-modal-container {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  padding: var(--space-medium) var(--space-large);
+  border-radius: 30px;
+  margin: var(--space-large);
+  width: 100%;
+
+}
+
 .map-loading {
   display: flex;
   justify-content: center;

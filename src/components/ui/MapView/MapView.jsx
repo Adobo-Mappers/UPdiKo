@@ -1,6 +1,7 @@
 // Important Dependencies
-import React, { useEffect, useState, useRef, act } from "react";
+import React, { useEffect, useState, useRef, act} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
+import { useParams } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
 import "./MapView.css";
@@ -29,7 +30,7 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, addPinnedLocationToDB, supabase, getCurrentUser } from "../../../services/supabase.js";
-import { getLocationReviews, submitLocationReview } from "../../../services/reviewsService.js";
+import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from "../../../services/reviewsService.js";
 import Yu from './../../../assets/images/profile/profile.jpg'
 
 // fixes icon
@@ -258,11 +259,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [selectedPanelTab, setSelectedPanelTab] = useState("About");
   const [tempLocation, setTempLocation] = useState(null);
 
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-      getCurrentUser().then(setUser);
-  }, []);
-
 
   // States for PostGIS directions using Leaflet
   const [routeCoords, setRouteCoords] = useState([]);
@@ -296,44 +292,88 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     }
   }
 
+  // user auth
+    const [user, setUser] = useState(null);
+    const [authLoading, setAuthLoading] = useState(true); 
+    useEffect(() => {
+        const unsubscribe = onAuthStateChangedListener((user) => {
+            setUser(user);
+            setAuthLoading(false); 
+        });
+        return () => unsubscribe(); 
+    }, []);
+
+    // get service id
+    const { id } = useParams();
+
+    // fetch service from cache
+    const [service, setService] = useState(null);
+    useEffect(() => {
+        async function loadService() {
+            if (!id) return;
+            if (!hasServiceCache()) {
+                await fetchServicesFromServer();
+            }
+            setService(getServiceFromCache(id));
+            setLoading(false);
+        }
+        loadService();
+    }, [id]);
+
   // Reviews state
   const [reviews, setReviews] = useState([]);
+  const [savedRating, setSavedRating] = useState(0);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState('');
+  const [reviewModal, setReviewModal] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  // Load reviews and reset all panel state whenever a new marker is selected
   useEffect(() => {
-    if (!selectedMarkerInfo?.id) { setReviews([]); return; }
-    setSelectedPanelTab('About');
-    setReviewRating(0);
-    setReviewComment('');
-    setSaved(false);  // reset save state for new location
-    getLocationReviews(Number(selectedMarkerInfo.id))
-      .then(setReviews)
-      .catch(() => setReviews([]));
-  }, [selectedMarkerInfo?.id]);
+      if (!id) return;
+      getLocationReviews(Number(id))
+          .then(setReviews)
+          .catch(() => setReviews([]));
+  }, [id]);
+
+  useEffect(() => {
+      if (!user) return;
+      getLocationReviewOfUser(id, user.id)
+          .then(data => { 
+              setReviewRating(data); 
+              setSavedRating(data); 
+          })
+          .catch(() => {
+              setReviewRating(0);
+              setSavedRating(0);
+          });
+  }, [authLoading])
+
+  useEffect(() => {
+      if (reviewModal === false) {
+          setReviewRating(savedRating);
+      }
+  }, [reviewModal])
 
   async function handleSubmitReview() {
-    if (!user || reviewRating === 0 || !selectedMarkerInfo?.id) return;
-    setSubmittingReview(true);
-    try {
-      await submitLocationReview({
-        locationId: Number(selectedMarkerInfo.id),
-        userId: user.id,
-        userName: user.user_metadata?.display_name ?? user.email,
-        rating: reviewRating,
-        comment: reviewComment,
-      });
-      const updated = await getLocationReviews(Number(selectedMarkerInfo.id));
-      setReviews(updated);
-      setReviewRating(0);
-      setReviewComment('');
-    } catch (e) {
-      console.error('Review submit failed:', e);
-    } finally {
-      setSubmittingReview(false);
-    }
+      if (!user || reviewRating === 0) return;
+      setSubmittingReview(true);
+      try {
+          await submitLocationReview({
+              locationId: Number(id),
+              userId: user.id,
+              userName: user.user_metadata?.display_name ?? user.email,
+              rating: reviewRating,
+              comment: reviewComment,
+          });
+          const updated = await getLocationReviews(Number(id));
+          setReviews(updated);
+          setSavedRating(reviewRating);
+          setReviewComment('');
+      } catch (e) {
+          console.error('Review submit failed:', e);
+      } finally {
+          setSubmittingReview(false);
+      }
   }
 
   const avgRating = reviews.length
@@ -620,6 +660,42 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         ))} 
       </MapContainer>
       
+      {reviewModal && 
+        <div className="review-modal">
+          <div className="review-modal-container">
+            <Heading className="py-small"><em className='fw-bold'>Leave a Review</em></Heading>      
+            <div className='flex gap-small justify-around py-medium px-xlarge'>
+                {[1,2,3,4,5].map(n => (
+                    <Icon
+                        key={n}
+                        name={reviewRating >= n ? 'star' : 'darkstar'}
+                        size='large'
+                        className='cursor-pointer'
+                        onClick={() => setReviewRating(n)}
+                    />
+                ))}
+            </div>
+          <textarea
+              className='p-small border-rounded bg-component '
+              style={{ width: '100%', border: 'none', background: 'white', fontFamily: 'inherit', fontSize: 'var(--fs-text)', resize: 'none', minHeight: '60px' }}
+              placeholder='Write your comment...'
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+          />
+          <div className="flex justify-end my-small gap-medium">
+            <Text className="flex items-center cursor-pointer" onClick={() => setReviewModal(false)}><em className="fw-bold">Cancel</em></Text>
+            <Button
+                onClick={handleSubmitReview}
+                disabled={reviewRating === 0 || submittingReview}
+            >
+                {submittingReview ? 'Submitting...' : 'Submit'}
+            </Button>
+          </div>
+        </div>
+      </div>
+      }
+
+
       {selectedMarkerInfo && (
         <div className="marker-info p-large" ref={panelRef}>
 
@@ -656,6 +732,12 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                     <Icon name="save" size="small" />
                     <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>
                   </Button>
+                </div>
+            )}
+            {user && (
+                <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
+                    <Icon name="darkstar" size="small" />
+                    <Caption>Rate</Caption>
                 </div>
             )}
           </div>
@@ -744,40 +826,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           {/* REVIEWS */}
           {selectedPanelTab === "Reviews" && (
             <div className="panel-scroll">
-              {user ? (
-                <div className="review-form my-small p-medium bg-component border-rounded">
-                  <Text className="fw-bold">Leave a Review</Text>
-                  <Caption className="text-muted my-xsmall">Rating</Caption>
-                  <select
-                    className="review-select my-xsmall"
-                    value={reviewRating}
-                    onChange={e => setReviewRating(Number(e.target.value))}
-                  >
-                    <option value={0} disabled>Select rating</option>
-                    <option value={5}>5 stars</option>
-                    <option value={4}>4 stars</option>
-                    <option value={3}>3 stars</option>
-                    <option value={2}>2 stars</option>
-                    <option value={1}>1 star</option>
-                  </select>
-                  <textarea
-                    className="review-textarea my-xsmall"
-                    placeholder="Share a quick tip about this place."
-                    value={reviewComment}
-                    onChange={e => setReviewComment(e.target.value)}
-                    rows={3}
-                  />
-                  <Button
-                    onClick={handleSubmitReview}
-                    disabled={reviewRating === 0 || submittingReview}
-                    className="my-xsmall"
-                  >
-                    {submittingReview ? "Saving..." : "Save Review"}
-                  </Button>
-                </div>
-              ) : (
-                <Text className="text-muted my-small">Log in to leave a review.</Text>
-              )}
               {reviews.length === 0 ? (
                 <Text className="text-muted my-small">No reviews yet.</Text>
               ) : (
