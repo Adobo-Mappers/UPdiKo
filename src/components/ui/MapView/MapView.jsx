@@ -28,7 +28,8 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, addPinnedLocationToDB, supabase, getCurrentUser } from "../../../services/supabase.js";
+import { getLocationReviews, submitLocationReview } from "../../../services/reviewsService.js";
 import Yu from './../../../assets/images/profile/profile.jpg'
 
 // fixes icon
@@ -43,28 +44,28 @@ L.Icon.Default.mergeOptions({
 const userIcon = new L.Icon({
     iconUrl: userPinIcon,
     iconSize: [50, 50],
-    iconAnchor: [10, 10], // Centered
+    iconAnchor: [25, 50], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
 const communityIcon = new L.Icon({
     iconUrl: communityPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [10, 10], // Centered
+    iconAnchor: [15, 30], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
 const universityIcon = new L.Icon({
     iconUrl: universityPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [10, 10], // Centered
+    iconAnchor: [15, 30], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
 const customIcon = new L.Icon({
     iconUrl: customPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [10, 10], // Centered
+    iconAnchor: [15, 30], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
@@ -168,18 +169,27 @@ function ChangeView({ center, zoom }) {
     const isDifferentZoom = zoom !== undefined && Math.abs(prevZoom.current - zoom) > 0;
     
     if (center && (isDifferentCenter || isDifferentZoom)) {
-      // Use the new zoom level if provided, otherwise stick to current map zoom
-      const targetZoom = zoom || map.getZoom(); 
-      
-      map.setView(center, targetZoom, {
-          animate: true,
-          duration: 0.5
+      const targetZoom = zoom || map.getZoom();
+
+      // Use targetZoom for the projection so the pixel offset is correct
+      // at the zoom level we're animating to.
+      // offsetPx shifts the view down so the pin appears in the upper portion
+      // of the screen above the info panel (panel is ~55dvh tall).
+      const offsetPx = window.innerHeight * 0.275; // ~half of 55dvh
+      const targetPoint = map.project(center, targetZoom);
+      const offsetPoint = targetPoint.add([0, offsetPx]);
+      const offsetLatLng = map.unproject(offsetPoint, targetZoom);
+
+      map.setView(offsetLatLng, targetZoom, {
+        animate: true,
+        duration: 0.6,
+        easeLinearity: 0.5,
       });
-      
+
       prevCenter.current = center;
       prevZoom.current = targetZoom;
     }
-  }, [center, zoom, map]); // Add zoom to dependencies
+  }, [center, zoom, map]);
 
   return null;
 }
@@ -214,7 +224,7 @@ function UserLocationMarker({ coords, trackingEnabled }) {
             icon={userIcon}
             ref={markerRef}
         >
-            <Popup>
+            <Popup autoPan={false}>
                 You are here.
                 {trackingEnabled && <span className="tracking-badge"> (Tracking ON)</span>}
             </Popup>
@@ -260,12 +270,75 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [routeDestination, setRouteDestination] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
 
-  // States for saving
-  
-  const [isSaved, setSaved] = useState(false);  // supposedly if service saved by user 
-  function toggleSaveButton() {
-      setSaved(!isSaved);
+  // States for saving — wired to addPinnedLocationToDB
+  const [isSaved, setSaved] = useState(false);
+  const [isSavingPin, setIsSavingPin] = useState(false);
+
+  async function toggleSaveButton() {
+    if (!user || !selectedMarkerInfo || isSavingPin) return;
+    if (isSaved) { setSaved(false); return; }
+    setIsSavingPin(true);
+    try {
+      await addPinnedLocationToDB(user.id, {
+        locationName: selectedMarkerInfo.name,
+        address: selectedMarkerInfo.address || 'Miagao, Iloilo',
+        latitude: parseFloat(selectedMarkerInfo.latitude),
+        longitude: parseFloat(selectedMarkerInfo.longitude),
+        description: selectedMarkerInfo.additional_info?.text_based?.[0] || '',
+        tags: selectedMarkerInfo.tags || [],
+        imageUrl: selectedMarkerInfo.images?.[0] || null,
+      });
+      setSaved(true);
+    } catch (e) {
+      console.error('Save pin failed:', e);
+    } finally {
+      setIsSavingPin(false);
+    }
   }
+
+  // Reviews state
+  const [reviews, setReviews] = useState([]);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Load reviews and reset all panel state whenever a new marker is selected
+  useEffect(() => {
+    if (!selectedMarkerInfo?.id) { setReviews([]); return; }
+    setSelectedPanelTab('About');
+    setReviewRating(0);
+    setReviewComment('');
+    setSaved(false);  // reset save state for new location
+    getLocationReviews(Number(selectedMarkerInfo.id))
+      .then(setReviews)
+      .catch(() => setReviews([]));
+  }, [selectedMarkerInfo?.id]);
+
+  async function handleSubmitReview() {
+    if (!user || reviewRating === 0 || !selectedMarkerInfo?.id) return;
+    setSubmittingReview(true);
+    try {
+      await submitLocationReview({
+        locationId: Number(selectedMarkerInfo.id),
+        userId: user.id,
+        userName: user.user_metadata?.display_name ?? user.email,
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+      const updated = await getLocationReviews(Number(selectedMarkerInfo.id));
+      setReviews(updated);
+      setReviewRating(0);
+      setReviewComment('');
+    } catch (e) {
+      console.error('Review submit failed:', e);
+    } finally {
+      setSubmittingReview(false);
+    }
+  }
+
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
 
 
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
@@ -308,11 +381,11 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       setSelectedMarkerInfo(data);
       setTempLocation(null);
       onClosePinForm();
-      
-      // 2. Center the map using the prop function passed from the parent (MapSection)
-      // We pass the desired zoom level (e.g., 17) along with the coordinates.
+
+      // 2. Center the map on the clicked marker.
+      //    The rightward shift was caused by wrong iconAnchor values, not the pan itself.
       if (onMarkerClick) {
-          onMarkerClick(lat, lng, 17); 
+          onMarkerClick(lat, lng, 17);
       }
       
       // 3. Calculate route if requested (e.g., from Cassie navigation)
@@ -403,28 +476,32 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     setRouteDestination(destination);
 
     try {
-      // get route coords for polyline
-      const coords = await getRoute(
-        currentCoords.lat,
-        currentCoords.lng,
-        parseFloat(destination.latitude),
-        parseFloat(destination.longitude)
-      );
+      const startLat = currentCoords.lat;
+      const startLng = currentCoords.lng;
+      const endLat = parseFloat(destination.latitude);
+      const endLng = parseFloat(destination.longitude);
 
-      // also fetch distance and duration info
-      const url = `https://router.project-osrm.org/route/v1/driving/${currentCoords.lng},${currentCoords.lat};${destination.longitude},${destination.latitude}?overview=full&geometries=geojson`;
+      // Single OSRM call — getRoute returns [lat,lng] pairs for the polyline
+      // and we also extract distance/duration from the same response
+      const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
       const response = await fetch(url);
       const data = await response.json();
 
-      if (data.code === "Ok") {
-        const route = data.routes[0];
-        setRouteInfo({
-          distance: (route.distance / 1000).toFixed(2) + " km",
-          duration: Math.ceil(route.duration / 60) + " mins"
-        });
+      if (data.code !== "Ok") {
+        console.warn("OSRM routing failed:", data.message);
+        return;
       }
 
+      const route = data.routes[0];
+
+      // Polyline coords: GeoJSON is [lng, lat], Leaflet needs [lat, lng]
+      const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
       setRouteCoords(coords);
+
+      setRouteInfo({
+        distance: (route.distance / 1000).toFixed(2) + " km",
+        duration: Math.ceil(route.duration / 60) + " mins",
+      });
 
     } catch (error) {
       console.error("Directions error:", error);
@@ -498,7 +575,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             position={[tempLocation.latitude, tempLocation.longitude]} 
             eventHandlers={{ click: () => {handleMarkerClick(tempLocation, tempLocation.latitude, tempLocation.longitude)} }}
           >
-             <Popup>
+             <Popup autoPan={false}>
                Clicked Location: <br />
                Lat: {tempLocation.latitude}, <br />
                Lng: {tempLocation.longitude}
@@ -544,156 +621,182 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       </MapContainer>
       
       {selectedMarkerInfo && (
-        <div className="marker-info p-large"  ref={panelRef}>
-            <div
-              className="drag-handle"
-              onMouseDown={onDragStart}
-              onMouseMove={onDragMove}
-              onMouseUp={onDragEnd}
-              onTouchStart={onDragStart}
-              onTouchMove={onDragMove}
-              onTouchEnd={onDragEnd}
-            />
-            <div className="flex justify-between  gap-xlarge">
-              <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
-              <Icon name="close" size="small" clsssName="cursor-pointer" onClick={() => setSelectedMarkerInfo(null)}/>
+        <div className="marker-info p-large" ref={panelRef}>
+
+          {/* Drag handle */}
+          <div
+            className="drag-handle"
+            onMouseDown={onDragStart}
+            onMouseMove={onDragMove}
+            onMouseUp={onDragEnd}
+            onTouchStart={onDragStart}
+            onTouchMove={onDragMove}
+            onTouchEnd={onDragEnd}
+          />
+
+          {/* Name + close */}
+          <div className="flex justify-between gap-xlarge my-small">
+            <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
+            <Icon name="close" size="small" className="cursor-pointer" onClick={() => setSelectedMarkerInfo(null)} />
+          </div>
+
+          {/* Get Directions */}
+          <div className="my-small">
+            <Button onClick={() => handleGetDirections(selectedMarkerInfo)} style={{width:"100%", justifyContent:"center"}}>
+              <Icon name="direction" size="small" />
+              <Caption>{isLoadingRoute ? "Loading..." : "Get Directions"}</Caption>
+            </Button>
+          </div>
+
+          {routeInfo && (
+            <div className="flex items-center gap-medium my-xsmall">
+              <Caption className="text-muted">🚗 {routeInfo.distance}</Caption>
+              <Caption className="text-muted">⏱ {routeInfo.duration}</Caption>
+              <Caption className="text-accent cursor-pointer" onClick={handleClearRoute}>Clear</Caption>
             </div>
-          
-            <div className="flex my-medium justify-between">
-              <div>
-                <div className='flex items-center gap-small'><Icon name='star' size='small'/><Text>4.5 <em className="text-muted">(243 reviews)</em></Text></div>                    
-                <div className='flex items-center gap-small my-xsmall'><Icon name='address'/><Text>{selectedMarkerInfo.address}</Text></div>
-                <div className='flex items-center gap-small my-xsmall'><Icon name='clock'/><Text>Opening Hours</Text></div>  
+          )}
+
+          {/* Tabs — use <button> not <Text/<p> so onClick always fires */}
+          <div className="flex gap-large my-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
+            {["About", "Photos", "Reviews"].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setSelectedPanelTab(tab)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "var(--fs-text)",
+                  fontWeight: selectedPanelTab === tab ? "var(--fw-bold)" : "var(--fw-regular)",
+                  color: selectedPanelTab === tab ? "var(--color-accent-primary)" : "var(--color-text-muted)",
+                  borderBottom: selectedPanelTab === tab ? "2px solid var(--color-accent-primary)" : "2px solid transparent",
+                  paddingBottom: "4px",
+                }}
+              >{tab}</button>
+            ))}
+          </div>
+
+          {/* ABOUT */}
+          {selectedPanelTab === "About" && (
+            <div className="panel-scroll">
+              <div className="flex items-center gap-small my-xsmall">
+                <Icon name="star" size="small" />
+                <Text>
+                  {avgRating ? avgRating : "No ratings yet"}
+                  {avgRating && <em className="text-muted"> ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</em>}
+                </Text>
               </div>
-              <Tag>Category</Tag>
-            </div>
-
-            <div className="flex gap-small">
-              <Button href="/map" onClick={() => handleGetDirections(selectedMarkerInfo)}>
-                <Icon name='direction'/>
-                <Caption>Get Directions</Caption>
-              </Button>
+              <div className="flex items-center gap-small my-xsmall">
+                <Icon name="address" size="small" /><Text>{selectedMarkerInfo.address || "—"}</Text>
+              </div>
+              {selectedMarkerInfo.opening_hours?.length > 0 && (
+                <div className="flex items-center gap-small my-xsmall">
+                  <Icon name="clock" size="small" /><Text>{selectedMarkerInfo.opening_hours[0]}</Text>
+                </div>
+              )}
+              {selectedMarkerInfo.tags?.length > 0 && (
+                <div className="flex gap-small my-small" style={{flexWrap:"wrap"}}>
+                  {selectedMarkerInfo.tags.map((tag, i) => <Tag key={i}>{tag}</Tag>)}
+                </div>
+              )}
+              {selectedMarkerInfo.additional_info?.text_based?.map((info, i) => (
+                <Text key={i} className="text-muted my-xsmall">{info}</Text>
+              ))}
+              {selectedMarkerInfo.contact_info?.map((info, i) => {
+                if (typeof info !== "string") return null;
+                if (info.toLowerCase().startsWith("email:"))
+                  return <div key={i} className="flex items-center gap-small my-xsmall"><Icon name="mail" size="small"/><Text><em className="text-muted">{info.replace("email:", "").replace("Email:", "").trim()}</em></Text></div>;
+                if (info.toLowerCase().startsWith("phone:"))
+                  return <div key={i} className="flex items-center gap-small my-xsmall"><Icon name="phone" size="small"/><Text><em className="text-muted">{info.replace("phone:", "").replace("Phone:", "").trim()}</em></Text></div>;
+                return null;
+              })}
               {user && (
-                  <Button className="flex items-center gap-small" toggled={isSaved} onClick={() => toggleSaveButton()}>
-                      <Icon name='save'/>
-                      <Caption>{(isSaved) ? "Saved" : "Save"}</Caption>
+                <div className="my-medium">
+                  <Button toggled={isSaved} onClick={toggleSaveButton} disabled={isSavingPin} className="items-center gap-small">
+                    <Icon name="save" size="small" />
+                    <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>
                   </Button>
-                )
-              }
-              {user && (
-                  <div className="flex items-center gap-small px-small cursor-pointer" onClick={() => setRatingSession(true)}>
-                      <Icon name='darkstar'/>
-                      <Caption><strong>Rate</strong></Caption>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PHOTOS */}
+          {selectedPanelTab === "Photos" && (
+            <div className="panel-scroll">
+              {selectedMarkerInfo.images?.length > 0 ? (
+                <div className="flex gap-medium overflow-x py-small">
+                  {selectedMarkerInfo.images.map((img, i) => (
+                    <img key={i} src={img} className="border-rounded" style={{width:"260px", height:"180px", objectFit:"cover", flexShrink:0}} />
+                  ))}
+                </div>
+              ) : (
+                <Text className="text-muted my-small">No photos available.</Text>
+              )}
+            </div>
+          )}
+
+          {/* REVIEWS */}
+          {selectedPanelTab === "Reviews" && (
+            <div className="panel-scroll">
+              {user ? (
+                <div className="review-form my-small p-medium bg-component border-rounded">
+                  <Text className="fw-bold">Leave a Review</Text>
+                  <Caption className="text-muted my-xsmall">Rating</Caption>
+                  <select
+                    className="review-select my-xsmall"
+                    value={reviewRating}
+                    onChange={e => setReviewRating(Number(e.target.value))}
+                  >
+                    <option value={0} disabled>Select rating</option>
+                    <option value={5}>5 stars</option>
+                    <option value={4}>4 stars</option>
+                    <option value={3}>3 stars</option>
+                    <option value={2}>2 stars</option>
+                    <option value={1}>1 star</option>
+                  </select>
+                  <textarea
+                    className="review-textarea my-xsmall"
+                    placeholder="Share a quick tip about this place."
+                    value={reviewComment}
+                    onChange={e => setReviewComment(e.target.value)}
+                    rows={3}
+                  />
+                  <Button
+                    onClick={handleSubmitReview}
+                    disabled={reviewRating === 0 || submittingReview}
+                    className="my-xsmall"
+                  >
+                    {submittingReview ? "Saving..." : "Save Review"}
+                  </Button>
+                </div>
+              ) : (
+                <Text className="text-muted my-small">Log in to leave a review.</Text>
+              )}
+              {reviews.length === 0 ? (
+                <Text className="text-muted my-small">No reviews yet.</Text>
+              ) : (
+                reviews.map(r => (
+                  <div key={r.id} className="review-item my-small p-medium border-rounded bg-component">
+                    <div className="flex justify-between items-center">
+                      <Text><em className="fw-bold">{r.userName}</em></Text>
+                      <div className="flex gap-xsmall">
+                        {[1,2,3,4,5].map(n => (
+                          <Icon key={n} name={r.rating >= n ? "star" : "darkstar"} size="small" />
+                        ))}
+                      </div>
+                    </div>
+                    {r.comment && <Text className="text-muted">{r.comment}</Text>}
+                    <Caption className="text-muted">{new Date(r.created_at).toLocaleDateString()}</Caption>
                   </div>
-                )
-              }
-
+                ))
+              )}
             </div>
+          )}
 
-            <div className="flex flex-no-wrap gap-medium overflow-x py-medium">
-              <img src={Yu} className="border-rounded" width="300px" height="200px"/>
-              <img src={Yu} className="border-rounded" width="300px" height="200px"/>
-            </div>
-
-            <div className="py-medium">
-              <Text>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer tincidunt egestas ante et bibendum. Etiam eget magna pharetra, tempus ante vel, volutpat tellus. Praesent feugiat tempus tellus. Duis ut egestas magna. Maecenas ultricies urna sit amet enim fermentum tempus. Mauris non blandit sem. In eu elit lobortis, sagittis ante quis, pharetra velit. Nam ut odio feugiat, tristique est a, suscipit libero. Integer placerat ultrices sem vitae consequat. Quisque eu magna nec nulla placerat auctor in id nisi.
-              </Text>
-            </div>
-
-            <div className='flex items-center gap-small my-xsmall'>
-                <Icon name='mail' size='small'/>
-                <Text><em className='text-muted'>Email</em></Text>
-            </div>        
-            <div className='flex items-center gap-small my-xsmall'>
-                <Icon name='phone' size='small'/>
-                <Text><em className='text-muted'>Phone</em></Text>
-            </div>
-  
         </div>
-
-
-        // <div className="marker-info-panel">
-
-        //   <div className="panel-handle">
-        //   <h2>{selectedMarkerInfo.name}</h2>
-        //   <span className="close-btn btn" onClick={() => setSelectedMarkerInfo(null)}><img src={closeIcon}></img></span>
-        //   </div>
-        
-        //   <div className="directions-container">
-        //     <button
-        //       className="directions-btn btn"
-        //       onClick={() => handleGetDirections(selectedMarkerInfo)}
-        //       disabled={isLoadingRoute}
-        //     >
-        //       {isLoadingRoute ? "Loading route..." : "Get Directions"}
-        //     </button>
-
-        //     {routeInfo && (
-        //       <div className="route-info">
-        //         <span> 🚗 {routeInfo.distance}</span>
-        //         <span> ⏱ {routeInfo.duration}</span>
-        //         <button className="clear-route-btn btn" onClick={handleClearRoute}>
-        //           Clear
-        //         </button>
-        //       </div>
-        //     )}
-        //   </div>
-
-        //   <hr className="separator"></hr>
-
-        //   <div className="marker-info-header">
-        //     <span className={"header-btn btn " + ((selectedPanelTab == "About") ? "active" : " ")} onClick={() => setSelectedPanelTab("About")}>About</span>
-        //     <span className={"header-btn btn " + ((selectedPanelTab == "Photos") ? "active" : " ")}  onClick={() => setSelectedPanelTab("Photos")}>Photos</span>
-        //   </div>
-
-        //   {selectedPanelTab === "About" && (
-        //     <div className="marker-info-container">
-        //       <div className="marker-description">
-        //         <p>{selectedMarkerInfo?.tags?.join(", ") ?? ""}</p>
-        //         <p>{selectedMarkerInfo.address}</p>                       
-        //         {selectedMarkerInfo.opening_hours && selectedMarkerInfo.opening_hours.length > 0 && (
-        //           <div>
-        //             <br></br>
-        //             <h3>Opening Hours</h3>
-        //             <ul>
-        //               {selectedMarkerInfo.opening_hours.map((hour, index) => (
-        //                 <li key={index}>{hour}</li>
-        //               ))}
-        //             </ul>
-        //           </div>
-        //         )} 
-
-        //         {selectedMarkerInfo.contact_info && selectedMarkerInfo.contact_info.length > 0 && (
-        //           <div>
-        //             <br></br>
-        //             <h3>Contact Information</h3>
-        //             <ul>
-        //               {selectedMarkerInfo.contact_info.map((info, index) => (
-        //                 <li key={index}>{info}</li>
-        //               ))}
-        //             </ul>
-        //           </div>
-        //         )}     
-        //       </div>
-        //     </div>
-        //   )}
-          
-        //   {selectedPanelTab === "Photos" && selectedMarkerInfo.images && selectedMarkerInfo.images.length > 0 && (
-        //     <div className="image-container">
-        //       <div className="image-gallery">
-        //         {selectedMarkerInfo.images.map((imgUrl, index) => (
-        //           <img key={index} className="image" src={imgUrl} alt={`Image ${index + 1}`} />
-        //         ))}
-        //       </div>
-        //     </div>
-        //   )}
-        //   {selectedPanelTab === "Photos" && (selectedMarkerInfo.images == null || (selectedMarkerInfo.images && selectedMarkerInfo.images.length <= 0)) && (
-        //     <div className="image-container">
-        //       <p>No photos available.</p>
-        //     </div>
-        //   )}
-        // </div>
       )}
     </div>
   )

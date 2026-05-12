@@ -7,7 +7,7 @@ export function Footer() {
     return (
     <footer>
         <nav>
-            <NavLink to="/service" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/service/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
                 <Icon name="servicesNavlink" size="large"/>
                 <Caption>Services</Caption>
             </NavLink>

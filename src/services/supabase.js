@@ -8,6 +8,8 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const LOCATION_IMAGE_BUCKET = 'location-images';
+
 
 // ============================================================
 // USER PINS (personal pinned locations)
@@ -15,11 +17,36 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Replaces: Firestore subcollection → users/{uid}/pinnedLocations
 // ============================================================
 
-// Replaces: addPinnedLocationToDB(uid, locationName, address, latitude, longitude, description)
-export async function addPinnedLocationToDB(uid, locationName, address, latitude, longitude, description) {
+/**
+ * Creates a personal pin for the authenticated user.
+ *
+ * @param {string} uid
+ * @param {{
+ *   locationName: string,
+ *   address: string,
+ *   latitude: number,
+ *   longitude: number,
+ *   description?: string,
+ *   tags?: string[],
+ *   imageUrl?: string | null
+ * }} location
+ * @returns {Promise<string>}
+ */
+export async function addPinnedLocationToDB(uid, location) {
   const { data, error } = await supabase
     .from("user_locations")
-    .insert([{ user_id: uid, location_name: locationName, address, latitude, longitude, description }])
+    .insert([
+      {
+        user_id: uid,
+        location_name: location.locationName,
+        address: location.address,
+        latitude: location.latitude,
+        longitude: location.longitude,
+        description: location.description || null,
+        tags: Array.isArray(location.tags) ? location.tags : [],
+        image_url: location.imageUrl || null,
+      },
+    ])
     .select("id")
     .single();
 
@@ -34,7 +61,7 @@ export async function addPinnedLocationToDB(uid, locationName, address, latitude
 export async function getPinnedLocationsFromDB(uid) {
   const { data, error } = await supabase
     .from("user_locations")
-    .select("*")  
+    .select("*")
     .eq("user_id", uid);
 
   if (error) {
@@ -49,7 +76,29 @@ export async function getPinnedLocationsFromDB(uid) {
     latitude: row.latitude,
     longitude: row.longitude,
     description: row.description,
+    tags: Array.isArray(row.tags) ? row.tags : [],
+    imageUrl: row.image_url || null,
   }));
+}
+
+/**
+ * Reads the public OSM-backed locations table.
+ *
+ * @returns {Promise<Array<Record<string, any>>>}
+ */
+export async function getPublicLocationsFromDB() {
+  const { data, error } = await supabase
+    .from('openstreets_static_locations')
+    .select(
+      'id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type'
+    );
+
+  if (error) {
+    console.error('Error getting public locations:', error);
+    throw error;
+  }
+
+  return data;
 }
 
 // Replaces: deletePinnedLocationFromDB(uid, id)

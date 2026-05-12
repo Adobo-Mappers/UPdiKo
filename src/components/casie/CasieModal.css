@@ -1,0 +1,35 @@
+.casie-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.casie-modal {
+    background: white;
+    border-radius: var(--border-rounded);
+    padding: var(--space-large);
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-medium);
+}
+.casie-modal-header { display: flex; align-items: center; gap: var(--space-small); }
+.casie-modal-icon { font-size: 24px; }
+.casie-modal-header h3 { font-size: var(--fs-heading); font-weight: var(--fw-bold); }
+.casie-modal-place-name { font-weight: var(--fw-bold); font-size: var(--fs-text); }
+.casie-modal-place-address { font-size: var(--fs-caption); color: var(--color-text-muted); }
+.casie-modal-actions { display: flex; justify-content: flex-end; gap: var(--space-small); }
+.casie-modal-btn {
+    padding: var(--space-small) var(--space-large);
+    border: none;
+    border-radius: var(--border-roundify);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-text);
+    cursor: pointer;
+    font-family: inherit;
+}
+.casie-modal-btn-cancel { background-color: var(--color-component-bg); }
+.casie-modal-btn-confirm { background-color: var(--color-accent-primary); }

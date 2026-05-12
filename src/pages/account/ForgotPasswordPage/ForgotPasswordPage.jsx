@@ -2,15 +2,41 @@ import './ForgotPasswordPage.css';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, InputField } from '../../../components/form';
-import { Icon, Carousel, Tag } from '../../../components/ui';
-import { Text, Caption, Heading, Title } from '../../../components/typography'
+import { Icon } from '../../../components/ui';
+import { Text, Heading, Title } from '../../../components/typography';
+import { sendPasswordReset } from '../../../services/supabase.js';
 
 export default function ForgotPassword() {
-    // states 
-    const [email, setEmail] = useState("");
-    
-    function handleSubmit() {
-        // function logic 
+    const [email, setEmail] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    async function handleSubmit() {
+        setErrorMessage('');
+        setSuccessMessage('');
+
+        if (!email.trim()) {
+            setErrorMessage('Please enter your email address.');
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            await sendPasswordReset(email.trim());
+            setSuccessMessage('Password reset link sent! Please check your inbox.');
+        } catch (e) {
+            const msg = e.message?.toLowerCase() ?? '';
+            if (msg.includes('rate limit')) {
+                setErrorMessage('Too many requests. Please wait a moment before trying again.');
+            } else if (msg.includes('invalid email')) {
+                setErrorMessage('The email address is not valid.');
+            } else {
+                setErrorMessage('Could not send reset email. Please try again.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -18,29 +44,46 @@ export default function ForgotPassword() {
             <main className='flex flex-col justify-center px-large py-medium'>
                 <div className='py-medium'>
                     <Link to="/account/login" className='flex items-center gap-small'>
-                        <Icon name="back" size='small'/>
+                        <Icon name="back" size='small' />
                         <Text>Back</Text>
-                    </Link>               
+                    </Link>
                 </div>
 
                 <Title>Password <em className='text-accent'>Recovery</em></Title>
                 <Heading>Enter your <em className='fw-bold'>email address</em> to receive a password reset link.</Heading>
 
-                <form className='my-large'>
+                {errorMessage && (
+                    <div className='my-medium p-medium border-roundify bg-accent-softer'>
+                        <Text>{errorMessage}</Text>
+                    </div>
+                )}
+                {successMessage && (
+                    <div className='my-medium p-medium border-roundify' style={{backgroundColor: '#d4edda'}}>
+                        <Text>{successMessage}</Text>
+                    </div>
+                )}
+
+                <div className='my-large'>
                     <div className='my-medium'>
-                        <InputField 
-                            className='border-roundify py-medium' 
-                            icon="mail" 
-                            placeholder="Email" 
-                            value = {email}
-                            onChange = {setEmail}        
+                        <InputField
+                            className='border-roundify py-medium'
+                            icon="mail"
+                            placeholder="Email"
+                            value={email}
+                            onChange={setEmail}
                         />
                     </div>
                     <div className='flex justify-center my-large'>
-                        <Button className='w-200' type='buttn' width="200px">Send Reset Link</Button>
-                    </div>                     
-                </form>
+                        <Button
+                            width="200px"
+                            onClick={handleSubmit}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Sending...' : 'Send Reset Link'}
+                        </Button>
+                    </div>
+                </div>
             </main>
         </div>
     );
-}   
+}

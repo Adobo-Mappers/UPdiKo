@@ -1,0 +1,64 @@
+.calendar-widget {
+    margin-block: var(--space-medium);
+}
+.calendar-container {
+    margin-block: var(--space-small);
+}
+
+/* Override react-calendar to match B1 design */
+.updi-calendar {
+    width: 100% !important;
+    border: none !important;
+    border-radius: var(--border-rounded) !important;
+    background-color: var(--color-component-bg) !important;
+    font-family: 'Outfit', Arial, sans-serif !important;
+    font-size: var(--fs-caption) !important;
+    padding: var(--space-small) !important;
+}
+.updi-calendar .react-calendar__navigation {
+    margin-bottom: var(--space-xsmall) !important;
+}
+.updi-calendar .react-calendar__navigation button {
+    background: none !important;
+    color: var(--color-text-main) !important;
+    font-weight: var(--fw-bold) !important;
+    font-family: inherit !important;
+    border-radius: var(--border-rounded) !important;
+}
+.updi-calendar .react-calendar__navigation button:hover {
+    background-color: var(--color-accent-tertiary) !important;
+}
+.updi-calendar .react-calendar__tile {
+    border-radius: var(--border-rounded) !important;
+    font-family: inherit !important;
+    color: var(--color-text-main) !important;
+}
+.updi-calendar .react-calendar__tile--active {
+    background-color: var(--color-accent-primary) !important;
+    color: var(--color-text-main) !important;
+}
+.updi-calendar .react-calendar__tile--now {
+    background-color: var(--color-accent-tertiary) !important;
+}
+.updi-calendar .react-calendar__tile:hover {
+    background-color: var(--color-accent-secondary) !important;
+}
+.updi-calendar .react-calendar__month-view__weekdays {
+    font-size: var(--fs-caption) !important;
+    color: var(--color-text-muted) !important;
+}
+.updi-calendar .react-calendar__month-view__weekdays abbr {
+    text-decoration: none !important;
+}
+
+.calendar-pins {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-small);
+    margin-top: var(--space-small);
+}
+.calendar-pin-item {
+    padding: var(--space-small);
+    border-radius: var(--border-rounded);
+    background-color: var(--color-component-bg);
+}

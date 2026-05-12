@@ -21,7 +21,7 @@ export function getServiceFromCache(id) {
 export async function fetchServicesFromServer() {
     try {
         const { data, error } = await supabase
-            .from('static_locations')
+            .from('openstreets_static_locations')
             .select('id, name, tags, address, latitude, longitude, opening_hours, contact_info, services, images, additional_info, location_type');
         if (error) {
             console.error('Error fetching services:', error);

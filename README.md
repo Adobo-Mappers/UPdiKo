@@ -2,103 +2,95 @@
 
 ![Gif that shows Peak running up the mountain](https://github.com/user-attachments/assets/ac40b878-a459-4599-b7ac-412a9d156214)
 
-**`updi-ko`** is a project made for CMSC 129: Software Engineering 2, UpdiKo is a website to support both local and non-locals in their navigation of Miagao, Iloilo. **`updi-ko`** helps the users locate both fixed services/faciltiies offered in the campus and reccomended facilties that the user may want to know in the local area.
+## Creators
 
-# Features
+- Keith Ashly Domingo
+- John Clyde Aparicio
+- Mark Leonel Misola
+- Adriel Neyro Caraig
+- Christian Jave Hulleza
 
-**`updi-ko`** has certain navigational features:
-- A working Map feature to search up locations available to the Map API.
-- Have a selectable set of facilties to locate on the map.
-- Be able to filter the visible pins on the map for each respective tags (e.g. Fixed Facilties and Local Facilities).
-- Be able to help the user navigate to a certain location they want to go to.
-- Be able to see information about the facilties selected (e.g. Address, Services Offered, Contact Info).
-- Account Creation and being able to pin your own locations.
-- and let your UpdiKo Buddy "Buddy" help you navigate through the website.
+## Description
 
+**`updi-ko`** is a project made for CMSC 129: Software Engineering 2. It is a web application that helps both locals and non-locals navigate Miagao, Iloilo — covering fixed facilities on the UP Visayas campus and recommended services in the surrounding town. The project uses [Supabase](https://supabase.com/) for its database and authentication, and [Leaflet](https://leafletjs.com/) via [OpenStreetMap](https://www.openstreetmap.org/) for its map.
 
-# Credits
-The team behind **`updi-ko`**:
+## Features
+
+**`updi-ko`** has the following features:
+
+- Browse and search public services and facilities in Miagao and UPV campus.
+- Filter locations by category tag (e.g. Food, Health, Campus).
+- View detailed information for each location: address, opening hours, contact info, and images.
+- Rate and comment on locations through the community review system.
+- Get directions from your current GPS location to any pin on the map.
+- Create personal pins on the map with a name, description, tags, and an optional photo.
+- Address auto-fill when dropping a pin using reverse geocoding (Nominatim).
+- View recent searches when using the map search bar.
+- Ask **Casie**, an AI assistant powered by Google Gemini, natural language questions about nearby places.
+- See today's weather in Miagao and any Philippine public holidays or campus events.
+- Register an account, log in, update your profile, and manage your personal pins.
+
+## Installation and Usage
+
+Start at the `updi-ko` repository.
+
+1. Clone the repository by opening a terminal and typing:
 ```
-Keith Ashly Domingo
-John Clyde Aparicio
-Mark Leonel Misola
-Adriel Neyro Caraig
-Christian Jave Hulleza
-```
-
-
-# Logical View Diagram
-
-<img width="6344" height="3352" alt="Logical Diagram for Act 1_ System Architecture Logical Diagram" src="https://github.com/user-attachments/assets/c6238d00-d0c6-418b-b0af-1470aa99321c" />
-
-# Module-Based + Layered Structure
-
-The project currently utilizes a **Module-Based + Layered Architecture Pattern**. In this pattern, each webpage is its own React applet, having its own jsx and css file. This allows each webpage to take responsibility only for its own logic and design. Additionally, this enables the developers to easily add and remove webpages whenever the requirements for the project change.
-
-Besides having its own applet, webpages can freely access assets and components from the system, but the webpages themselves are not connected to each other. Instead, there is a central hub that controls which webpage is being requested by the user. Under this view and logic layer is the service layer, composed of the functions the webpages can then use to talk to the database, which is the bottommost layer. The general project architecture is as follows:
-
-```
-[ Central Hub ]
-├─ [ Webpages ] → [ Assets and Components ]
-----------------------------------------------
-│  ├─ [ Service Layer (Data Access) ]
-----------------------------------------------
-│  │  ├─  [ Database ]
-```
-## High Level Structure
-
-```
-src/
-├─ assets/          # global resource
-├─ components/      # view layer
-├─ pages/           # logic and view layer
-├─ services/        # services layer
-├─ App.jsx	        # logic layer
+git clone <repo-url>
+cd updi-ko
 ```
 
-## Logic and View Layer
-
+2. Install dependencies:
 ```
-src/
-├─ assets/          # contains image and static data assets
-├─ components/      # contains reusable ui components
-├─ pages/           # contains website applets
-├─ App.jsx	        # responsible for site requests
+npm install
 ```
 
-## Services Layer
+3. Set up your environment variables:
+```
+cp .env.example .env
+```
+Fill in your `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, and `GEMINI_API_KEY` in the `.env` file.
+
+4. Start the development servers:
+   - To run the frontend, type `npm run dev` in a terminal.
+   - To run the backend (required for Casie AI), open another terminal and type `npm run dev:server`.
+
+5. Open the link to the local hosting and enjoy the website.
+
+## API Endpoints
 
 ```
-services/
-├─ firebase.js      # contains functions that talk to the database
+Health check:              method=GET  route=/api/health
+Send message to Casie:     method=POST route=/api/cassie
+Clear Casie session:       method=POST route=/api/cassie/clear
+Get pedestrian directions: method=POST route=/api/directions
 ```
 
-## Pages Folder Structure
+## Supabase Tables Required
 
 ```
-pages/
-├─ account/                         # global resource
-│  ├─ AccountInfoSection.jsx		# displays user account details
-│  ├─ AccountSection.jsx		    # main account page, displays account actions
-│  ├─ AccountUpdateSection.jsx	    # interface for account update
-├─ auth/     
-│  ├─ LoginSection.jsx			    # displays login form and handles user auth
-│  ├─ RegisterSection.jsx		    # handles new user registration
-├─ home/      
-│  ├─ HomeSection.jsx		        # landing page displaying public data and nav actions
-├─ map/                             # services layer
-│  ├─ MapSection.jsx		        # displays map page and search, creates new pins
-│  ├─ PersonalPinSection.jsx	    # displays and manages personal pins
+openstreets_static_locations   public location data (OSM-sourced)
+user_locations                 personal pins created by users
+users                          user profile data
+location_reviews               community ratings and comments
 ```
 
-## Components Folder Structure
+## Known Issues
 
-```
-components/
-├─ map/                        
-│  ├─ MapView.jsx		# displays user account details
-	                    # main account page, displays account actions
-│  ├─ SearchBar.jsx	# search component for public location data
-```   
+- Directions require the Express backend (`npm run dev:server`) to be running.
+- Pedestrian routing (`/api/directions`) requires a campus path graph loaded in Supabase — falls back to OSRM driving directions if unavailable.
+- Weather card requires `VITE_OPENMETEO_API_URL` to be set in `.env`.
+- The service worker (`/sw.js`) must be provided in the `public/` folder for tile caching to work.
+- Casie AI requires a valid `GEMINI_API_KEY` in the server `.env`.
 
-# License
+## License and Credits
+
+This project was created as a group project for CMSC 129 - Software Engineering 2.
+
+- Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
+- Tiles provided by [Stadia Maps](https://stadiamaps.com/).
+- AI powered by [Google Gemini](https://ai.google.dev/).
+- Code is free for **educational purposes** (learning, teaching, academic research).
+- Code is free for **personal, non-commercial use**.
+
+**Copyright © 2026 Keith Ashly Domingo, John Clyde Aparicio, Mark Leonel Misola, Adriel Neyro Caraig, and Christian Jave Hulleza**

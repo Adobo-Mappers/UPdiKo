@@ -46,7 +46,7 @@ export default function RegisterPage() {
 
             // Save to public.users table using user.id (Supabase uses .id not .uid)
             await saveUserDataToDB(newUserCredential.id, {
-              name,
+              name: username,
               email
             });
             navigate('/service/');

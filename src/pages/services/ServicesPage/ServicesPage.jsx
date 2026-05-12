@@ -2,41 +2,46 @@ import './ServicesPage.css';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InputField, Dropdown } from './../../../components/form/';
-import { Caption, Heading, Text, Title } from './../../../components/typography/';
+import { Heading, Text, Title } from './../../../components/typography/';
 import { Icon, Card, Profile } from './../../../components/ui/';
-import { getCurrentUser, logOut } from './../../../services/supabase.js';
-import { supabase } from './../../../services/supabase.js';
+import { getCurrentUser } from './../../../services/supabase.js';
 import { hasServiceCache, fetchServicesFromServer, getAllServicesFromCache } from './../../../services/service-handler.js';
+import { usePublicLocations } from '../../../hooks/useUnifiedLocations.js';
+import EventDisplay from '../../../components/events/EventDisplay.jsx';
+import WeatherView from '../../../components/weather/Weather.jsx';
 
 export default function ServicesPage() {
-    // check user auth
+    // user auth
     const [user, setUser] = useState(null);
     useEffect(() => {
         getCurrentUser().then(setUser);
     }, []);
 
+    // B2: TanStack Query for locations
+    const { data: queryServices } = usePublicLocations();
 
-    // fetch service and set all tags and filters
-    const [services, setServices] = useState([]);
+    // B1: cache-based fetch as fallback
+    const [cachedServices, setCachedServices] = useState([]);
     useEffect(() => {
         async function loadServices() {
             if (!hasServiceCache()) {
-                const data = await fetchServicesFromServer();
-            } 
-            setServices(getAllServicesFromCache());  
+                await fetchServicesFromServer();
+            }
+            setCachedServices(getAllServicesFromCache());
         }
         loadServices();
     }, []);
 
+    // Prefer query data, fall back to cache
+    const services = queryServices?.length ? queryServices : cachedServices;
+
     const SERVICE_TAGS = ['All', ...new Set(services.flatMap(service => service.tags ?? []))];
     const FILTER_OPTIONS = ['Nearest Location', 'Top Rated', 'Open Now'];
-    
-    // states 
+
     const [activeTag, setActiveTag] = useState('All');
     const [activeFilter, setActiveFilter] = useState('Nearest Location');
     const [searchQuery, setSearchQuery] = useState('');
 
-    // filtered services to be displayed 
     const filteredServices = services.filter((service) => {
         const matchesTag = activeTag === 'All' || (service.tags ?? []).includes(activeTag);
         const matchesSearch = service.name?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -46,12 +51,18 @@ export default function ServicesPage() {
     return (
         <div className='services-page'>
             <header className='flex justify-end px-large py-medium'>
-                <Profile user={user}/>
+                <Profile user={user} />
             </header>
             <main className='p-large'>
-                <Title>Good Day <span className='text-accent'>{( (user) ? "Yu!" : "" )}</span></Title>
-                <Heading>What services do you want to find today?</Heading>
-                
+                <Title>Good Day <span className='text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</span></Title>
+                <Heading>What services do you want to find.</Heading>
+
+                {/* Weather + Event cards side by side — matches design */}
+                <div className='flex gap-medium my-medium'>
+                    <WeatherView />
+                    <EventDisplay />
+                </div>
+
                 <div className='my-medium'>
                     <InputField
                         className='border-roundify py-medium'
@@ -61,14 +72,15 @@ export default function ServicesPage() {
                         onChange={setSearchQuery}
                     />
                 </div>
-                
+
                 <div id="category-tab" className="flex overflow-x my-large">
                     {SERVICE_TAGS.map((tag) => (
-                        <div 
-                            className={(activeTag === tag) ? "active" : ""}
-                            onClick= {() => setActiveTag(tag)}
+                        <div
+                            key={tag}
+                            className={(activeTag === tag) ? 'active' : ''}
+                            onClick={() => setActiveTag(tag)}
                         >
-                        {tag}
+                            {tag}
                         </div>
                     ))}
                 </div>
@@ -82,43 +94,18 @@ export default function ServicesPage() {
                         className='border-roundify'
                     />
                 </div>
-                
-                <hr/>
-                
+
+                <hr />
+
                 <div id="service-list" className='gap-medium overflow-y'>
                     {filteredServices.length > 0 && filteredServices.map((service) => (
                         <Link key={service.id} to={`/service/info/${service.id}`} className='text-inherit'>
-                            <Card service={service} className="my-medium"/>
+                            <Card service={service} className="my-medium" />
                         </Link>
                     ))}
                 </div>
 
             </main>
-            
-            {/*
-            
-            <section className='px-large py-medium flex-col'>
-                <div className='flex justify-between items-center gap-medium'>
-                    <div>
-                        <Heading>Services</Heading>
-                        <Caption className='text-muted'>Showing {filteredServices.length} services</Caption>
-                    </div>
-                    <Dropdown
-                        value={activeFilter}
-                        onChange={setActiveFilter}
-                        options={FILTER_OPTIONS}
-                        className='border-roundify'
-                    />
-                </div>
-                <hr/>
-                <div className='gap-medium' style={{"overflow" : "auto", "height" : "350px"}}>
-                    {filteredServices.length > 0 && filteredServices.map((service) => (
-                        <Link key={service.id} to={`/service/info/${service.id}`} className='text-inherit'>
-                            <Card service={service} className="my-medium"/>
-                        </Link>
-                    ))}
-                </div>
-            </section> */}
         </div>
     );
 }

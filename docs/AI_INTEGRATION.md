@@ -1,7 +1,7 @@
 # Casie AI Integration Guide
 
-> **Last Updated:** April 2026  
-> **Version:** 1.0.0
+> **Last Updated:** May 2026  
+> **Version:** 2.0.0
 
 ---
 
@@ -26,19 +26,20 @@
 
 Casie is an AI-powered chatbot that helps users discover locations in Miagao, Iloilo. It combines:
 
-- **Conversational interface** - Natural language queries
-- **Location search** - Integration with local SQLite database
-- **Map integration** - Click to navigate to locations
+- **Conversational interface** — Natural language queries
+- **Location search** — Integration with the Supabase `openstreets_static_locations` table
+- **Map integration** — Clickable location cards that center the map
 
 ### 1.2 Key Features
 
 | Feature | Description |
 |--------|-------------|
 | Natural language search | "Find restaurants near campus" |
-| Quick prompts | Pre-defined common queries |
-| Location cards | Clickable results on map |
-| Session continuity | Remembers conversation context |
-| Distance calculation | Shows nearby locations |
+| Quick prompts | Pre-defined common queries shown on first open |
+| Location cards | Clickable results that navigate the map |
+| Session continuity | Remembers conversation context (server-side, 15 min TTL) |
+| Rate limiting | 40 requests per 15 min per IP; 2 sec client-side cooldown |
+| Input sanitization | Prompt injection patterns filtered before sending to Gemini |
 
 ---
 
@@ -47,105 +48,111 @@ Casie is an AI-powered chatbot that helps users discover locations in Miagao, Il
 ### 2.1 System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      UPdiKo App                           │
-├───────────────────────────────────────────────────────────┤
-│                                                              │
-│  ┌─────────────────┐    ┌──────────────────────────────┐  │
-│  │ CassieWidget    │    │ CassieSection                 │  │
-│  │ (Floating)      │    │ (Full Page)                   │  │
-│  └────────┬────────┘    └──────────────┬───────────────┘  │
-│           │                               │                  │
-│           └───────────┬─────────────────┘                  │
-│                       ▼                                    │
-│         ┌──────────────────────────────┐                │
-│         │  cassieService.js (Frontend)   │                │
-│         │  - sendToCasie()              │                │
-│         │  - clearCasieHistory()         │                │
-│         └──────────────┬───────────────┘                │
-│                        │                                 │
-└────────────────────────┼─────────────────────────────────┘
-                        ▼
-┌──────────────────────────────────────────────────────────────┐
-│                    Express Server                          │
-├──────────────────────────────────────────────────────────────┤
-│                                                              │
-│    ┌─────────────────────────────────────────────────────┐  │
-│    │  gemini.js (Backend)                                 │  │
-│    │                                                     │  │
-│    │  1. Receive message + context                        │  │
-│    │  2. Call Gemini with tool definition                │  │
-│    │  3. If tool called → query locations DB            │  │
-│    │  4. Second Gemini call to synthesize response      │  │
-│    │  5. Return message + places to frontend          │  │
-│    └─────────────────────────────────────────────────────┘  │
-│                             │                               │
-│                             ▼                               │
-│         ┌────────────────────────────────────────┐         │
-│         │  SQLite Database                       │         │
-│         │  - locations table                    │         │
-│         └────────────────────────────────────────┘         │
-└──────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                   UPdiKo Frontend                   │
+│                                                     │
+│  ┌──────────────────┐   ┌────────────────────────┐  │
+│  │  CassieWidget    │   │  (Future: CassieSection)│  │
+│  │  (Floating FAB)  │   │  (Full-page chat)       │  │
+│  └────────┬─────────┘   └────────────────────────┘  │
+│           │                                         │
+│           ▼                                         │
+│  ┌────────────────────────────────────┐             │
+│  │  useCasie.js (hook)                │             │
+│  │  - rate limiting (2s cooldown)     │             │
+│  │  - daily message limit (50/day)    │             │
+│  │  - input sanitization              │             │
+│  └────────────┬───────────────────────┘             │
+│               │                                     │
+│  ┌────────────▼───────────────────────┐             │
+│  │  cassieService.js                  │             │
+│  │  - sendToCasie()                   │             │
+│  │  - clearCasieHistory()             │             │
+│  └────────────┬───────────────────────┘             │
+└───────────────┼─────────────────────────────────────┘
+                │  POST /api/cassie
+                ▼
+┌─────────────────────────────────────────────────────┐
+│              Express Backend (server/index.js)       │
+│                                                     │
+│  1. Validate message                                │
+│  2. Look up or create session                       │
+│  3. First Gemini call (with search_locations tool)  │
+│  4. If tool triggered → query Supabase DB           │
+│  5. Second Gemini call (synthesize with results)    │
+│  6. Return { message, places, sessionId }           │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐   │
+│  │  Supabase — openstreets_static_locations     │   │
+│  └─────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────┘
 ```
 
 ### 2.2 Data Flow
 
 ```
-User: "Find restaurants"
+User types: "Find restaurants"
         │
         ▼
-┌───────────────────┐
-│ CassieWidget.jsx  │
-│ sendToCasie()     │
-└────────┬──────────┘
-         │ POST /api/cassie
-         ▼
-┌───────────────────┐
-│ server/gemini.js  │
-│                  │
-│ 1. Get session   │
-│ 2. Gemini call   │
-│    └─► function  │
-│ 3. Query DB     │
-│ 4. Synthesize  │
-└────────┬──────────┘
-         │ { message, places }
-         ▼
-┌───────────────────┐
-│ CassieWidget    │
-│ Display message │
-│ + LocationCards │
-└───────────────────┘
+useCasie.js → sanitize → rate check → daily limit check
+        │
+        ▼
+cassieService.sendToCasie({ message, context, sessionId })
+        │  POST /api/cassie
+        ▼
+server/index.js
+  └─► Gemini call 1 (tool definition included)
+      └─► Gemini returns function call: search_locations({ category: "restaurant" })
+          └─► queryLocations() → Supabase → results
+              └─► Gemini call 2 (synthesize with results)
+                  └─► Returns natural language response
+        │
+        ▼
+{ message: "I found 3 restaurants...", places: [...], sessionId: "uuid" }
+        │
+        ▼
+CassieWidget → renders message + LocationCards
 ```
 
 ---
 
 ## 3. Components
 
-### 3.1 Backend (server/gemini.js)
+### 3.1 Backend (`server/index.js`)
 
 | Function | Purpose |
 |----------|---------|
-| `getGenAIInstance()` | Lazy-load Gemini client |
-| `queryLocations()` | Search SQLite database |
-| `router.post('/')` | Main chat endpoint |
-| Session cleanup | Auto-remove abandoned sessions |
+| `ensureSessionId()` | Generate UUID if no session provided |
+| `getDynamicContext()` | Append current page / user coords to system prompt |
+| `queryLocations()` | Filter Supabase locations by category/keyword |
+| `loadPublicLocations()` | Fetch all locations from Supabase |
+| `callGemini()` | Authenticated Gemini REST call |
+| `POST /api/cassie` | Main chat endpoint with rate limiting |
+| `POST /api/cassie/clear` | Clear a session |
+| `POST /api/directions` | Pedestrian routing via Supabase RPC |
 
-### 3.2 Frontend Service (src/services/cassieService.js)
+### 3.2 Frontend Hook (`src/hooks/useCasie.js`)
+
+| Export | Purpose |
+|--------|---------|
+| `useCasie(context)` | Full chat state: messages, input, loading, send, clear |
+| `sendMessage(override?)` | Send with rate limiting + daily cap |
+| `clearSession()` | Reset session on backend + local state |
+
+### 3.3 Frontend Service (`src/services/cassieService.js`)
 
 | Function | Purpose |
 |----------|---------|
-| `sendToCasie()` | Send message, get response |
-| `clearCasieHistory()` | Clear session on backend |
-| `resetSession()` | Reset local session ID |
+| `sendToCasie(payload)` | POST to `/api/cassie` |
+| `clearCasieHistory(sessionId)` | POST to `/api/cassie/clear` |
 
-### 3.3 Frontend Components
+### 3.4 Frontend Components
 
-| Component | File | Description |
+| Component | Path | Description |
 |-----------|------|-------------|
-| CassieWidget | `src/components/cassie/CassieWidget.jsx` | Floating chat button |
-| CassieSection | `src/pages/cassie/CassieSection.jsx` | Full-page chat |
-| LocationCards | `src/components/casie/LocationCards.jsx` | Display search results |
+| `CassieWidget` | `src/components/casie/CassieWidget.jsx` | Floating FAB + inline chat panel |
+| `LocationCards` | `src/components/casie/LocationCards.jsx` | Clickable location result cards |
+| `CasieModal` | `src/components/casie/CasieModal.jsx` | "Go to this location?" confirmation dialog |
 
 ---
 
@@ -155,25 +162,32 @@ User: "Find restaurants"
 
 Send a message to Casie.
 
-```bash
-curl -X POST http://localhost:3000/api/cassie \
-  -H "Content-Type: application/json" \
-  -H "X-Gemini-Key: YOUR_API_KEY" \
-  -d '{
-    "message": "Find restaurants",
-    "context": {
-      "currentPage": "MAP",
-      "userLocation": { "lat": 10.64, "lng": 122.07 }
-    }
-  }'
+**Request:**
+```json
+{
+  "message": "Find restaurants",
+  "sessionId": "optional-uuid-from-previous-response",
+  "context": {
+    "currentPage": "MAP",
+    "userLocation": { "lat": 10.6419, "lng": 122.2354 },
+    "selectedLocation": { "name": "UPV Main Library" }
+  }
+}
 ```
 
 **Response:**
 ```json
 {
-  "message": "I found some restaurants for you! ...",
+  "message": "I found some restaurants for you! Here are a few options nearby...",
   "places": [
-    { "name": "Kusina ni Co", "lat": 10.64, "lng": 122.07 }
+    {
+      "id": 42,
+      "name": "Kusina ni Co",
+      "address": "Miagao, Iloilo",
+      "latitude": 10.64,
+      "longitude": 122.07,
+      "tags": ["restaurant", "food"]
+    }
   ],
   "sessionId": "uuid-for-next-message"
 }
@@ -181,68 +195,82 @@ curl -X POST http://localhost:3000/api/cassie \
 
 ### 4.2 POST /api/cassie/clear
 
-Clear conversation history.
+Clear a conversation session.
 
-```bash
-curl -X POST http://localhost:3000/api/cassie/clear \
-  -H "Content-Type: application/json" \
-  -H "X-Gemini-Key: YOUR_API_KEY" \
-  -d '{"sessionId": "current-session-id"}'
+**Request:** `{ "sessionId": "uuid" }`  
+**Response:** `{ "success": true }`
+
+### 4.3 POST /api/directions
+
+Get pedestrian routing between two coordinates.
+
+**Request:**
+```json
+{ "startLat": 10.64, "startLng": 122.23, "endLat": 10.65, "endLng": 122.24 }
+```
+
+**Response:**
+```json
+{
+  "coordinates": [[10.64, 122.23], ...],
+  "distanceMeters": 450,
+  "durationMinutes": 6
+}
 ```
 
 ---
 
 ## 5. Frontend Integration
 
-### 5.1 Basic Usage
+### 5.1 Using the Hook (recommended)
 
 ```jsx
-import { sendToCasie, clearCasieHistory } from '../services/cassieService';
+import { useCasie } from '../hooks/useCasie';
 
-function MyComponent() {
-  const handleSend = async () => {
-    const { message, places } = await sendToCasie(
-      "Find the library",
-      { currentPage: "MAP", userLocation: { lat: 10.64, lng: 122.07 } }
-    );
-    console.log(message, places);
-  };
-  
-  return <button onClick={handleSend}>Ask Casie</button>;
+function MyChatComponent({ userLocation }) {
+  const context = { currentPage: 'MAP', userLocation };
+  const { messages, input, isLoading, setInput, sendMessage, clearSession } = useCasie(context);
+
+  return (
+    <div>
+      {messages.map((m, i) => <p key={i}>{m.content}</p>)}
+      <input value={input} onChange={e => setInput(e.target.value)} />
+      <button onClick={() => sendMessage()}>Send</button>
+    </div>
+  );
 }
 ```
 
 ### 5.2 Using CassieWidget
 
 ```jsx
-import CassieWidget from '../components/cassie/CassieWidget';
+import CassieWidget from '../components/casie/CassieWidget';
 
 function MapPage() {
-  const handleNavigate = (place) => {
-    // Center map on selected location
-    map.flyTo([place.latitude, place.longitude]);
-  };
-  
   return (
-    <MapView>
+    <div>
+      {/* ... map ... */}
       <CassieWidget
         currentSection="MAP"
-        userLocation={userCoords}
-        onNavigateToLocation={handleNavigate}
+        userLocation={{ lat: 10.64, lng: 122.23 }}
+        selectedService={selectedService}
+        onNavigateToLocation={(place) => {
+          map.flyTo([place.latitude, place.longitude]);
+        }}
       />
-    </MapView>
+    </div>
   );
 }
 ```
 
-### 5.3 Props
+### 5.3 CassieWidget Props
 
 | Prop | Type | Required | Description |
-|-----|------|----------|-------------|
-| `currentSection` | string | No | Current app section |
-| `selectedService` | object | No | Selected location |
-| `userLocation` | object | No | User's GPS coords |
-| `onNavigateToLocation` | function | No | Location select callback |
+|------|------|----------|-------------|
+| `currentSection` | string | No | Current page name sent as context |
+| `selectedService` | object | No | Currently selected location |
+| `userLocation` | `{ lat, lng }` | No | User GPS coordinates |
+| `onNavigateToLocation` | function | No | Called when user taps a location card |
 
 ---
 
@@ -250,131 +278,86 @@ function MapPage() {
 
 ### 6.1 How It Works
 
-Casie uses Gemini's function calling feature to search the database:
-
 ```
-1. User asks: "Find restaurants"
-2. Gemini receives message + search_locations tool definition
-3. Gemini decides to call tool → sends function call
-4. Backend executes queryLocations()
-5. Results pushed back to Gemini
-6. Gemini generates natural response
-7. Return to frontend
+1. User sends message
+2. Backend sends message + search_locations tool definition to Gemini
+3. Gemini decides if a location search is needed
+4. If yes → Gemini returns a function call with { category, keyword }
+5. Backend queries Supabase with those params
+6. Results pushed back to Gemini as a function response
+7. Gemini generates a natural language reply mentioning only real location names
+8. Backend returns reply + places array to frontend
 ```
 
 ### 6.2 Tool Definition
 
 ```javascript
 const searchLocationsTool = {
-  name: "search_locations",
-  description: "Searches places in Miagao...",
-  parameters: {
-    type: "object",
-    properties: {
-      category: { type: "string", description: "e.g., restaurant, pharmacy" },
-      keyword: { type: "string", description: "Specific name to search" }
+  functionDeclarations: [{
+    name: 'search_locations',
+    description: 'Searches public UPdiKo locations for category or keyword matches.',
+    parameters: {
+      type: 'object',
+      properties: {
+        category: { type: 'string', description: 'e.g. restaurant, pharmacy, clinic' },
+        keyword:  { type: 'string', description: 'Specific name or term' }
+      }
     }
-  }
+  }]
 };
 ```
 
-### 6.3 Two-Step Process
+### 6.3 Two-Step Gemini Process
 
-The backend makes TWO Gemini API calls:
-
-1. **Initial call** - With tool definition, gets function call
-2. **Synthesis call** - With DB results, gets natural response
-
-This ensures:
-- Accurate data from database
-- Natural-sounding AI response
+| Step | Purpose | Tools |
+|------|---------|-------|
+| Call 1 | Detect if search needed, get function call | `search_locations` enabled |
+| Call 2 | Synthesize natural response with DB results | No tools (text only) |
 
 ---
 
 ## 7. Session Management
 
-### 7.1 Session Flow
+- Sessions stored in a server-side `Map` keyed by UUID
+- History capped at last **20 messages** per session
+- Sessions persist for the lifetime of the server process
+- Cleared explicitly via `POST /api/cassie/clear` or on widget "clear" button
 
-```
-Client sends message
-    │
-    ▼
-No sessionId? → Generate UUID
-    │
-    ▼
-Add to sessions Map
-    │
-    ▼
-Process message
-    │
-    ▼
-Return with sessionId
-    │
-    ▼
-Client uses sessionId for next message
-```
+### Client-side limits (useCasie.js)
 
-### 7.2 Session Cleanup
-
-Sessions auto-expire after 15 minutes of inactivity:
-
-```javascript
-// Automatic cleanup every 15 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [sessionId, lastActive] of sessionTimestamps) {
-    if (now - lastActive > 15 * 60 * 1000) {
-      sessions.delete(sessionId);
-    }
-  }
-}, SESSION_CLEANUP_INTERVAL_MS);
-```
-
-This prevents memory leaks from abandoned sessions.
+| Limit | Value |
+|-------|-------|
+| Min time between messages | 2 seconds |
+| Daily message cap | 50 messages |
+| Max input length | 500 characters |
 
 ---
 
 ## 8. Security
 
-### 8.1 Input Sanitization
+### 8.1 API Key
 
-User input is sanitized before sending to Gemini:
+- The Gemini API key is **only on the server** (`GEMINI_API_KEY` env var)
+- Frontend calls `/api/cassie` — never Gemini directly
+- No API key is ever sent to the browser
 
-```javascript
-const sanitizeInput = (text) => {
-  let sanitized = text.trim();
-  
-  // Limit length
-  if (sanitized.length > 500) {
-    sanitized = sanitized.substring(0, 500);
-  }
-  
-  // Filter injection patterns
-  const patterns = [
-    /ignore\s+previous/i,
-    /forget\s+everything/i,
-    /system\s*:/i
-  ];
-  
-  for (const pattern of patterns) {
-    sanitized = sanitized.replace(pattern, '[ FILTERED ]');
-  }
-  
-  return sanitized;
-};
+### 8.2 Rate Limiting
+
+Express rate limiter: **40 requests per 15 minutes per IP** (returns 429 on exceed).
+
+### 8.3 Input Sanitization
+
+Prompt injection patterns filtered in `useCasie.js` before sending:
+
 ```
-
-### 8.2 API Key
-
-Gemini API key passed in header:
-
-```javascript
-headers: {
-  'X-Gemini-Key': process.env.VITE_GEMINI_API_KEY
-}
+/ignore\s+(previous|all|prior)/i
+/forget\s+(everything|all|previous)/i
+/disregard\s+(instructions|system)/i
+/system\s*:/i
+/you\s+are\s+(now|a)/i
+/act\s+as\s+if/i
+/pretend\s+(to|you)/i
 ```
-
-**Never expose in frontend code!**
 
 ---
 
@@ -382,62 +365,37 @@ headers: {
 
 ### 9.1 Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_GEMINI_API_KEY` | Yes | Client-side Gemini key |
-| `API_BASE` | No | Backend URL (default: localhost:3000) |
-| `GEMINI_MODEL` | No | Model name (default: gemini-2.0-flash) |
+| Variable | Where | Required | Description |
+|----------|-------|----------|-------------|
+| `GEMINI_API_KEY` | server `.env` | ✅ | Gemini API key (never expose client-side) |
+| `GEMINI_MODEL` | server `.env` | No | Defaults to `gemini-2.0-flash` |
+| `VITE_SUPABASE_URL` | `.env` | ✅ | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | `.env` | ✅ | Supabase anon key |
+| `VITE_API_BASE` | `.env` | No | Backend base URL (empty = use Vite proxy) |
+| `PORT` | server `.env` | No | Express port (default: 3000) |
 
-### 9.2 .env File
+### 9.2 Example .env
 
 ```env
-VITE_GEMINI_API_KEY=your-api-key-here
-API_BASE=http://localhost:3000
-```
-
-### 9.3 Server Configuration
-
-In `server/gemini.js`:
-
-```javascript
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-const API_BASE = process.env.API_BASE || 'http://localhost:3000/api';
+VITE_SUPABASE_URL=https://xyz.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
+GEMINI_API_KEY=AIza...
+GEMINI_MODEL=gemini-2.0-flash
+PORT=3000
 ```
 
 ---
 
 ## 10. Troubleshooting
 
-### 10.1 Common Issues
-
 | Issue | Cause | Fix |
 |-------|-------|-----|
-| "Gemini API key not provided" | Missing header | Add `X-Gemini-Key` header |
-| Empty places array | No matches in DB | Check database has data |
-| Session lost | 15 min timeout | Continue conversation |
-| Model error | API quota exceeded | Check API dashboard |
-
-### 10.2 Debug Logging
-
-Enable debug logging in browser console:
-
-```javascript
-// Check cassieService.js for console.log
-// Not production-ready - remove before deploy
-```
-
-### 10.3 Testing
-
-```bash
-# Start backend
-node server/index.js
-
-# Test API
-curl -X POST http://localhost:3000/api/cassie \
-  -H "Content-Type: application/json" \
-  -H "X-Gemini-Key: $GEMINI_KEY" \
-  -d '{"message": "Hello"}'
-```
+| `"Missing GEMINI_API_KEY"` | Env var not set on server | Add to server `.env` |
+| Empty `places` array | No DB matches | Verify `openstreets_static_locations` has data |
+| 429 Too Many Requests | Rate limit hit | Wait 15 min or increase `max` in `casieLimiter` |
+| Session lost between reloads | Server restarted | Normal — sessions are in-memory |
+| CORS error | Frontend origin not whitelisted | Update `cors` origin in `server/index.js` |
+| `"AI is not configured correctly"` | Client can't reach `/api/cassie` | Ensure `npm run dev:server` is running |
 
 ---
 
@@ -445,21 +403,21 @@ curl -X POST http://localhost:3000/api/cassie \
 
 ```
 src/
-├── components/
-│   └── cassie/
-│       ├── CassieWidget.jsx      # Floating chat
-│       └── LocationCards.jsx   # Results display
-├── pages/
-│   └── cassie/
-│       └── CassieSection.jsx   # Full-page chat
+├── components/casie/
+│   ├── CassieWidget.jsx      # Floating FAB + inline chat
+│   ├── CassieWidget.css
+│   ├── LocationCards.jsx     # Clickable location results
+│   ├── LocationCards.css
+│   ├── CasieModal.jsx        # Navigate confirmation dialog
+│   └── CasieModal.css
+├── hooks/
+│   └── useCasie.js           # Chat state hook
 ├── services/
-│   └── cassieService.js      # API client
+│   └── cassieService.js      # API client (sendToCasie, clearCasieHistory)
 server/
-├── gemini.js               # AI backend
-└── index.js              # Express server
-
+└── index.js                  # Express server (all backend logic)
 docs/
-└── AI_INTEGRATION.md      # This file
+└── AI_INTEGRATION.md         # This file
 ```
 
 ---

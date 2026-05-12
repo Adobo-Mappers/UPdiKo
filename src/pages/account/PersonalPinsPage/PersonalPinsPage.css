@@ -1,0 +1,17 @@
+.personal-pins-page {
+    position: relative;
+    background-color: white;
+    width: inherit;
+    min-height: inherit;
+}
+.personal-pins-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-image: url("./../../../assets/images/bg/upv-bg.jpg");
+    background-size: cover;
+    opacity: 0.05;
+}
+.personal-pins-page > * { position: relative; z-index: 2; }
+.pin-card { align-items: flex-start; }

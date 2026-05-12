@@ -9,16 +9,18 @@
 
 /* MAIN GROUP: LOADING SCREEN */
 .marker-info {
-  height: 45dvh;
+  height: 55dvh;
   position: absolute;
-  bottom: 0;
+  bottom: var(--footer-height);
   left: 0;
-  z-index: 1000;
+  z-index: 90;
   right: 0;
   border-top-left-radius: var(--border-roundify);
   border-top-right-radius: var(--border-roundify);
-  background-color: white;  
+  background-color: white;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 
   .drag-handle {
     display: flex;
@@ -181,3 +183,55 @@
   font-weight: var(--fw-semi);
   font-size: var(--fs-14);
 } */
+/* ── Info Panel Tabs ── */
+.marker-tabs {
+  border-bottom: 1px solid var(--color-component-bg);
+  padding-bottom: var(--space-small);
+}
+.marker-tab-active {
+  border-bottom: 2px solid var(--color-accent-primary);
+  padding-bottom: 2px;
+}
+
+/* Scrollable content area inside the panel */
+.panel-scroll {
+  overflow-y: auto;
+  flex: 1;
+  padding-bottom: var(--space-large);
+}
+
+/* Review form elements — styled to match B1 design */
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-small);
+}
+.review-select {
+  width: 100%;
+  padding: var(--space-small) var(--space-medium);
+  border: none;
+  border-radius: var(--border-roundify);
+  background-color: white;
+  font-family: 'Outfit', Arial, sans-serif;
+  font-size: var(--fs-text);
+  font-weight: var(--fw-bold);
+  color: var(--color-text-main);
+  appearance: auto;
+  cursor: pointer;
+}
+.review-textarea {
+  width: 100%;
+  padding: var(--space-small) var(--space-medium);
+  border: none;
+  border-radius: var(--border-rounded);
+  background-color: white;
+  font-family: 'Outfit', Arial, sans-serif;
+  font-size: var(--fs-text);
+  color: var(--color-text-main);
+  resize: none;
+}
+.review-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xsmall);
+}

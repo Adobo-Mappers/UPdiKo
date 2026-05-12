@@ -18,10 +18,9 @@ export default function LoginPage() {
     async function handleLogin() {
         try {
             await logIn(email, password);
-            if (error) throw error;
             navigate("/service/");
         } catch (e) {
-            setErrorMessage("Invalid Email or Password Found.")
+            setErrorMessage("Invalid Email or Password Found.");
             return;   
         }   
     }

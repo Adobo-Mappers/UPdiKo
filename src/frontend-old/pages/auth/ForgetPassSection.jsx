@@ -5,8 +5,6 @@ import mascot from '../../assets/images/logo/logo.png'
 import homeIcon from '../../assets/images/icon/home-icon.png'
 import mapIcon from '../../assets/images/icon/map-pin-icon.png'
 import accountIcon from '../../assets/images/icon/user-icon.png'
-import showPassIcon from '../../assets/images/icon/view-pass-icon.png'
-import hidePassIcon from '../../assets/images/icon/hide-pass-icon.png'
 
 import { useState } from "react" 
 

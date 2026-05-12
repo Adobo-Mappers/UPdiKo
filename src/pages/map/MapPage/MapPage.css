@@ -80,3 +80,17 @@
     }
 }
 
+
+    /* B2: Create pin sheet */
+    .pin-form-sheet {
+        position: absolute;
+        bottom: var(--footer-height);
+        left: 0;
+        right: 0;
+        background: white;
+        border-top-left-radius: var(--border-roundify);
+        border-top-right-radius: var(--border-roundify);
+        padding: var(--space-large);
+        z-index: 1000;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    }
