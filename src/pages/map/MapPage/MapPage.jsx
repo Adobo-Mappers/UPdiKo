@@ -1,5 +1,5 @@
 import './MapPage.css';
-import { useSearchParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, CircularButton, InputField } from './../../../components/form/';
@@ -61,8 +61,7 @@ export default function MapPage() {
     }
 
     // get service id from url
-    const [searchParams, setSearchParams] = useSearchParams();
-    const id = searchParams.get('id');
+    const { id } = useParams();
     const [selectedService, setSelectedService] = useState(getServiceFromCache(id));
 
     // map tracking logic

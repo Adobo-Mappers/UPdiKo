@@ -205,7 +205,7 @@ export default function ServiceInfoPage() {
                 </div>
 
                 <div className='flex gap-small my-medium'>
-                    <Button href={`/map?id=${id}`} className="items-center gap-small">
+                    <Button href={`/map/${id}`} className="items-center gap-small">
                         <Icon name='map' /><Caption>View in Map</Caption>
                     </Button>
                     {user &&

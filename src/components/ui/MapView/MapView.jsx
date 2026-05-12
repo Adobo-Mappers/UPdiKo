@@ -32,6 +32,8 @@ import { getStaticLocations, getRoute } from "../../../services/locations.js";
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, addPinnedLocationToDB, supabase, getCurrentUser } from "../../../services/supabase.js";
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from "../../../services/reviewsService.js";
 import Yu from './../../../assets/images/profile/profile.jpg'
+import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
+
 
 // fixes icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -305,7 +307,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
     // get service id
     const { id } = useParams();
-
+    console.log(id);
     // fetch service from cache
     const [service, setService] = useState(null);
     useEffect(() => {
@@ -372,7 +374,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       } catch (e) {
           console.error('Review submit failed:', e);
       } finally {
-          setSubmittingReview(false);
+        setReviewModal(false);
+        setSubmittingReview(false); 
       }
   }
 
@@ -670,7 +673,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                         key={n}
                         name={reviewRating >= n ? 'star' : 'darkstar'}
                         size='large'
-                        className='cursor-pointer'
+                        className='cursor-pointer's
                         onClick={() => setReviewRating(n)}
                     />
                 ))}
