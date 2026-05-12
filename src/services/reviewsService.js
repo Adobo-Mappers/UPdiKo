@@ -47,3 +47,25 @@ export async function submitLocationReview(review) {
     throw new Error(error.message);
   }
 }
+
+/**
+ * Loads the review for a public OSM-backed location for a userID.
+ *
+ * @param {number} locationId
+ * @param {string} userId
+ * @returns {number}
+ */
+export async function getLocationReviewOfUser(locationId, userId) {
+  const { data, error } = await supabase
+    .from('location_reviews')
+    .select('id, location_id, user_id, reviewer_name, rating, comment, created_at, updated_at')
+    .eq('location_id', locationId)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return ((data && data[0].rating) || 0);
+}

@@ -651,7 +651,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             </div>
             
             {user && (
-                <div className="my-small">w
+                <div className="my-small">
                   <Button toggled={isSaved} onClick={toggleSaveButton} disabled={isSavingPin} className="items-center gap-small">
                     <Icon name="save" size="small" />
                     <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>

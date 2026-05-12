@@ -31,6 +31,7 @@ export default function ServicesPage() {
         }
         loadServices();
     }, []);
+    console.log(cachedServices[0]);
 
     // Prefer query data, fall back to cache
     const services = queryServices?.length ? queryServices : cachedServices;
@@ -39,7 +40,6 @@ export default function ServicesPage() {
     const FILTER_OPTIONS = ['Nearest Location', 'Top Rated', 'Open Now'];
 
     const [activeTag, setActiveTag] = useState('All');
-    const [activeFilter, setActiveFilter] = useState('Nearest Location');
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredServices = services.filter((service) => {
@@ -85,14 +85,8 @@ export default function ServicesPage() {
                     ))}
                 </div>
 
-                <div className='flex py-xsmall justify-between'>
+                <div className='flex py-xsmall'>
                     <Heading><strong>{activeTag} Services</strong></Heading>
-                    <Dropdown
-                        value={activeFilter}
-                        onChange={setActiveFilter}
-                        options={FILTER_OPTIONS}
-                        className='border-roundify'
-                    />
                 </div>
 
                 <hr />

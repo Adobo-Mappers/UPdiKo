@@ -4,17 +4,24 @@ import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../../components/form';
 import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography';
-import { getCurrentUser, addPinnedLocationToDB } from './../../../services/supabase.js';
+import { getCurrentUser, addPinnedLocationToDB, onAuthStateChangedListener } from './../../../services/supabase.js';
 import { getServiceFromCache, fetchServicesFromServer, hasServiceCache } from './../../../services/service-handler.js';
-import { getLocationReviews, submitLocationReview } from '../../../services/reviewsService.js';
+import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from '../../../services/reviewsService.js';
 
 export default function ServiceInfoPage() {
     // user auth
     const [user, setUser] = useState(null);
+    const [authLoading, setAuthLoading] = useState(true); 
     useEffect(() => {
-        getCurrentUser().then(setUser);
+        const unsubscribe = onAuthStateChangedListener((user) => {
+            setUser(user);
+            setAuthLoading(false); 
+        });
+        return () => unsubscribe(); 
     }, []);
 
+
+    console.log(user);
     // get service id
     const { id } = useParams();
 
@@ -72,6 +79,13 @@ export default function ServiceInfoPage() {
             .then(setReviews)
             .catch(() => setReviews([]));
     }, [id]);
+
+    useEffect(() => {
+        if (!user) return;
+        getLocationReviewOfUser(id, user.id)
+            .then(setReviewRating)
+            .catch(() => setReviewRating(0));
+    }, [authLoading])
 
     async function handleSubmitReview() {
         if (!user || reviewRating === 0) return;
@@ -171,9 +185,11 @@ export default function ServiceInfoPage() {
                     <div className='flex items-center gap-small my-xsmall'>
                         <Icon name='address' /><Text>{service.address}</Text>
                     </div>
+                    {(service.opening_hours[0]) &&
                     <div className='flex items-center gap-small my-xsmall'>
                         <Icon name='clock' /><Text>{service.opening_hours?.[0]}</Text>
                     </div>
+                    }
                 </div>
 
                 <div className='flex gap-small my-medium'>
@@ -205,37 +221,42 @@ export default function ServiceInfoPage() {
 
                 {reviewTab === 'info' && (
                     <div>
-                        {service.additional_info?.text_based?.length > 0 && (
+                        {(service.additional_info?.text_based?.length > 0 || email || phone) ? (
                             <>
                                 <Heading><em className='fw-bold'>Additional Information</em></Heading>
                                 {service.additional_info.text_based.map((info, i) => (
                                     <Text key={i} className='text-muted my-xsmall'>{info}</Text>
                                 ))}
+                            
+                                <div className='py-medium'>
+                                {email && (
+                                    <div className='flex items-center gap-small my-xsmall'>
+                                        <Icon name='mail' size='small' />
+                                        <Text><em className='text-muted'>{email}</em></Text>
+                                    </div>
+                                )}
+                                {phone && (
+                                    <div className='flex items-center gap-small my-xsmall'>
+                                        <Icon name='phone' size='small' />
+                                        <Text><em className='text-muted'>{phone}</em></Text>
+                                    </div>
+                                )}
+                            </div>
                             </>
-                        )}
-                        <div className='py-medium'>
-                            {email && (
-                                <div className='flex items-center gap-small my-xsmall'>
-                                    <Icon name='mail' size='small' />
-                                    <Text><em className='text-muted'>{email}</em></Text>
-                                </div>
-                            )}
-                            {phone && (
-                                <div className='flex items-center gap-small my-xsmall'>
-                                    <Icon name='phone' size='small' />
-                                    <Text><em className='text-muted'>{phone}</em></Text>
-                                </div>
-                            )}
-                        </div>
+                        ) : 
+                        (<Text>No additional information found.</Text>)
+                        }
                     </div>
                 )}
 
                 {/* B2: Reviews tab */}
                 {reviewTab === 'reviews' && (
                     <div className='my-medium'>
-                        {user && (
+                        {!authLoading && <div>Loading Reviews...</div>}
+                        {(user) && (
                             <div className='flex flex-col gap-small p-medium bg-component border-rounded my-medium'>
                                 <Text><em className='fw-bold'>Leave a Review</em></Text>
+                 
                                 <div className='flex gap-small'>
                                     {[1,2,3,4,5].map(n => (
                                         <Icon
