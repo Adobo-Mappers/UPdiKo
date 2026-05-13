@@ -9,6 +9,7 @@ import { supabase, getCurrentUser } from './services/supabase';
 
 // B1 pages (base)
 import ServicesPage from './pages/services/ServicesPage/ServicesPage';
+import ServiceCategoryPage from './pages/services/ServiceCategoryPage/ServicesCategoryPage.jsx';
 import ServiceInfoPage from './pages/services/ServiceInfoPage/ServiceInfoPage';
 import MapPage from './pages/map/MapPage/MapPage';
 import LoginPage from './pages/account/LoginPage/LoginPage';
@@ -39,7 +40,8 @@ export default function App() {
 
                         {/* Services */}
                         <Route path='/service/' element={<ServicesPage />} />
-                        <Route path='/service/info/:id' element={<ServiceInfoPage />} />
+                        <Route path='/service/:category' element={<ServiceCategoryPage/>} />
+                        <Route path='/service/:category/:id' element={<ServiceInfoPage/>} />
 
                         {/* Map */}
                         <Route path='/map/' element={<MapPage />} />

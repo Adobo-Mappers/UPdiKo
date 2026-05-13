@@ -58,7 +58,7 @@ export default function AccountUpdatePage() {
 
     return (
         <div className="account-update-page">
-            <main className='flex flex-col px-large py-medium'>
+            <main className='flex flex-col px-large justify-center'>
                 <div className='py-medium'>
                     <Link to="/account" className='flex items-center gap-small'>
                         <Icon name="back" size='small' />
@@ -77,7 +77,7 @@ export default function AccountUpdatePage() {
                     </div>
                 )}
 
-                <div className='my-medium'>
+                <div className='my-xsmall'>
                     <InputField
                         icon="user"
                         placeholder="Display Name"
@@ -95,7 +95,7 @@ export default function AccountUpdatePage() {
                     />
                 </div>
 
-                <div className='flex justify-center my-large'>
+                <div className='flex justify-center my-medium'>
                     <Button width='200px' onClick={handleUpdate}>Save Changes</Button>
                 </div>
             </main>

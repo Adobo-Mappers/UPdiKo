@@ -1,7 +1,7 @@
 .account-page {
     position: relative;
     display: grid;
-    grid-template-rows: var(--header-height) 1fr var(--footer-height);
+    grid-template-rows: 1fr var(--footer-height);
     background-color: white;
     width: inherit;
     height: inherit;

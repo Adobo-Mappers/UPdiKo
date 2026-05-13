@@ -22,8 +22,8 @@ export default function ServiceInfoPage() {
 
 
     // get service id
-    const { id } = useParams();
-
+    const { category, id } = useParams();
+    
     // fetch service from cache
     const [service, setService] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -168,7 +168,7 @@ export default function ServiceInfoPage() {
     return (
         <div className="service-info-page">
             <header className='px-large py-medium flex justify-between'>
-                <Link to="/service" className='flex items-center gap-small'>
+                <Link to={`/service/${category}`} className='flex items-center gap-small'>
                     <Icon name="back" size='small' />
                     <Text>Back</Text>
                 </Link>

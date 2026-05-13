@@ -1,8 +1,10 @@
 .personal-pins-page {
+    display: grid;
+    grid-template-rows: 1fr var(--footer-height);
     position: relative;
     background-color: white;
     width: inherit;
-    min-height: inherit;
+    height: inherit;
 }
 .personal-pins-page::before {
     content: "";

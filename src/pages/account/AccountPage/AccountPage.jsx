@@ -26,18 +26,18 @@ export default function AccountPage() {
 
     return (
         <div className='account-page'>
-            <header className='flex justify-between items-center px-large py-medium'>
-                <div className='flex items-center gap-medium'>
-                    <Profile user={user} width='48px' height='48px' />
-                    <div>
-                        <Text><em className='fw-bold'>{user.user_metadata?.display_name ?? 'User'}</em></Text>
-                        <Text className='text-muted'>{user.email}</Text>
+            <main className='px-large py-mediums flex flex-col justify-center '>
+                <div className='flex items-center justify-between my-small'>
+                    <div className='flex items-center gap-medium'>
+                        <Profile user={user} width='48px' height='48px' />
+                        <div>
+                            <Text><em className='fw-bold'>{user.user_metadata?.display_name ?? 'User'}</em></Text>
+                            <Text className='text-muted'>{user.email}</Text>
+                        </div>
                     </div>
+                    <Icon name='logout' size='medium' className='cursor-pointer' onClick={handleLogOut} />
                 </div>
-                <Icon name='logout' size='medium' className='cursor-pointer' onClick={handleLogOut} />
-            </header>
-
-            <main className='px-large py-medium'>
+                
                 <Title>Dashboard</Title>
                 <Heading className='my-small'>Good day! What do you want to do today?</Heading>
 
