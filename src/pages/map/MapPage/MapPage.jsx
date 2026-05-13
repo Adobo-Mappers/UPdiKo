@@ -1,5 +1,5 @@
 import './MapPage.css';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, CircularButton, InputField } from './../../../components/form/';
@@ -62,6 +62,16 @@ export default function MapPage() {
 
     // get service id from url
     const { id } = useParams();
+    const navigate = useNavigate();
+    const handleMarkerClick = (markerId) => {
+        navigate(`/map/${markerId}`);
+    };
+
+    // When a user closes the info panel:
+    const handleClosePanel = () => {
+        navigate('/map');
+    };
+
     const [selectedService, setSelectedService] = useState(getServiceFromCache(id));
 
     // map tracking logic
@@ -242,6 +252,7 @@ export default function MapPage() {
                 currentCoords={userCurrentLocation}
                 trackingEnabled={trackingEnabled}
                 selectedService={selectedService}
+                handleMarkerClick={handleMarkerClick}
                 onMapClickForPin={handleMapClickForPin}   // FIX: was passing handleCenterToPin (wrong fn)
                 onMarkerClick={handleCenterToPin}         // FIX: was missing — centers map when a pin is clicked
                 onClosePinForm={handleClosePinForm}       // FIX: was missing — lets MapView close the pin form
@@ -268,7 +279,7 @@ export default function MapPage() {
                                         onClick={() => {
                                             const found = services.find(s => s.id === item.id);
                                             if (found) {
-                                                setSearchParams({ id: found.id });
+                                                handleMarkerClick(found.id);
                                                 setSelectedService(found);
                                                 setSearching(false);
                                                 handleCenterToPin(found.latitude, found.longitude);
@@ -290,7 +301,7 @@ export default function MapPage() {
                                 key={service.id}
                                 className='flex gap-large py-medium'
                                 onClick={() => {
-                                    setSearchParams({ id: service.id });
+                                    handleMarkerClick(service.id);
                                     setSelectedService(service);
                                     setSearching(false);
                                     addToHistory(service);

@@ -1,7 +1,7 @@
 // Important Dependencies
 import React, { useEffect, useState, useRef, act} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
 import "./MapView.css";
@@ -252,6 +252,8 @@ function RotationController({ bearing, setBearing }) {
 
 // // main map element
 export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded, setRatingSession, isRating, setRating, activeTag}) {
+  const navigate = useNavigate();
+
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
@@ -429,6 +431,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       //    The rightward shift was caused by wrong iconAnchor values, not the pan itself.
       if (onMarkerClick) {
           onMarkerClick(lat, lng, 17);
+          navigate(`/map/${data.id}`);
       }
       
       // 3. Calculate route if requested (e.g., from Cassie navigation)
@@ -717,7 +720,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           
           <div className="flex justify-between gap-xlarge my-small">
             <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
-            <Icon name="close" size="small" className="cursor-pointer" onClick={() => setSelectedMarkerInfo(null)} />
+            <Icon name="close" size="small" className="cursor-pointer" onClick={() => { setSelectedMarkerInfo(null); navigate("/map")}} />
           </div>
 
           <div className="flex gap-small">
