@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef, act} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
 import { useParams, useNavigate } from "react-router-dom";
+import { TAG_GROUPS } from './../../../utils/servicecoding.js'
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
 import "./MapView.css";
@@ -431,7 +432,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       //    The rightward shift was caused by wrong iconAnchor values, not the pan itself.
       if (onMarkerClick) {
           onMarkerClick(lat, lng, 17);
-          navigate(`/map/${data.id}`);
+          navigate(`/map/${data.id ? data.id : ""}`);
       }
       
       // 3. Calculate route if requested (e.g., from Cassie navigation)
@@ -638,7 +639,12 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           </Marker>
         ))}
         {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
-        {staticLocations.filter(pin => (activeTag === "All") || (pin.tags || []).includes(activeTag))
+       {staticLocations
+          .filter(pin => {
+              if (activeTag === "All") return true;
+              const allowedTags = TAG_GROUPS[activeTag]?.tags || [];
+              return (pin.tags || []).some(tag => allowedTags.includes(tag));
+          })
           .filter(shouldShowMarker)
           .filter(facility => {
             const lat = parseFloat(facility.latitude);

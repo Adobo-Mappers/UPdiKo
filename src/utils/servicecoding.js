@@ -107,17 +107,5 @@ export function getGroupForTag(tag) {
   return "Other";
 }
 
-export function getTagsForGroup(group) {
-  return GROUPS[group]?.tags || [];  // .tags was missing
-}
-
-export function getDescriptionForGroup(group) {
-  return GROUPS[group]?.description || "";
-}
-
-export function getGroup(group) {
-  return GROUPS[group] || null;
-}
-
 export const GROUP_NAMES = Object.keys(GROUPS);
 export const TAG_GROUPS = GROUPS;

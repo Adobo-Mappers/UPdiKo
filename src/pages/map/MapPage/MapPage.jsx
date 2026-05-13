@@ -2,6 +2,7 @@ import './MapPage.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { TAG_GROUPS } from './../../../utils/servicecoding.js'
 import { Button, CircularButton, InputField } from './../../../components/form/';
 import { Heading, Text } from './../../../components/typography/';
 import { Icon, MapView } from './../../../components/ui/';
@@ -38,6 +39,9 @@ export default function MapPage() {
 
     // searching services logic
     const [activeTag, setActiveTag] = useState('All');
+
+
+
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setSearching] = useState(false);
     const filteredServices = services.filter((service) => {
@@ -402,17 +406,15 @@ export default function MapPage() {
                     {!isSearching && <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px" />}
                 </div>
 
-                <div id="category-tab" className="flex overflow-x">
-                    {SERVICE_TAGS.map((tag) => (
-                        <div
-                            key={tag}
-                            className={`${activeTag === tag ? "active" : ""} flex bg-white px-small py-xsmall border-roundify`}
-                            onClick={() => setActiveTag(tag)}
-                        >
-                            {tag}
-                        </div>
-                    ))}
-                </div>
+                {!isSearching && (
+                    <div className="filter-dropdown-container flex justify-end">
+                        <select value={activeTag} onChange={(e) => setActiveTag(e.target.value)} className='bg-accent-softer border-none border-roundify py-small px-medium fw-bold' style={{"width":"150px"}}>
+                            {Object.entries(TAG_GROUPS).map(([name, data]) => (
+                                <option value={name}>{name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
             </header>
 
             <main className='map-utils'>
