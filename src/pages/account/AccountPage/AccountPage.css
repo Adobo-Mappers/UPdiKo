@@ -1,0 +1,19 @@
+.account-page {
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr var(--footer-height);
+    background-color: white;
+    width: inherit;
+    height: inherit;
+}
+.account-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-image: url("./../../../assets/images/bg/upv-bg.jpg");
+    background-size: cover;
+    opacity: 0.05;
+}
+.account-page > * { position: relative; z-index: 2; }
+.option-card { cursor: pointer; }

@@ -1,0 +1,96 @@
+.map-page {
+    position:relative;
+    background-size: cover;
+    background-color: white;
+    width: inherit;
+    height: inherit;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+
+
+    header {
+        position: absolute;
+        top: 0px;
+        width: 100%;
+    } 
+
+    .search-overlay {
+        display: grid;
+        grid-template-rows: var(--header-height) 1fr;
+        width: 100%;
+        height: inherit;
+        position: absolute;
+        top: 0px;
+        z-index: 500;
+        background-color: white;
+    }
+    .search-list {
+        overflow-y: auto;
+    }
+    .search-div {
+        position: relative;
+        z-index: 501;
+    }
+
+    .rating-modal { 
+        position: absolute;
+        width: 400px;
+        top: 30%;
+        left: 50%;
+        transform: translate(-50%);
+        z-index: 1000;
+        padding: var(--space-large) var(--space-large) ;
+        border-radius: var(--border-rounded);
+        background-color: white;
+
+    }
+
+    #category-tab {
+        > * { 
+            font-size: var(--fs-text);
+            margin-right: var(--space-large); 
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .active {
+            font-weight: var(--fw-bold);
+            background-color: var(--color-accent-tertiary) !important;
+        }
+        
+
+    }
+
+
+    .rotation-controls {
+        position: absolute;
+        top: calc(var(--header-height) + 50px);
+        right: var(--space-large);
+        
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-small);
+    }
+
+    .main-controls {
+        position: absolute;
+        bottom: calc(var(--footer-height) + 20px); 
+        right: var(--space-large);
+    }
+}
+
+
+    /* B2: Create pin sheet */
+    .pin-form-sheet {
+        position: absolute;
+        bottom: var(--footer-height);
+        left: 0;
+        right: 0;
+        background: white;
+        border-top-left-radius: var(--border-roundify);
+        border-top-right-radius: var(--border-roundify);
+        padding: var(--space-large);
+        z-index: 1000;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    }

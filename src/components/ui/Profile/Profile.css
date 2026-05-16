@@ -1,0 +1,4 @@
+.profile {
+    border-radius: var(--border-circlify);
+    background-color: var(--color-component-bg);
+}

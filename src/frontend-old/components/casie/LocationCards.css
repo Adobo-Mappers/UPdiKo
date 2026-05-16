@@ -1,0 +1,63 @@
+.location-cards {
+  margin: var(--mar-8) 0;
+}
+
+.location-cards-title {
+  font-size: var(--fs-12);
+  color: var(--color-accent-2);
+  margin-bottom: var(--mar-8);
+  padding: 0 var(--mar-4);
+}
+
+.location-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mar-8);
+}
+
+.location-card {
+  display: flex;
+  align-items: center;
+  gap: var(--mar-12);
+  padding: var(--pad-12);
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.location-card:hover {
+  background: #f8f9fa;
+  border-color: var(--color-primary);
+}
+
+.location-card-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.location-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.location-card-name {
+  font-size: var(--fs-14);
+  font-weight: var(--fw-med);
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.location-card-address {
+  font-size: var(--fs-12);
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,4 @@
+.title {
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-title);
+}

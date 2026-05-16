@@ -1,32 +1,75 @@
-import customEvents from './custom-events.json';
+import './EventDisplay.css';
 import { useEffect, useState } from 'react';
+import customEvents from './custom-events.json';
+import { Text, Caption } from '../typography';
 
-export default function EventDisplay() {
-    const [events, setEvents] = useState([]);
+const MANILA_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Manila',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+});
+
+// e.g. "2026-05-11" → "May 11, 2026"
+function formatDateDisplay(dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-PH', {
+        month: 'long', day: 'numeric', year: 'numeric',
+    });
+}
+
+function EventDisplay() {
+    const [todayEvents, setTodayEvents] = useState([]);
+    const [todayStr, setTodayStr] = useState('');
+    const [loaded, setLoaded] = useState(false);
+
     useEffect(() => {
-        async function fetchEvents () {
+        const controller = new AbortController();
+        const today = MANILA_FORMATTER.format(new Date());
+        setTodayStr(today);
+
+        const load = async () => {
             try {
-                const response = await fetch('https://date.nager.at/api/v3/PublicHolidays/2026/ph');
-                const data = (await response.json()).map(event => ({ date: event.date, name: event.name }));
-                const events = [...customEvents, ...data];
-                setEvents(events);
-            } catch (error) {
-                console.error('Error fetching events:', error);
+                const res = await fetch('https://date.nager.at/api/v3/PublicHolidays/2026/ph', {
+                    signal: controller.signal,
+                });
+                if (!res.ok) throw new Error('Failed to fetch');
+                const holidays = await res.json();
+                const all = [
+                    ...customEvents,
+                    ...holidays.map(h => ({ date: h.date, name: h.name })),
+                ];
+                setTodayEvents(all.filter(e => e.date === today));
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    setTodayEvents(customEvents.filter(e => e.date === today));
+                }
+            } finally {
+                setLoaded(true);
             }
-        }
-        fetchEvents();
+        };
+
+        load();
+        return () => controller.abort();
     }, []);
-    
+
+    // Always show the card — either an event name or just today's date
     return (
-        <div className='displayed-events'>
-            { events.filter(event => event.date == new Date().toISOString().split('T')[0]).map(event => (
-                <div key={event.id} className='event-item'>
-                    <h3>{event.name}</h3>   
-                    <p>{event.date}</p>
-                </div>
-              )) 
-            }
+        <div className='event-card'>
+            <Caption className='event-card-label'>📅 Today</Caption>
+            {loaded && todayEvents.length > 0 ? (
+                <>
+                    <Text><em className='fw-bold'>{todayEvents[0].name}</em></Text>
+                    <Caption className='text-muted'>is Happening!</Caption>
+                    {todayEvents.length > 1 && (
+                        <Caption className='text-muted'>+{todayEvents.length - 1} more</Caption>
+                    )}
+                </>
+            ) : (
+                <Text><em className='fw-bold'>{todayStr ? formatDateDisplay(todayStr) : '—'}</em></Text>
+            )}
         </div>
     );
-
 }
+
+export default EventDisplay;

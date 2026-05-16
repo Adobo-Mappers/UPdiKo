@@ -1,0 +1,25 @@
+.input-field {
+    position: relative;
+    width: 100%;
+
+    img {
+        position: absolute;
+        top: 50%;
+        left: var(--space-medium);
+        transform: translateY(-50%);
+        z-index: 100;
+    }
+
+    input {
+        display: flex;
+        width: inherit;
+        padding: var(--space-medium);
+        border: none;
+        border-radius: var(--border-roundify);
+        text-indent: 32px;
+        font-weight: var(--fw-bold);
+        cursor: pointer;
+        background-color: var(--color-component-bg);        
+        color: var(--color-text-main);
+    }
+}

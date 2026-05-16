@@ -1,0 +1,29 @@
+.account-update-page {
+    display: grid;
+    grid-template-rows: 1fr var(--footer-height);
+    position: relative;
+    background-color: white;
+    width: inherit;
+    height: inherit;
+}
+.account-update-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-image: url("./../../../assets/images/bg/upv-bg.jpg");
+    background-size: cover;
+    opacity: 0.05;
+}
+.account-update-page > * { position: relative; z-index: 2; }
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+.modal-box { width: 300px; }

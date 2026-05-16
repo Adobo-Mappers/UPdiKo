@@ -1,0 +1,138 @@
+.cassie-widget {
+    position: relative;
+    z-index: 600;
+}
+.cassie-toggle {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--border-circlify);
+    border: none;
+    background-color: var(--color-accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.cassie-toggle img { width: 24px; height: 24px; }
+
+.cassie-chat {
+    position: fixed;
+    bottom: calc(var(--footer-height) + 70px);
+    right: var(--space-large);
+    width: 320px;
+    max-height: 480px;
+    background: white;
+    border-radius: var(--border-rounded);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 600;
+}
+.cassie-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-medium);
+    background-color: var(--color-text-main);
+}
+.cassie-header-info { display: flex; align-items: center; gap: var(--space-small); }
+.cassie-avatar { width: 32px; height: 32px; border-radius: var(--border-circlify); }
+.cassie-header h3 { font-size: var(--fs-text); font-weight: var(--fw-bold); color: white; margin: 0; }
+.cassie-status { font-size: var(--fs-caption); color: var(--color-accent-secondary); }
+.cassie-header-actions { display: flex; gap: var(--space-small); }
+.cassie-clear-btn, .cassie-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+.cassie-clear-btn img, .cassie-close-btn img { width: 18px; height: 18px; filter: invert(1); }
+
+.cassie-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-medium);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-small);
+}
+.cassie-quick-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xsmall);
+    margin-bottom: var(--space-small);
+}
+.cassie-quick-prompt {
+    padding: var(--space-xsmall) var(--space-small);
+    border: 1px solid var(--color-component-bg);
+    border-radius: var(--border-roundify);
+    background: white;
+    font-size: var(--fs-caption);
+    cursor: pointer;
+    font-family: inherit;
+}
+.cassie-quick-prompt:hover { background-color: var(--color-accent-tertiary); }
+
+.cassie-message { display: flex; }
+.cassie-message.user { justify-content: flex-end; }
+.cassie-message.assistant { justify-content: flex-start; }
+.cassie-message-bubble {
+    max-width: 80%;
+    padding: var(--space-small) var(--space-medium);
+    border-radius: var(--border-rounded);
+    font-size: var(--fs-caption);
+    line-height: 1.5;
+}
+.cassie-message.user .cassie-message-bubble {
+    background-color: var(--color-accent-primary);
+    color: var(--color-text-main);
+}
+.cassie-message.assistant .cassie-message-bubble {
+    background-color: var(--color-component-bg);
+    color: var(--color-text-main);
+}
+.cassie-message-bubble.typing { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+    font-size: 20px;
+    animation: bounce 1s infinite;
+    color: var(--color-text-muted);
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.cassie-input-area {
+    display: flex;
+    gap: var(--space-small);
+    padding: var(--space-small) var(--space-medium);
+    border-top: 1px solid var(--color-component-bg);
+}
+.cassie-input-area input {
+    flex: 1;
+    padding: var(--space-small) var(--space-medium);
+    border: none;
+    border-radius: var(--border-roundify);
+    background-color: var(--color-component-bg);
+    font-size: var(--fs-caption);
+    font-family: inherit;
+}
+.cassie-send-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--border-circlify);
+    border: none;
+    background-color: var(--color-accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.cassie-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cassie-send-btn img { width: 16px; height: 16px; filter: invert(1); }

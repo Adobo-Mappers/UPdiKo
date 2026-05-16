@@ -1,0 +1,7 @@
+.app {
+    position: relative;
+    margin: auto;
+    width: var(--screen-width);
+    height: 100dvh;
+}
+

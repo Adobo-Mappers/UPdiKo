@@ -1,0 +1,20 @@
+.event-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--space-medium);
+    background-color: var(--color-accent-tertiary);
+    border-radius: var(--border-rounded);
+    min-height: 80px;
+}
+.event-card-label {
+    font-weight: var(--fw-bold);
+    color: var(--color-text-muted);
+}
+.event-card-empty {
+    flex: 1;
+    min-height: 80px;
+    background-color: transparent;
+}

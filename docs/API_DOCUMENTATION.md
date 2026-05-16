@@ -1,7 +1,7 @@
 # UPdiKo API Documentation
 
-> **Last Updated:** April 2026  
-> **Version:** 1.0.0  
+> **Last Updated:** May 2026  
+> **Version:** 2.0.0  
 > **Base URL:** `http://localhost:3000`
 
 ---
@@ -11,7 +11,7 @@
 1. [Getting Started](#1-getting-started)
 2. [Architecture](#2-architecture)
 3. [API Endpoints](#3-api-endpoints)
-4. [Internal Functions](#4-internal-functions)
+4. [Supabase Services](#4-supabase-services)
 5. [Database Schema](#5-database-schema)
 6. [Authentication](#6-authentication)
 7. [Error Handling](#7-error-handling)
@@ -24,949 +24,510 @@
 
 ### 1.1 Prerequisites
 
-Before making API calls, ensure you have:
+- Node.js v18 or higher
+- npm
+- A Supabase project with the required tables
+- A Google Gemini API key
 
-- **Node.js** (v14 or higher) installed
-- **npm** package manager
-- A running Express server on `http://localhost:3000`
-
-### 1.2 Quick Start Tutorial
-
-#### Step 1: Install Dependencies and Start Server
+### 1.2 Quick Start
 
 ```bash
-cd server
+# Install dependencies
 npm install
-node index.js
+
+# Copy environment template
+cp .env.example .env
+# Fill in VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, GEMINI_API_KEY
+
+# Start frontend (Vite dev server)
+npm run dev
+
+# Start backend (Express — required for Casie AI and directions)
+npm run dev:server
 ```
 
-You should see output similar to:
+You should see:
 ```
-⚡ No previous sync found, running initial sync...
-🔄 Starting OSM sync...
-📦 Fetched 50 named locations from OSM
-✅ Sync complete: { added: 50, updated: 0, unchanged: 0, total: 50 }
-Server running on port 3000
+UPdiKo backend listening on http://localhost:3000
 ```
 
-#### Step 2: Make Your First API Call
+### 1.3 Health Check
 
-**Fetch all locations:**
-```javascript
-const response = await fetch('http://localhost:3000/api/locations');
-const locations = await response.json();
-console.log('Found', locations.length, 'locations');
-```
-
-**Response:**
-```json
-[
-  {
-    "id": 1,
-    "osm_id": "123456789",
-    "name": "UP Miagao Campus",
-    "latitude": 10.6419,
-    "longitude": 122.0759,
-    "address": "Miagao, Iloilo",
-    "tags": "[\"education\"]",
-    "opening_hours": "[\"7:00 AM - 5:00 PM\"]",
-    "contact_info": "[\"+63 33 123 4567\"]",
-    "location_type": "campus",
-    "services": "[]",
-    "images": "[]",
-    "additional_info": null
-  }
-]
-```
-
-#### Step 3: Check Sync Status
-
-```javascript
-const response = await fetch('http://localhost:3000/api/sync/status');
-const status = await response.json();
-console.log('Last sync:', status.synced_at);
-```
-
-#### Step 4: Trigger Manual Sync
-
-```javascript
-const response = await fetch('http://localhost:3000/api/sync', {
-  method: 'POST'
-});
-const result = await response.json();
-console.log('Sync result:', result);
+```bash
+curl http://localhost:3000/api/health
+# → { "status": "ok" }
 ```
 
 ---
 
 ## 2. Architecture
 
-### 2.1 System Overview
+### 2.1 Backend Overview
 
-The UPdiKo backend consists of three main files:
+The Express backend (`server/index.js`) handles three concerns:
 
 ```
-server/
-├── index.js      # Express server - API endpoints
-├── database.js   # SQLite database initialization
-└── sync.js       # OpenStreetMap synchronization
+server/index.js
+├── POST /api/cassie          # Casie AI chat (Gemini + Supabase location search)
+├── POST /api/cassie/clear    # Clear a chat session
+├── POST /api/directions      # Pedestrian routing via Supabase RPC
+└── GET  /api/health          # Health check
 ```
+
+Locations are stored and served from **Supabase** (PostgreSQL), not SQLite. The frontend fetches them directly via the Supabase client and caches them in **IndexedDB** (24-hour TTL).
 
 ### 2.2 Data Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Express Server (index.js)                   │
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
-│  │ GET /locations│  │ GET /sync   │  │ POST /sync          │  │
-│  │              │  │   /status    │  │                      │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘  │
-│         │                 │                      │              │
-│         ▼                 ▼                      ▼              │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │              SQLite Database (database.js)                  ││
-│  │                                                              ││
-│  │  Tables:                                                    ││
-│  │  - openstreets_static_locations                            ││
-│  │  - sync_metadata                                           ││
-│  └─────────────────────────────────────────────────────────────┘│
-│                              │                                  │
-│                              ▼                                  │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │              OSM Sync Service (sync.js)                    ││
-│  │                                                              ││
-│  │  - fetchOSMLocations() - Fetches from Overpass API        ││
-│  │  - syncLocations() - Syncs data to database                ││
-│  │                                                              ││
-│  └─────────────────────────────────────────────────────────────┘│
-│                              │                                  │
-│                              ▼                                  │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │              OpenStreetMap Overpass API                     ││
-│  │              https://overpass-api.de/api/interpreter       ││
-│  └─────────────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### 2.3 Automatic Sync Behavior
-
-The server includes automatic synchronization:
-
-```javascript
-// From index.js - Auto sync runs:
-// 1. On server startup (if no previous sync exists)
-// 2. Every 24 hours via setInterval
-const SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
+Frontend (React + Vite)
+│
+├── Public locations  → supabase.js → openstreets_static_locations table
+├── User pins         → supabase.js → user_locations table
+├── Reviews           → reviewsService.js → location_reviews table
+├── Images            → storageService.js → Supabase Storage
+│
+├── Casie AI          → cassieService.js → POST /api/cassie → Gemini API
+├── Directions        → locations.js (getRoute) → OSRM public API (no backend needed)
+└── Geocoding         → geocoding.js → Nominatim (OpenStreetMap)
 ```
 
 ---
 
 ## 3. API Endpoints
 
-### 3.1 Casie AI Chatbot Endpoints
+### 3.1 GET /api/health
 
-The Casie AI chatbot provides conversational location search using Google Gemini.
+Health check.
 
-#### 3.1.1 POST /api/cassie
+**Response:**
+```json
+{ "status": "ok" }
+```
+
+---
+
+### 3.2 POST /api/cassie
 
 Send a message to the Casie AI assistant.
 
-**Endpoint:**
-```
-POST http://localhost:3000/api/cassie
-```
-
-**Headers:**
-| Header | Required | Description |
-|--------|----------|-------------|
-| `Content-Type` | Yes | Must be `application/json` |
-| `X-Gemini-Key` | Yes | Google Gemini API key |
-
-**Request Body:**
+**Request:**
 ```json
 {
-  "message": "Find restaurants near the campus",
+  "message": "Find restaurants near campus",
+  "sessionId": "optional-uuid",
   "context": {
     "currentPage": "MAP",
-    "userLocation": {
-      "lat": 10.6419,
-      "lng": 122.0759
-    }
-  },
-  "sessionId": "optional-uuid-for-continuity"
+    "userLocation": { "lat": 10.6419, "lng": 122.2354 },
+    "selectedLocation": { "name": "UPV Main Library" }
+  }
 }
 ```
 
-**Parameters:**
 | Field | Type | Required | Description |
-|------|------|----------|-------------|
-| `message` | string | Yes | User's input message |
-| `context` | object | No | Current app state |
+|-------|------|----------|-------------|
+| `message` | string | ✅ | User's message (max 500 chars after sanitization) |
+| `sessionId` | string | No | UUID from previous response for continuity |
 | `context.currentPage` | string | No | Current page (HOME, MAP, etc.) |
-| `context.selectedLocation` | object | No | Selected location |
-| `context.userLocation` | object | No | User's GPS coordinates |
-| `sessionId` | string | No | UUID for conversation continuity |
+| `context.userLocation` | object | No | User GPS `{ lat, lng }` |
+| `context.selectedLocation` | object | No | Currently selected location `{ name }` |
 
-**Response (200 OK):**
+**Response (200):**
 ```json
 {
-  "message": "I found some great restaurants near the campus! Here are a few options...",
+  "message": "Here are some restaurants I found...",
   "places": [
     {
+      "id": 42,
       "name": "Kusina ni Co",
       "address": "Miagao, Iloilo",
-      "lat": 10.6425,
-      "lng": 122.0762
+      "latitude": 10.6425,
+      "longitude": 122.0762,
+      "tags": ["restaurant", "food"]
     }
   ],
-  "sessionId": "uuid-continues-here"
+  "sessionId": "uuid-for-next-message"
 }
 ```
 
-**Response Schema:**
-| Field | Type | Description |
-|------|------|-------------|
-| `message` | string | AI's conversational response |
-| `places` | array | Location results (if any) |
-| `places[].name` | string | Location name |
-| `places[].address` | string | Location address |
-| `places[].lat` | number | Latitude |
-| `places[].lng` | number | Longitude |
-| `sessionId` | string | Session ID for next message |
-
-**Error Responses:**
-- `400`: Missing message or API key
-- `500`: Gemini API error
-
-**Example cURL:**
-```bash
-curl -X POST http://localhost:3000/api/cassie \
-  -H "Content-Type: application/json" \
-  -H "X-Gemini-Key: YOUR_API_KEY" \
-  -d '{"message": "Where is the library?"}'
-```
+**Errors:**
+| Status | Cause |
+|--------|-------|
+| `400` | Empty message |
+| `429` | Rate limit exceeded (40 req / 15 min) |
+| `500` | Gemini API error or Supabase failure |
 
 ---
 
-#### 3.1.2 POST /api/cassie/clear
+### 3.3 POST /api/cassie/clear
 
-Clear conversation history for a session.
+Clear a session's conversation history.
 
-**Endpoint:**
-```
-POST http://localhost:3000/api/cassie/clear
-```
-
-**Request Body:**
-```json
-{
-  "sessionId": "uuid-to-clear"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "message": "Conversation cleared for session"
-}
-```
+**Request:** `{ "sessionId": "uuid" }`  
+**Response:** `{ "success": true }`
 
 ---
 
-#### 3.1.3 GET /api/cassie/history
+### 3.4 POST /api/directions
 
-Get conversation history for a session.
+Get pedestrian routing between two coordinates using a Supabase RPC function.
 
-**Endpoint:**
-```
-GET http://localhost:3000/api/cassie/history?sessionId=uuid
-```
-
-**Response (200 OK):**
+**Request:**
 ```json
 {
-  "history": [
-    { "role": "user", "parts": [{ "text": "Find restaurants" }] },
-    { "role": "model", "parts": [{ "text": "Here are some options..." }] }
-  ]
+  "startLat": 10.641944,
+  "startLng": 122.235556,
+  "endLat": 10.645000,
+  "endLng": 122.238000
+}
+```
+
+**Response (200):**
+```json
+{
+  "coordinates": [[10.6419, 122.2355], [10.6425, 122.2362], ...],
+  "distanceMeters": 450,
+  "durationMinutes": 6
+}
+```
+
+**Error (503):** Returned when the campus path graph hasn't been loaded into Supabase yet.
+
+```json
+{
+  "error": "Pedestrian routing is not ready yet. Load the campus path graph in Supabase, then retry.",
+  "detail": "..."
 }
 ```
 
 ---
 
-### 3.2 GET /api/locations
+## 4. Supabase Services
 
-Retrieve all locations from the SQLite database.
+These are frontend service functions that talk directly to Supabase (not via the Express server).
 
-**Endpoint:**
-```
-GET http://localhost:3000/api/locations
-```
+### 4.1 `src/services/supabase.js`
 
-**Parameters:** None (no query parameters, path parameters, or request body)
+| Function | Description |
+|----------|-------------|
+| `signUp(email, password, name)` | Register new user |
+| `logIn(email, password)` | Sign in |
+| `logOut()` | Sign out |
+| `getCurrentUser()` | Get current session user |
+| `onAuthStateChangedListener(cb)` | Subscribe to auth changes |
+| `updateUserProfile(updates)` | Update display name / photo |
+| `updateUserPassword(newPass, currentPass)` | Change password (re-auth required) |
+| `sendPasswordReset(email)` | Send reset email |
+| `saveUserDataToDB(uid, data)` | Upsert user row in `users` table |
+| `getUserDataFromDB(uid)` | Read user row |
+| `addPinnedLocationToDB(uid, location)` | Create a personal pin |
+| `getPinnedLocationsFromDB(uid)` | Get all pins for a user |
+| `deletePinnedLocationFromDB(uid, id)` | Delete a pin |
+| `getPublicLocationsFromDB()` | Read all public locations |
 
-**Response (200 OK):**
-```json
-[
-  {
-    "id": 1,
-    "osm_id": "123456789",
-    "name": "UP Miagao Campus",
-    "latitude": 10.6419,
-    "longitude": 122.0759,
-    "address": "Miagao, Iloilo",
-    "tags": "[\"education\"]",
-    "opening_hours": "[\"7:00 AM - 5:00 PM\"]",
-    "contact_info": "[\"+63 33 123 4567\"]",
-    "location_type": "campus",
-    "services": "[]",
-    "images": "[]",
-    "additional_info": null
-  },
-  {
-    "id": 2,
-    "osm_id": "987654321",
-    "name": "Miagao Public Market",
-    "latitude": 10.6425,
-    "longitude": 122.0765,
-    "address": "Poblacion, Miagao, Iloilo",
-    "tags": "[\"market\"]",
-    "opening_hours": "[\"5:00 AM - 6:00 PM\"]",
-    "contact_info": "[]",
-    "location_type": "community",
-    "services": "[\"fresh produce\"]",
-    "images": "[]",
-    "additional_info": null
-  }
-]
-```
+### 4.2 `src/services/locations.js`
 
-**Response Schema - Location:**
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `id` | integer | Primary key, auto-increment | `1` |
-| `osm_id` | string | OpenStreetMap feature ID | `"123456789"` |
-| `name` | string | Location name | `"UP Miagao Campus"` |
-| `latitude` | number | Geographic latitude | `10.6419` |
-| `longitude` | number | Geographic longitude | `122.0759` |
-| `address` | string | Full address | `"Miagao, Iloilo"` |
-| `tags` | string | JSON array of category tags | `"[\"education\"]"` |
-| `opening_hours` | string | JSON array of operating hours | `"[\"7:00 AM - 5:00 PM\"]"` |
-| `contact_info` | string | JSON array of contact info | `"[\"+63 33 123 4567\"]"` |
-| `location_type` | string | "campus" or "community" | `"campus"` |
-| `services` | string | JSON array of services | `"[]"` |
-| `images` | string | JSON array of image URLs | `"[]"` |
-| `additional_info` | string/null | Additional metadata | `null` |
+| Function | Description |
+|----------|-------------|
+| `getStaticLocations(supabase)` | Fetch public locations with IndexedDB cache (24h TTL) |
+| `getRoute(startLat, startLng, endLat, endLng)` | Fetch driving route coordinates from OSRM; returns `[lat, lng][]` for the polyline |
+| `getCacheStatus()` | Debug info about the IndexedDB cache |
+| `matchLocation(locations, searchTerm)` | Find a location by name/tag |
+| `queryLocations(locations, options)` | Filter + sort by category, keyword, distance |
+| `getNearbyLocations(lat, lng, radius, options)` | Get locations within radius km |
 
-**Error Responses:**
-- `500 Internal Server Error`: Database query failed
+### 4.3 `src/services/reviewsService.js`
 
----
+| Function | Description |
+|----------|-------------|
+| `getLocationReviews(locationId)` | Fetch all reviews for a location |
+| `submitLocationReview(review)` | Create or update a review (upsert on `location_id + user_id`) |
 
-### 3.2 GET /api/sync/status
-
-Check the status of the last OpenStreetMap synchronization.
-
-**Endpoint:**
-```
-GET http://localhost:3000/api/sync/status
-```
-
-**Parameters:** None
-
-**Response (200 OK - Previous Sync Exists):**
-```json
-{
-  "id": 1,
-  "synced_at": "2026-04-10T12:00:00.000Z",
-  "added": 5,
-  "updated": 2,
-  "unchanged": 143,
-  "total": 150
-}
-```
-
-**Response (200 OK - No Previous Sync):**
-```json
-{
-  "message": "No sync has been run yet"
-}
-```
-
-**Response Schema - Sync Metadata:**
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `id` | integer | Primary key | `1` |
-| `synced_at` | string | ISO 8601 timestamp | `"2026-04-10T12:00:00.000Z"` |
-| `added` | integer | New locations added | `5` |
-| `updated` | integer | Existing locations updated | `2` |
-| `unchanged` | integer | Unchanged locations | `143` |
-| `total` | integer | Total locations in database | `150` |
-
-**Error Responses:**
-- `500 Internal Server Error`: Database query failed
-
----
-
-### 3.3 POST /api/sync
-
-Manually trigger an OpenStreetMap data synchronization.
-
-**Endpoint:**
-```
-POST http://localhost:3000/api/sync
-```
-
-**Parameters:** None (empty request body)
-
-**Request Body:** Empty (no JSON required)
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "result": {
-    "added": 5,
-    "updated": 2,
-    "unchanged": 143,
-    "total": 150,
-    "timestamp": "2026-04-11T10:30:00.000Z"
-  }
-}
-```
-
-**Response Schema - Sync Result:**
-| Field | Type | Description | Example |
-|-------|------|-------------|---------|
-| `success` | boolean | Indicates success | `true` |
-| `result.added` | integer | New locations inserted | `5` |
-| `result.updated` | integer | Existing locations modified | `2` |
-| `result.unchanged` | integer | Unchanged locations | `143` |
-| `result.total` | integer | Total locations processed | `150` |
-| `result.timestamp` | string | ISO 8601 completion time | `"2026-04-11T10:30:00.000Z"` |
-
-**Error Response (500):**
-```json
-{
-  "success": false,
-  "error": "Failed to fetch from Overpass API"
-}
-```
-
----
-
-## 4. Internal Functions
-
-These functions are used internally by the server and are not exposed as HTTP endpoints.
-
-### 4.1 fetchOSMLocations()
-
-Fetches location data from the OpenStreetMap Overpass API.
-
-**File:** `server/sync.js`
-
-**Function Signature:**
-```javascript
-const fetchOSMLocations = async () => { ... }
-```
-
-**Returns:** `Promise<Array>` - Array of OSM elements with names
-
-**Process:**
-1. Sends a POST request to `https://overpass-api.de/api/interpreter`
-2. Queries for amenities, shops, and tourism points in Miagao area
-3. Filters elements to only include those with names
-
-**Overpass Query:**
-```javascript
-const query = `
-  [out:json][timeout:25];
-  area[name="Miagao"]->.searchArea;
-  (
-    node["amenity"](area.searchArea);
-    node["shop"](area.searchArea);
-    node["tourism"](area.searchArea);
-    way["amenity"](area.searchArea);
-    way["shop"](area.searchArea);
-    way["tourism"](area.searchArea);
-    relation["amenity"](area.searchArea);
-    relation["shop"](area.searchArea);
-    relation["tourism"](area.searchArea);
-  );
-  out center;
-`;
-```
-
-**Data Extracted:**
-| Field | Source | Description |
-|-------|--------|-------------|
-| `lat` | `el.lat` or `el.center.lat` | Latitude |
-| `lon` | `el.lon` or `el.center.lon` | Longitude |
-| `name` | `el.tags.name` | Location name |
-| `address` | `el.tags["addr:full"]` or `el.tags["addr:street"]` | Address |
-| `type` | `el.tags.amenity` or `el.tags.shop` or `el.tags.tourism` | Category |
-| `opening_hours` | `el.tags.opening_hours` | Operating hours |
-| `phone` | `el.tags.phone` | Contact phone |
-
----
-
-### 4.2 syncLocations()
-
-Main synchronization function that fetches OSM data and updates the SQLite database.
-
-**File:** `server/sync.js`
-
-**Function Signature:**
-```javascript
-const syncLocations = async () => { ... }
-```
-
-**Returns:** `Promise<Object>` - Sync summary object
-
-**Process:**
-
-1. **Fetch Data** - Calls `fetchOSMLocations()` to get OSM elements
-
-2. **Process Each Location:**
-   ```javascript
-   for (const el of elements) {
-     // Extract location data
-     const lat = el.lat ?? el.center?.lat;
-     const lon = el.lon ?? el.center?.lon;
-     const name = el.tags?.name;
-     const address = el.tags?.["addr:full"] || el.tags?.["addr:street"] || "Miagao, Iloilo";
-     const type = el.tags?.amenity || el.tags?.shop || el.tags?.tourism || "unknown";
-     
-     // Determine location type
-     const locationType = type === "university" || type === "school" || type === "college" 
-       ? "campus" 
-       : "community";
-   }
-   ```
-
-3. **Database Operations:**
-   - **INSERT** - If `osm_id` doesn't exist in database
-   - **UPDATE** - If data has changed (name, lat, lon, address, or location_type)
-   - **UNCHANGED** - If no changes detected
-
-4. **Record Sync Metadata:**
-   ```javascript
-   db.prepare(`
-     INSERT INTO sync_metadata (synced_at, added, updated, unchanged, total)
-     VALUES (?, ?, ?, ?, ?)
-   `).run(timestamp, added, updated, unchanged, elements.length);
-   ```
-
-**Returns:**
+**Review shape:**
 ```javascript
 {
-  added: number,    // New locations inserted
-  updated: number,  // Existing locations updated
-  unchanged: number, // No changes detected
-  total: number,    // Total elements fetched
-  timestamp: string // ISO 8601 timestamp
+  locationId: number,
+  userId: string,
+  userName: string,
+  rating: number,    // 1-5
+  comment: string,
 }
 ```
 
----
+### 4.4 `src/services/storageService.js`
 
-### 4.3 autoSync()
+| Function | Description |
+|----------|-------------|
+| `uploadPinImage(file, userId)` | Upload pin image to `location-images` bucket, returns public URL |
 
-Internal function that runs automatically on server startup and every 24 hours.
+### 4.5 `src/services/geocoding.js`
 
-**File:** `server/index.js`
+| Function | Description |
+|----------|-------------|
+| `reverseGeocode(lat, lng, options?)` | Reverse geocode via Nominatim; returns address string; supports AbortSignal |
 
-**Function:**
-```javascript
-const autoSync = async () => {
-  const last = db.prepare(
-    'SELECT * FROM sync_metadata ORDER BY id DESC LIMIT 1'
-  ).get();
+### 4.6 `src/services/locationAdapter.js`
 
-  if (!last) {
-    console.log("⚡ No previous sync found, running initial sync...");
-    await syncLocations();
-    return;
-  }
+| Function | Description |
+|----------|-------------|
+| `normalizeOpenStreetLocation(loc)` | Maps a Supabase OSM row to `UnifiedLocation` shape |
+| `normalizeUserLocation(loc)` | Maps a user pin row to `UnifiedLocation` shape |
+| `createUnifiedLocations(public, user)` | Merges both arrays into one unified list |
 
-  const lastSyncTime = new Date(last.synced_at).getTime();
-  const now = Date.now();
-  const hoursSinceLastSync = (now - lastSyncTime) / (1000 * 60 * 60);
+**UnifiedLocation shape:**
 
-  if (hoursSinceLastSync >= 24) {
-    console.log(`⏰ Last sync was ${hoursSinceLastSync.toFixed(1)} hours ago, syncing now...`);
-    await syncLocations();
-  } else {
-    console.log(`✅ Last sync was ${hoursSinceLastSync.toFixed(1)} hours ago, no sync needed`);
-  }
-};
+```typescript
+{
+  id: string;              // "osm-42" or "user-7"
+  recordId: number | null;
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+  address: string;
+  tags: string[];
+  source: 'OSM' | 'USER';
+  locationType: string;
+  openingHours: string[];
+  contactInfo: string[];
+  images: string[];
+  imageUrl: string | null;
+  description: string | null;
+  rawData: object;
+}
 ```
-
-**Behavior:**
-- If no previous sync exists → runs initial sync
-- If last sync was > 24 hours ago → runs sync
-- Otherwise → skips sync
 
 ---
 
 ## 5. Database Schema
 
-### 5.1 Table: openstreets_static_locations
+### 5.1 `openstreets_static_locations`
 
-Stores all location data synced from OpenStreetMap.
+Public location data sourced from OpenStreetMap.
 
-**Creation SQL:**
-```sql
-CREATE TABLE IF NOT EXISTS openstreets_static_locations (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  osm_id TEXT UNIQUE,
-  name TEXT,
-  latitude REAL,
-  longitude REAL,
-  address TEXT,
-  tags TEXT,
-  opening_hours TEXT,
-  contact_info TEXT,
-  location_type TEXT,
-  services TEXT,
-  images TEXT,
-  additional_info TEXT
-);
-```
-
-**Columns:**
-| Column | Type | Description | Constraints |
-|--------|------|-------------|-------------|
-| `id` | INTEGER | Primary key | AUTOINCREMENT |
-| `osm_id` | TEXT | OSM feature ID | UNIQUE |
-| `name` | TEXT | Location name | |
-| `latitude` | REAL | Latitude coordinate | |
-| `longitude` | REAL | Longitude coordinate | |
-| `address` | TEXT | Full address | |
-| `tags` | TEXT | JSON array of tags | |
-| `opening_hours` | TEXT | JSON array of hours | |
-| `contact_info` | TEXT | JSON array of contacts | |
-| `location_type` | TEXT | "campus" or "community" | |
-| `services` | TEXT | JSON array of services | |
-| `images` | TEXT | JSON array of image URLs | |
-| `additional_info` | TEXT | Extra metadata | |
-
----
-
-### 5.2 Table: sync_metadata
-
-Stores synchronization history.
-
-**Creation SQL:**
-```sql
-CREATE TABLE IF NOT EXISTS sync_metadata (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  synced_at TEXT,
-  added INTEGER,
-  updated INTEGER,
-  unchanged INTEGER,
-  total INTEGER
-);
-```
-
-**Columns:**
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | INTEGER | Primary key |
-| `synced_at` | TEXT | ISO 8601 timestamp |
-| `added` | INTEGER | New locations added |
-| `updated` | INTEGER | Locations updated |
-| `unchanged` | INTEGER | Unchanged locations |
-| `total` | INTEGER | Total locations processed |
+| `id` | integer | Primary key |
+| `name` | text | Location name |
+| `latitude` | float | Latitude |
+| `longitude` | float | Longitude |
+| `address` | text | Full address |
+| `tags` | text[] | Category tags (e.g. `["restaurant", "food"]`) |
+| `opening_hours` | text[] | Hours strings |
+| `contact_info` | text[] | Email/phone strings |
+| `location_type` | text | `"campus"` or `"community"` |
+| `services` | text[] | Services offered |
+| `images` | text[] | Image URLs |
+| `additional_info` | jsonb | Extra metadata |
+
+### 5.2 `user_locations`
+
+Personal pins created by authenticated users.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | uuid | Primary key |
+| `user_id` | uuid | FK → auth.users |
+| `location_name` | text | Pin name |
+| `address` | text | Address |
+| `latitude` | float | Latitude |
+| `longitude` | float | Longitude |
+| `description` | text | Optional description |
+| `tags` | text[] | User-defined tags |
+| `image_url` | text | URL of uploaded image |
+
+### 5.3 `users`
+
+Public user profile data (synced from Supabase Auth).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | uuid | FK → auth.users |
+| `name` | text | Display name |
+| `email` | text | Email address |
+
+### 5.4 `location_reviews`
+
+Community reviews for public locations.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | uuid | Primary key |
+| `location_id` | integer | FK → openstreets_static_locations.id |
+| `user_id` | uuid | FK → auth.users |
+| `reviewer_name` | text | Display name at time of review |
+| `rating` | integer | 1–5 stars |
+| `comment` | text | Review text |
+| `created_at` | timestamptz | Creation time |
+| `updated_at` | timestamptz | Last update time |
+
+**Unique constraint:** `(location_id, user_id)` — one review per user per location (upsert).
 
 ---
 
 ## 6. Authentication
 
-### 6.1 Express API (Backend)
-
-The Express API endpoints **do not require authentication** (public endpoints):
-
-| Endpoint | Method | Authentication Required |
-|----------|--------|-------------------------|
-| `/api/locations` | GET | No |
-| `/api/sync/status` | GET | No |
-| `/api/sync` | POST | No |
-
-> **Note:** For production deployment, consider adding API key authentication.
-
-### 6.2 Supabase (Frontend User Data)
-
-User authentication and personal data are handled by Supabase on the frontend:
+User authentication is handled entirely by **Supabase Auth**.
 
 ```javascript
-import { createClient } from "@https://esm.sh/@supabase/supabase-js@2";
+import { supabase } from './services/supabase';
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+// Sign up
+await supabase.auth.signUp({ email, password, options: { data: { display_name: name } } });
+
+// Sign in
+await supabase.auth.signInWithPassword({ email, password });
+
+// Sign out
+await supabase.auth.signOut();
+
+// Get current user
+const { data } = await supabase.auth.getSession();
+const user = data.session?.user ?? null;
 ```
 
-**Environment Variables Required:**
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
+The Express backend does **not** validate user tokens — it is used only for Casie AI and routing. Personal data endpoints (pins, reviews) rely on Supabase Row Level Security (RLS).
 
 ---
 
 ## 7. Error Handling
 
-### 7.1 HTTP Status Codes
+### HTTP Status Codes
 
-| Status Code | Meaning | Description |
-|-------------|---------|-------------|
-| `200` | OK | Request succeeded |
-| `400` | Bad Request | Malformed request |
-| `500` | Internal Server Error | Server-side error |
+| Status | Meaning |
+|--------|---------|
+| `200` | Success |
+| `400` | Bad request (missing required field) |
+| `429` | Rate limit exceeded |
+| `500` | Server error |
+| `503` | Service unavailable (e.g. routing not configured) |
 
-### 7.2 Error Response Format
-
-All errors follow a consistent JSON format:
+### Error Response Format
 
 ```json
-{
-  "success": false,
-  "error": "Error message description"
-}
+{ "error": "Human-readable error message" }
 ```
 
-### 7.3 Common Error Messages
+### Frontend Error Mapping (useCasie.js)
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `"Failed to fetch from Overpass API"` | Overpass API unavailable or timeout | Check internet, try again later |
-| `"No sync has been run yet"` | Database empty, no prior sync | Call `POST /api/sync` |
-| `"SQLITE_CANTOPEN: unable to open database file"` | Database file not found | Ensure `server/database.db` exists |
-
-### 7.4 Error Handling in Code
-
-```javascript
-async function fetchLocations() {
-  try {
-    const response = await fetch('http://localhost:3000/api/locations');
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || `HTTP ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error('Error:', err.message);
-    throw err;
-  }
-}
-```
+| Error string | User-facing message |
+|--------------|-------------------|
+| `429` / `quota` / `rate` | "You've sent too many messages. Please wait a moment." |
+| `network` / `fetch` | "Unable to connect. Check your internet connection." |
+| `api key` / `permission` | "AI is not configured correctly." |
 
 ---
 
 ## 8. Rate Limits
 
-### 8.1 Endpoint Limits
+### Express Backend
 
 | Endpoint | Limit | Window |
 |----------|-------|--------|
-| `GET /api/locations` | 100 requests | 1 minute |
-| `GET /api/sync/status` | 60 requests | 1 minute |
-| `POST /api/sync` | 10 requests | 1 minute |
+| `POST /api/cassie` | 40 requests | 15 minutes |
+| All others | Unlimited | — |
 
-### 8.2 Overpass API Limits
+### Client-side (useCasie.js)
 
-The Overpass API has its own rate limits:
-- **Timeout:** 25 seconds per request
-- **Recommended:** Do not exceed 1 sync per minute
+| Limit | Value |
+|-------|-------|
+| Min time between messages | 2 seconds |
+| Daily message cap | 50 messages |
+| Max input length | 500 characters |
 
-### 8.3 Handling 429 (Rate Limited)
+### Nominatim (Geocoding)
 
-```javascript
-async function fetchWithRetry(url, retries = 3) {
-  for (let i = 0; i < retries; i++) {
-    const response = await fetch(url);
-    
-    if (response.status === 429) {
-      const waitTime = Math.pow(2, i) * 1000;
-      console.log(`Rate limited. Waiting ${waitTime}ms...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-      continue;
-    }
-    
-    return response;
-  }
-  throw new Error('Max retries exceeded');
-}
-```
+Per Nominatim usage policy: max 1 request/second, no bulk requests. The app uses AbortController to cancel pending geocoding requests when the pin form is closed.
 
 ---
 
 ## 9. Code Examples
 
-### 9.1 JavaScript - Fetch All Locations
+### 9.1 Fetch public locations (with cache)
 
 ```javascript
-async function getLocations() {
-  const response = await fetch('http://localhost:3000/api/locations');
-  
-  if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`);
-  }
-  
-  return response.json();
-}
+import { getStaticLocations } from './services/locations';
+import { supabase } from './services/supabase';
 
-// Usage
-const locations = await getLocations();
-console.log(`Found ${locations.length} locations`);
+const locations = await getStaticLocations(supabase);
+// Returns from IndexedDB if fresh (<24h), otherwise fetches from Supabase
+```
 
-// Parse JSON fields
-locations.forEach(loc => {
-  console.log(loc.name, '- Tags:', JSON.parse(loc.tags));
+### 9.2 Submit a review
+
+```javascript
+import { submitLocationReview } from './services/reviewsService';
+
+await submitLocationReview({
+  locationId: 42,
+  userId: user.id,
+  userName: user.user_metadata?.display_name ?? user.email,
+  rating: 5,
+  comment: 'Great place!',
 });
 ```
 
-### 9.2 JavaScript - Check Sync Status
+### 9.3 Create a personal pin with image
 
 ```javascript
-async function getSyncStatus() {
-  const response = await fetch('http://localhost:3000/api/sync/status');
-  return response.json();
-}
+import { uploadPinImage } from './services/storageService';
+import { addPinnedLocationToDB } from './services/supabase';
 
-// Usage
-const status = await getSyncStatus();
-if (status.message) {
-  console.log(status.message);
-} else {
-  console.log(`Last sync: ${status.synced_at}`);
-  console.log(`Total locations: ${status.total}`);
-}
+const imageUrl = await uploadPinImage(file, user.id);
+await addPinnedLocationToDB(user.id, {
+  locationName: 'My Spot',
+  address: 'Miagao, Iloilo',
+  latitude: 10.6419,
+  longitude: 122.2354,
+  description: 'My favorite study corner',
+  tags: ['study', 'quiet'],
+  imageUrl,
+});
 ```
 
-### 9.3 JavaScript - Trigger Manual Sync
+### 9.4 Reverse geocode a coordinate
 
 ```javascript
-async function triggerSync() {
-  const response = await fetch('http://localhost:3000/api/sync', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
-  
-  const result = await response.json();
-  
-  if (!result.success) {
-    throw new Error(result.error);
-  }
-  
-  return result.result;
-}
+import { reverseGeocode } from './services/geocoding';
 
-// Usage
-const syncResult = await triggerSync();
-console.log(`Added: ${syncResult.added}`);
-console.log(`Updated: ${syncResult.updated}`);
-console.log(`Total: ${syncResult.total}`);
+const controller = new AbortController();
+const address = await reverseGeocode(10.6419, 122.2354, { signal: controller.signal });
+// → "University of the Philippines Visayas, Miagao, Iloilo, Philippines"
+
+// Cancel if needed:
+controller.abort();
 ```
 
-### 9.4 cURL Examples
-
-**Get all locations:**
-```bash
-curl -X GET http://localhost:3000/api/locations
-```
-
-**Get sync status:**
-```bash
-curl -X GET http://localhost:3000/api/sync/status
-```
-
-**Trigger manual sync:**
-```bash
-curl -X POST http://localhost:3000/api/sync
-```
-
-### 9.5 React Integration Example
-
-```jsx
-import { useState, useEffect } from 'react';
-
-function LocationList() {
-  const [locations, setLocations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    fetch('http://localhost:3000/api/locations')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch');
-        return res.json();
-      })
-      .then(data => {
-        setLocations(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-
-  return (
-    <ul>
-      {locations.map(loc => (
-        <li key={loc.id}>
-          <strong>{loc.name}</strong> - {loc.address}
-          <br />
-          <small>Type: {loc.location_type}</small>
-        </li>
-      ))}
-    </ul>
-  );
-}
-```
-
-### 9.6 Complete Sync Workflow
+### 9.5 Chat with Casie (direct service call)
 
 ```javascript
-async function initializeAndSync() {
-  console.log('Checking sync status...');
-  
-  // Check last sync
-  const statusRes = await fetch('http://localhost:3000/api/sync/status');
-  const status = await statusRes.json();
-  
-  if (status.message === 'No sync has been run yet') {
-    console.log('No previous sync. Triggering initial sync...');
-    const syncRes = await fetch('http://localhost:3000/api/sync', {
-      method: 'POST'
-    });
-    const syncResult = await syncRes.json();
-    console.log('Initial sync complete:', syncResult.result);
-  } else {
-    console.log('Last sync:', status.synced_at);
-    console.log('Total locations:', status.total);
-  }
-  
-  // Fetch locations
-  const locationsRes = await fetch('http://localhost:3000/api/locations');
-  const locations = await locationsRes.json();
-  console.log(`Loaded ${locations.length} locations`);
-  
-  return locations;
-}
+import { sendToCasie, clearCasieHistory } from './services/cassieService';
+
+let sessionId = null;
+
+const response = await sendToCasie({
+  message: 'Find pharmacies',
+  sessionId,
+  context: { currentPage: 'MAP', userLocation: { lat: 10.64, lng: 122.23 } },
+});
+
+sessionId = response.sessionId;
+console.log(response.message);   // Natural language reply
+console.log(response.places);    // Array of matching locations
+```
+
+### 9.6 cURL — Test Casie
+
+```bash
+curl -X POST http://localhost:3000/api/cassie \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Where is the library?"}'
+```
+
+### 9.7 cURL — Get directions
+
+```bash
+curl -X POST http://localhost:3000/api/directions \
+  -H "Content-Type: application/json" \
+  -d '{"startLat":10.641944,"startLng":122.235556,"endLat":10.645,"endLng":122.238}'
 ```
 
 ---

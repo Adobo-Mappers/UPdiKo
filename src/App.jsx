@@ -1,52 +1,70 @@
-import { useState } from 'react';
-import MapSection from './pages/map/MapSection.jsx';
-import HomeSection from './pages/home/HomeSection.jsx';
-import AccountSection from './pages/account/AccountSection.jsx';
-import LoginSection from './pages/auth/LoginSection.jsx';
-import RegisterSection from './pages/auth/RegisterSection.jsx';
-import ForgetPassSection from './pages/auth/ForgetPassSection.jsx';
-import AccountInfoSection from './pages/account/AccountInfoSection.jsx';
-import AccountUpdateSection from './pages/account/AccountUpdateSection.jsx';
-import PersonalPinSection from './pages/map/PersonalPinSection.jsx';
-import CassieSection from './pages/cassie/CassieSection.jsx';
+import './App.css';
 
-function App() {
-    const [section, setSection] = useState("HOME");
-    
-    const [service, setService] = useState(null);
+import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-    const [showCasie, setShowCasie] = useState(false);
+import { Footer } from './components/ui';
+import { supabase, getCurrentUser } from './services/supabase';
 
-    const [navigateToLocation, setNavigateToLocation] = useState(null);
+// B1 pages (base)
+import ServicesPage from './pages/services/ServicesPage/ServicesPage';
+import ServiceCategoryPage from './pages/services/ServiceCategoryPage/ServicesCategoryPage.jsx';
+import ServiceInfoPage from './pages/services/ServiceInfoPage/ServiceInfoPage';
+import MapPage from './pages/map/MapPage/MapPage';
+import LoginPage from './pages/account/LoginPage/LoginPage';
+import RegisterPage from './pages/account/RegisterPage/RegisterPage';
+import ForgotPasswordPage from './pages/account/ForgotPasswordPage/ForgotPasswordPage';
+import AccountPage from './pages/account/AccountPage/AccountPage';
+import LabPage from './pages/lab/Lab';
 
-    const handleNavigateToLocation = (place) => {
-        setService(place);
-        setShowCasie(false);
-    };
+// B2 new pages
+import AccountUpdatePage from './pages/account/AccountUpdatePage/AccountUpdatePage';
+import PersonalPinsPage from './pages/account/PersonalPinsPage/PersonalPinsPage';
 
-    /**
-     * These are the routes or logic for the currently renderd page.
-     */
-    switch (section) {
-    case "HOME":
-        return <HomeSection setAppSection={setSection} setAppService={setService} />;
-    case "MAP":
-        return <MapSection setAppSection={setSection} service={service} setAppService={setService} />;
-    case "ACCOUNT":
-        return <AccountSection setAppSection={setSection} />;
-    case "ACCOUNT-UPDATE": 
-        return <AccountUpdateSection setAppSection={setSection} />;
-    case "LOGIN":
-        return <LoginSection setAppSection={setSection} />;
-    case "REGISTER":
-        return <RegisterSection setAppSection={setSection} />;
-    case "FORGET-PASS":
-        return <ForgetPassSection setAppSection={setSection} />;
-    case "PERSONAL-PIN":
-        return <PersonalPinSection setAppSection={setSection} setAppService={setService} />;
-    default:
-        return <HomeSection setAppSection={setSection} setAppService={setService} />; // Fallback
-    }
+const queryClient = new QueryClient();
+
+export default function App() {
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        getCurrentUser().then(setUser);
+    }, []);
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <div className="app">
+                <BrowserRouter>
+                    <Routes>
+                        {/* Default → services */}
+                        <Route path='/' element={<Navigate to='/service/' />} />
+
+                        {/* Services */}
+                        <Route path='/service/' element={<ServicesPage />} />
+                        <Route path='/service/:category' element={<ServiceCategoryPage/>} />
+                        <Route path='/service/:category/:id' element={<ServiceInfoPage/>} />
+
+                        {/* Map */}
+                        <Route path='/map/' element={<MapPage />} />
+                        <Route path='/map/:id' element={<MapPage />} />
+
+                        {/* Account */}
+                        <Route path='/account' element={user ? <AccountPage /> : <Navigate to='/account/login' />} />
+                        <Route path='/account/login' element={<LoginPage />} />
+                        <Route path='/account/register' element={<RegisterPage />} />
+                        <Route path='/account/forgot-password' element={<ForgotPasswordPage />} />
+
+                        {/* B2 new account pages */}
+                        <Route path='/account/update' element={<AccountUpdatePage />} />
+                        <Route path='/account/pins' element={<PersonalPinsPage />} />
+
+                        {/* Dev */}
+                        <Route path='/lab' element={<LabPage />} />
+
+                        <Route path='*' element={<Navigate to='/service/' />} />
+                    </Routes>
+                    <Footer />
+                </BrowserRouter>
+            </div>
+        </QueryClientProvider>
+    );
 }
-
-export default App;

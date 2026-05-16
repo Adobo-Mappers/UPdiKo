@@ -1,53 +1,63 @@
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { useState, useEffect } from "react";
-import { getPinnedLocationsFromDB, getCurrentUser } from "../../services/supabase"; // will add events to pinned locations later
+import './Calendar.css';
+import ReactCalendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import { useState, useEffect } from 'react';
+import { Text, Heading, Caption } from '../typography';
+import { Icon } from '../ui';
+import { getPinnedLocationsFromDB, getCurrentUser } from '../../services/supabase';
 
-const CalendarView = () => {
+function CalendarView() {
     const [date, setDate] = useState(new Date());
-    const [events, setEvents] = useState([]);
+    const [pins, setPins] = useState([]);
 
+    // Load user's pinned locations to show on calendar
     useEffect(() => {
-        loadEvents();
+        const load = async () => {
+            try {
+                const user = await getCurrentUser();
+                if (user) {
+                    const locations = await getPinnedLocationsFromDB(user.id);
+                    setPins(locations);
+                }
+            } catch (error) {
+                console.error('Error loading pins for calendar:', error);
+            }
+        };
+        load();
     }, []);
 
-    const loadEvents = async () => {
-        try {
-        const user = await getCurrentUser();
-        if (user) {
-            const locations = await getPinnedLocationsFromDB(user.id);
-            const eventData = locations.map(loc => ({
-            title: loc.locationName,
-            start: new Date(), 
-            end: new Date(),
-            location: loc.address
-            }));
-            setEvents(eventData);
-        }
-        } catch (error) {
-        console.error('Error loading events:', error);
-        }
-    };
+    const selectedDateStr = date.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const pinsForDate = pins.filter(pin => {
+        // Show all pins on selected date for now — can be refined when pins get a date field
+        return true;
+    });
 
     return (
-        <div>
-        <h2>Upcoming Events</h2>
-        <Calendar 
-            value={date}
-            onChange={setDate}
-        />
-        {/* Display events list below calendar*/}
-        <div className="events-list">
-            {events.map(event => (
-            <div key={event.id} className="event-item">
-                <h3>{event.title}</h3>
-                <p>{event.location}</p>
-                <p>{event.start.toLocaleDateString()}</p>
+        <div className='calendar-widget'>
+            <Heading><em className='fw-bold'>Calendar</em></Heading>
+            <div className='calendar-container'>
+                <ReactCalendar
+                    value={date}
+                    onChange={setDate}
+                    className='updi-calendar'
+                />
             </div>
-            ))}
-        </div>
+            {pins.length > 0 && (
+                <div className='calendar-pins'>
+                    <Caption className='text-muted'>Your saved pins</Caption>
+                    {pinsForDate.map(pin => (
+                        <div key={pin.id} className='calendar-pin-item flex items-center gap-small'>
+                            <Icon name='map' size='small' />
+                            <div>
+                                <Text><em className='fw-bold'>{pin.locationName}</em></Text>
+                                <Caption className='text-muted'>{pin.address}</Caption>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
-};
+}
 
 export default CalendarView;
