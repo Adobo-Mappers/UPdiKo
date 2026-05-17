@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import LocationCards from './LocationCards';
 import { useCasie } from '../../hooks/useCasie.js';
 import chatIcon from '../../assets/images/icon/chatIcon.svg';
+import cassIcon from '../../assets/images/icon/cass-ai.png';
 import closeIcon from '../../assets/images/icon/x.svg';
 import nextIcon from '../../assets/images/icon/next-icon.png';
 import clearIcon from '../../assets/images/icon/broom.svg';
@@ -39,7 +40,7 @@ function CassieWidget({
         <div className="cassie-chat">
           <div className="cassie-header">
             <div className="cassie-header-info">
-              <img src={chatIcon} alt="Casie" className="cassie-avatar" />
+              <img src={chatIcon} style={{"filter" : "invert(1)"}} alt="Casie" className="cassie-avatar" />
               <div>
                 <h3>Casie</h3>
                 <span className="cassie-status">AI Assistant</span>
@@ -131,7 +132,7 @@ function CassieWidget({
         onClick={() => setIsOpen((previous) => !previous)}
         aria-label={isOpen ? 'Close Casie' : 'Open Casie'}
       >
-        <img src={isOpen ? closeIcon : chatIcon} alt={isOpen ? 'Close' : 'Chat'} />
+        <img src={isOpen ? closeIcon : cassIcon} alt={isOpen ? 'Close' : 'Chat'} />
       </button>
     </div>
   );

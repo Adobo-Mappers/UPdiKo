@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InputField, Dropdown } from './../../../components/form/';
 import { Heading, Text, Title } from './../../../components/typography/';
-import { Icon, Card, Profile } from './../../../components/ui/';
+import { Icon, Card } from './../../../components/ui/';
 import { getCurrentUser } from './../../../services/supabase.js';
 import { hasServiceCache, fetchServicesFromServer, getAllServicesFromCache } from './../../../services/service-handler.js';
 import { usePublicLocations } from '../../../hooks/useUnifiedLocations.js';
@@ -19,7 +19,7 @@ export default function ServicesPage() {
     useEffect(() => {
         getCurrentUser().then(setUser);
     }, []);
-
+    
     const serviceCategories = useMemo(() => {
         return Object.entries(TAG_GROUPS).map(([groupName, groupData]) => ({
             groupName,
@@ -42,21 +42,19 @@ export default function ServicesPage() {
         ? categorySearch.search(trimmedSearchQuery).map((result) => result.item)
         : serviceCategories;
 
+    console.log(filteredCategories);
     return (
         <div className='services-page'>
-            <header className='flex justify-end px-large py-medium'>
-                <Profile user={user} />
-            </header>
+            <div className='flex gap-medium my-medium'>
+                <WeatherView />
+                {/* <EventDisplay /> */}
+            </div>
+
             <main className='p-large'>
-                <Title>Good Day <span className='text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</span></Title>
+                <Title>Good Day <br/><span className='text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</span></Title>
                 <Heading>What services do you want to find.</Heading>
 
                 {/* Weather + Event cards side by side — matches design */}
-                <div className='flex gap-medium my-medium'>
-                    <WeatherView />
-                    <EventDisplay />
-                </div>
-
                 <div className='my-large'>
                     <InputField
                         className='border-roundify py-medium'
@@ -70,14 +68,13 @@ export default function ServicesPage() {
                 <div id="service-list" className='gap-medium overflow-y'>
                     {filteredCategories.map(({ groupName, description }) => (
                         <Link key={groupName} to={`/service/${groupName}/`} className='text-inherit'>
-                            <div className="my-medium bg-component px-large py-medium border-rounded">
+                            <div className="my-medium bg-component px-xlarge py-large border-roundify">
                                 <Heading>{groupName}</Heading>
                                 <Text className='fw-regular'>{description}</Text>
                             </div>
                         </Link>
                     ))}
                 </div>
-
             </main>
         </div>
     );

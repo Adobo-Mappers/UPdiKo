@@ -10,7 +10,7 @@ import "leaflet-rotate";
 
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
+import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
 
 // Placeholder Icons from Leaflet
@@ -58,9 +58,8 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, addPinnedLocationToDB, supabase, getCurrentUser } from "../../../services/supabase.js";
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from "../../../services/reviewsService.js";
-import Yu from './../../../assets/images/profile/profile.jpg'
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
 
 
@@ -512,33 +511,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeDestination, setRouteDestination] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
-
-  // States for saving — wired to addPinnedLocationToDB
-  const [isSaved, setSaved] = useState(false);
-  const [isSavingPin, setIsSavingPin] = useState(false);
-
-  async function toggleSaveButton() {
-    if (!user || !selectedMarkerInfo || isSavingPin) return;
-    if (isSaved) { setSaved(false); return; }
-    setIsSavingPin(true);
-    try {
-      await addPinnedLocationToDB(user.id, {
-        locationName: selectedMarkerInfo.name,
-        address: selectedMarkerInfo.address || 'Miagao, Iloilo',
-        latitude: parseFloat(selectedMarkerInfo.latitude),
-        longitude: parseFloat(selectedMarkerInfo.longitude),
-        description: selectedMarkerInfo.additional_info?.text_based?.[0] || '',
-        tags: selectedMarkerInfo.tags || [],
-        imageUrl: selectedMarkerInfo.images?.[0] || null,
-      });
-      setSaved(true);
-    } catch (e) {
-      console.error('Save pin failed:', e);
-    } finally {
-      setIsSavingPin(false);
-    }
-  }
-
   // user auth
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true); 
@@ -632,37 +604,53 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
   const mapZoom = userLocation?.zoom || 16;
 
-  // for dragging
+  // Bottom-sheet drag state for the marker info panel.
   const dragY = useRef(0);
   const startY = useRef(null);
+  const isDraggingPanel = useRef(false);
   const panelRef = useRef(null);
 
   function onDragStart(e) {
-      startY.current = e.touches?.[0]?.clientY ?? e.clientY;
-      panelRef.current.style.transition = 'none';
+      startY.current = e.clientY;
+      isDraggingPanel.current = true;
+      dragY.current = 0;
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+
+      if (panelRef.current) {
+          panelRef.current.style.transition = 'none';
+      }
   }
 
   function onDragMove(e) {
-      if (startY.current === null) return;
-      const delta = (e.touches?.[0]?.clientY ?? e.clientY) - startY.current;
-      if (delta < 0) return; // block dragging up
+      if (!isDraggingPanel.current || startY.current === null || !panelRef.current) return;
+
+      const delta = Math.max(0, e.clientY - startY.current);
       dragY.current = delta;
       panelRef.current.style.transform = `translateY(${delta}px)`;
   }
 
-  function onDragEnd() {
-    setSelectedMarkerInfo(null);
-      if (dragY.current > 200) {
+  function onDragEnd(e) {
+      if (!isDraggingPanel.current || !panelRef.current) return;
+
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+      panelRef.current.style.transition = 'transform 0.25s ease';
+
+      if (dragY.current > 140) {
+          panelRef.current.style.transform = 'translateY(100%)';
+          setTimeout(() => {
+              setSelectedMarkerInfo(null);
+              navigate('/map');
+          }, 200);
       } else {
-          panelRef.current.style.transition = 'transform 0.3s ease';
           panelRef.current.style.transform = 'translateY(0)';
       }
+
       dragY.current = 0;
       startY.current = null;
+      isDraggingPanel.current = false;
+
   }
 
-
-  
   // Function to handle the marker click logic
   const handleMarkerClick = (data, lat, lng, shouldRoute = false) => {
       // 1. Set the selected marker info panel
@@ -880,6 +868,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     return communityIcon;
   };
 
+  const isLocationVisibleForActiveTag = (location) => {
+    if (activeTag === 'All') return true;
+    const allowedTags = TAG_GROUPS[activeTag]?.tags || [];
+    const tags = Array.isArray(location.tags)
+      ? location.tags.map((tag) => String(tag).toLowerCase())
+      : [];
+    return tags.some((tag) => allowedTags.includes(tag));
+  };
+
   return (
     <div className="MapView">
       <MapContainer 
@@ -949,18 +946,14 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         {/* <Marker position={center}>
           <Popup>You are here</Popup>
         </Marker> */}
-        {pinnedLocations.map((pin) => (
+        {pinnedLocations.filter(isLocationVisibleForActiveTag).map((pin) => (
           <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={customIcon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
             {/* <Popup>{pin.name}</Popup> */}
           </Marker>
         ))}
         {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
        {staticLocations
-          .filter(pin => {
-              if (activeTag === "All") return true;
-              const allowedTags = TAG_GROUPS[activeTag]?.tags || [];
-              return (pin.tags || []).some(tag => allowedTags.includes(tag));
-          })
+          .filter(isLocationVisibleForActiveTag)
           .filter(shouldShowMarker)
           .filter(facility => {
             const lat = parseFloat(facility.latitude);
@@ -998,7 +991,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                         key={n}
                         name={reviewRating >= n ? 'star' : 'darkstar'}
                         size='large'
-                        className='cursor-pointer's
+                        className='cursor-pointer'
                         onClick={() => setReviewRating(n)}
                     />
                 ))}
@@ -1028,15 +1021,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         <div className="marker-info p-large" ref={panelRef}>
 
           {/* Drag handle */}
-          <div
-            className="drag-handle"
-            onMouseDown={onDragStart}
-            onMouseMove={onDragMove}
-            onMouseUp={onDragEnd}
-            onTouchStart={onDragStart}
-            onTouchMove={onDragMove}
-            onTouchEnd={onDragEnd}
-          />
+          <div className="drag-region">
+            <div
+              className="drag-handle"
+              onPointerDown={onDragStart}
+              onPointerMove={onDragMove}
+              onPointerUp={onDragEnd}
+              onPointerCancel={onDragEnd}
+            />
+          </div>
 
           {/* Name + close */}
           
@@ -1046,22 +1039,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           </div>
 
           <div className="flex gap-small">
-            {/* Get Directions & Save Buttons*/}
+            {/* Get Directions */}
             <div className="my-small">
               <Button onClick={() => handleGetDirections(selectedMarkerInfo)}>
                 <Icon name="direction" size="small" />
                 <Caption>{isLoadingRoute ? "Loading..." : "Get Directions"}</Caption>
               </Button>
             </div>
-            
-            {user && (
-                <div className="my-small">
-                  <Button toggled={isSaved} onClick={toggleSaveButton} disabled={isSavingPin} className="items-center gap-small">
-                    <Icon name="save" size="small" />
-                    <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>
-                  </Button>
-                </div>
-            )}
             {user && (
                 <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
                     <Icon name="darkstar" size="small" />
@@ -1181,3 +1165,4 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   )
 };
 
+  

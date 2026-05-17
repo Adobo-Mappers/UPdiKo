@@ -17,11 +17,11 @@
 .cassie-toggle img { width: 24px; height: 24px; }
 
 .cassie-chat {
-    position: fixed;
-    bottom: calc(var(--footer-height) + 70px);
-    right: var(--space-large);
-    width: 320px;
-    max-height: 480px;
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + var(--space-small));
+    width: min(320px, calc(var(--screen-width) - (var(--space-large) * 2)));
+    max-height: min(480px, calc(100dvh - var(--footer-height) - 140px));
     background: white;
     border-radius: var(--border-rounded);
     box-shadow: 0 8px 32px rgba(0,0,0,0.2);

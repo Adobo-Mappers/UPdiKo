@@ -94,10 +94,6 @@ export default function AccountUpdatePage() {
                         className='border-roundify py-medium'
                     />
                 </div>
-
-                <div className='flex justify-center my-medium'>
-                    <Button width='200px' onClick={handleUpdate}>Save Changes</Button>
-                </div>
             </main>
 
             {showConfirm && (

@@ -13,7 +13,6 @@ import { reverseGeocode } from '../../../services/geocoding.js';
 import { uploadPinImage } from '../../../services/storageService.js';
 import CassieWidget from '../../../components/casie/CassieWidget.jsx';
 
-import Yu from './../../../assets/images/profile/profile.jpg';
 
 export default function MapPage() {
     // TODO: Map recenterings (the compass) requires two presses to recenter (the first tap will recenter, but succeding recenters need two taps :<)
@@ -40,8 +39,15 @@ export default function MapPage() {
 
     // searching services logic
     const [activeTag, setActiveTag] = useState('All');
+    const [isFilterOpen, setFilterOpen] = useState(false);
 
-
+    const activeCategoryTags = TAG_GROUPS[activeTag]?.tags || [];
+    const filterServiceByActiveTag = (service) => {
+        if (activeTag === 'All') return true;
+        if (!Array.isArray(service.tags)) return false;
+        const serviceTags = service.tags.map((tag) => String(tag).toLowerCase());
+        return serviceTags.some((tag) => activeCategoryTags.includes(tag));
+    };
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setSearching] = useState(false);
@@ -57,8 +63,8 @@ export default function MapPage() {
     }), [services]);
     const trimmedSearchQuery = searchQuery.trim();
     const filteredServices = trimmedSearchQuery
-        ? serviceSearch.search(trimmedSearchQuery).map((result) => result.item)
-        : services;
+        ? serviceSearch.search(trimmedSearchQuery).map((result) => result.item).filter(filterServiceByActiveTag)
+        : services.filter(filterServiceByActiveTag);
 
     // Search history (persisted to localStorage)
     const HISTORY_KEY = 'updi_search_history';
@@ -391,9 +397,6 @@ export default function MapPage() {
                             onChange={(e) => setPinImageFile(e.target.files?.[0] || null)}
                         />
                     </div>
-                    <div className='flex justify-end my-medium'>
-                        <Button onClick={handleAddPin}>Save Pin</Button>
-                    </div>
                 </section>
             }
 
@@ -415,16 +418,37 @@ export default function MapPage() {
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
-                    {!isSearching && <img className='border-circlify' src={Yu} alt="Yu Profile" width="36px" height="36px" />}
                 </div>
 
                 {!isSearching && (
-                    <div className="filter-dropdown-container flex justify-end">
-                        <select value={activeTag} onChange={(e) => setActiveTag(e.target.value)} className='bg-accent-softer border-none border-roundify py-small px-medium fw-bold' style={{"width":"150px"}}>
-                            {Object.entries(TAG_GROUPS).map(([name, data]) => (
-                                <option value={name}>{name}</option>
-                            ))}
-                        </select>
+                    <div className="filter-dropdown-container">
+                        <button
+                            type="button"
+                            className="filter-dropdown-trigger"
+                            onClick={() => setFilterOpen((open) => !open)}
+                        >
+                            <span className="filter-dropdown-label">
+                                <span>{activeTag}</span>
+                            </span>
+                        </button>
+
+                        {isFilterOpen && (
+                            <div className="filter-dropdown-menu">
+                                {Object.entries(TAG_GROUPS).map(([name, data]) => (
+                                    <button
+                                        key={name}
+                                        type="button"
+                                        className={`filter-dropdown-item ${activeTag === name ? 'active' : ''}`}
+                                        onClick={() => {
+                                            setActiveTag(name);
+                                            setFilterOpen(false);
+                                        }}
+                                    >
+                                        <span>{name}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </header>

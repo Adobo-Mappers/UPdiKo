@@ -6,8 +6,6 @@ import { Text } from '../../components/typography';
 import { useState } from 'react';
 
 
-import Yu from './../../assets/images/profile/profile.jpg'
-
 export default function LabPage() {
     const [activeTab, setActiveTab] = useState("");
     return (

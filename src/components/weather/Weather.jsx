@@ -1,10 +1,9 @@
 import './Weather.css';
 import { useEffect, useState } from 'react';
-import { Text, Caption } from '../typography';
 
 // WMO weather code → label
 function getWeatherLabel(code) {
-    if (code === 0) return 'Clear Sky';
+    if (code === 0) return 'Sunny Weather';
     if (code <= 2) return 'Partly Cloudy';
     if (code === 3) return 'Overcast';
     if (code <= 49) return 'Foggy';
@@ -46,13 +45,15 @@ function WeatherView() {
 
     if (!today) return null;
 
+    const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+
     return (
-        <div className='weather-card'>
-            <div className='weather-temp'>
-                <span className='weather-circle'>☀️</span>
-                <Text><em className='fw-bold'>{today.high}° C</em></Text>
+        <div className='weather-card mx-medium'>
+            <div className='weather-icon' aria-hidden='true'></div>
+            <div className='weather-copy'>
+                <h3 className='weather-title'>{getWeatherLabel(today.code)}</h3>
+                <p className='weather-day'>{dayName}</p>
             </div>
-            <Caption className='text-muted'>Today is {getWeatherLabel(today.code)}</Caption>
         </div>
     );
 }
