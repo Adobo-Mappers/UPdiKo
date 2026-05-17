@@ -1,5 +1,6 @@
 import './ServicesPage.css';
-import { useEffect, useState } from 'react';
+import Fuse from 'fuse.js';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InputField, Dropdown } from './../../../components/form/';
 import { Heading, Text, Title } from './../../../components/typography/';
@@ -14,9 +15,32 @@ import WeatherView from '../../../components/weather/Weather.jsx';
 export default function ServicesPage() {
     // user auth
     const [user, setUser] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     useEffect(() => {
         getCurrentUser().then(setUser);
     }, []);
+
+    const serviceCategories = useMemo(() => {
+        return Object.entries(TAG_GROUPS).map(([groupName, groupData]) => ({
+            groupName,
+            description: groupData.description,
+            tags: groupData.tags || [],
+        }));
+    }, []);
+    const categorySearch = useMemo(() => new Fuse(serviceCategories, {
+        keys: [
+            { name: 'groupName', weight: 2 },
+            { name: 'description', weight: 1 },
+            { name: 'tags', weight: 1 },
+        ],
+        threshold: 0.35,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+    }), [serviceCategories]);
+    const trimmedSearchQuery = searchQuery.trim();
+    const filteredCategories = trimmedSearchQuery
+        ? categorySearch.search(trimmedSearchQuery).map((result) => result.item)
+        : serviceCategories;
 
     return (
         <div className='services-page'>
@@ -33,12 +57,22 @@ export default function ServicesPage() {
                     <EventDisplay />
                 </div>
 
+                <div className='my-large'>
+                    <InputField
+                        className='border-roundify py-medium'
+                        icon='search'
+                        placeholder='Search services...'
+                        value={searchQuery}
+                        onChange={setSearchQuery}
+                    />
+                </div>
+
                 <div id="service-list" className='gap-medium overflow-y'>
-                    {Object.entries(TAG_GROUPS).map(([groupName, groupData]) => (
+                    {filteredCategories.map(({ groupName, description }) => (
                         <Link key={groupName} to={`/service/${groupName}/`} className='text-inherit'>
                             <div className="my-medium bg-component px-large py-medium border-rounded">
                                 <Heading>{groupName}</Heading>
-                                <Text className='fw-regular'>{groupData.description}</Text>
+                                <Text className='fw-regular'>{description}</Text>
                             </div>
                         </Link>
                     ))}

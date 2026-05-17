@@ -3,7 +3,8 @@ import { usePublicLocations } from '../../../hooks/useUnifiedLocations.js';
 import { Heading, Text, Title } from '../../../components/typography/index.js';
 import { Icon, Card, Profile } from '../../../components/ui/index.js';
 import { InputField } from '../../../components/form/';
-import { useState, useEffect } from 'react';
+import Fuse from 'fuse.js';
+import { useState, useEffect, useMemo } from 'react';
 import { getCurrentUser } from '../../../services/supabase.js';
 import { TAG_GROUPS } from '../../../utils/servicecoding.js';
 
@@ -19,19 +20,27 @@ export default function ServiceCategoryPage() {
 
     const groupData = TAG_GROUPS[category];
     const allowedTags = groupData?.tags || [];
+    const categoryServices = useMemo(() => {
+        return services?.filter((service) => {
+            return category === "All" ||
+                (Array.isArray(service.tags) && service.tags.some(tag => allowedTags.includes(tag)));
+        }) || [];
+    }, [services, category, allowedTags]);
+    const serviceSearch = useMemo(() => new Fuse(categoryServices, {
+        keys: [
+            { name: 'name', weight: 2 },
+            { name: 'address', weight: 1 },
+            { name: 'tags', weight: 1 },
+        ],
+        threshold: 0.35,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+    }), [categoryServices]);
 
-    // Filter services by Category TAGS AND Search Query
-    const filteredServices = services?.filter((service) => {
-        // 1. Check Category Match
-        const matchesCategory = category === "All" || 
-            (Array.isArray(service.tags) && service.tags.some(tag => allowedTags.includes(tag)));
-        
-        // 2. Check Search Match (Name or Address)
-        const matchesSearch = service.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                             service.address?.toLowerCase().includes(searchQuery.toLowerCase());
-
-        return matchesCategory && matchesSearch;
-    }) || [];
+    const trimmedSearchQuery = searchQuery.trim();
+    const filteredServices = trimmedSearchQuery
+        ? serviceSearch.search(trimmedSearchQuery).map((result) => result.item)
+        : categoryServices;
 
     return (
         <div className='services-page'>
