@@ -20,6 +20,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.0",
+    "fuse.js": "^7.3.0",
     "leaflet": "^1.9.4",
     "leaflet-rotate": "^0.2.8",
     "prettier": "^3.8.3",
@@ -39,8 +40,15 @@
     "lint": "eslint . --ext js,jsx"
   },
   "browserslist": {
-    "production": ["defaults", "not IE 11"],
-    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+    "production": [
+      "defaults",
+      "not IE 11"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.2",

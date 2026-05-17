@@ -451,6 +451,29 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   }
 
   useEffect(() => {
+    if (!id) return;
+
+    const personalPin = pinnedLocations.find((pin) => String(pin.id) === String(id));
+    if (personalPin) {
+      handleMarkerClick(
+        personalPin,
+        parseFloat(personalPin.latitude),
+        parseFloat(personalPin.longitude)
+      );
+      return;
+    }
+
+    const staticLocation = staticLocations.find((location) => String(location.id) === String(id));
+    if (staticLocation) {
+      handleMarkerClick(
+        { ...staticLocation, type: staticLocation.location_type },
+        parseFloat(staticLocation.latitude),
+        parseFloat(staticLocation.longitude)
+      );
+    }
+  }, [id, pinnedLocations, staticLocations]);
+
+  useEffect(() => {
       handleServiceClick(selectedService)
   }, [selectedService])
   useEffect(() => {
