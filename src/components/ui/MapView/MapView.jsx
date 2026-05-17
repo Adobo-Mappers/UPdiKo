@@ -18,13 +18,41 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Custom Icons
+// Information Icons
 import closeIcon from '../../../assets/images/icon/close-icon.png';
 import timeIcon from '../../../assets/images/icon/open-hours-icon.png';
 
-import userPinIcon from '../../../assets/images/icon/save.png';
+// Custom Icons
+import userPinIcon from '../../../assets/images/icon/user.png';
+
+import restaurantPinIcon from '../../../assets/images/icon/restaurant.png';
+import cafePinIcon from '../../../assets/images/icon/cafe.png';
+import bakeryPinIcon from '../../../assets/images/icon/bakery.png';
+import groceryPinIcon from '../../../assets/images/icon/grocery.png';
+import giftPinIcon from '../../../assets/images/icon/gift.png';
+import hardwarePinIcon from '../../../assets/images/icon/hardware.png';
+import printingPinIcon from '../../../assets/images/icon/printing.png';
+import beautyPinIcon from '../../../assets/images/icon/beauty.png';
+import medicalPinIcon from '../../../assets/images/icon/medical.png';
+import pharmacyPinIcon from '../../../assets/images/icon/pharmacy.png';
+import financialPinIcon from '../../../assets/images/icon/financial.png';
+import universityPinIcon from '../../../assets/images/icon/university.png';
+import schoolsPinIcon from '../../../assets/images/icon/schools.png';
+import accommodationPinIcon from '../../../assets/images/icon/accommodation.png';
+import automotivePinIcon from '../../../assets/images/icon/automotive.png';
+import laundryPinIcon from '../../../assets/images/icon/laundry.png';
+import tourismPinIcon from '../../../assets/images/icon/tourism.png';
+import religiousPinIcon from '../../../assets/images/icon/religious.png';
+import entertainmentPinIcon from '../../../assets/images/icon/entertainment.png';
+import governmentPinIcon from '../../../assets/images/icon/government.png';
+import informationPinIcon from '../../../assets/images/icon/information.png';
+import recyclingPinIcon from '../../../assets/images/icon/recycling.png';
+import funeralPinIcon from '../../../assets/images/icon/funeral.png';
+import shelterPinIcon from '../../../assets/images/icon/shelter.png';
+import toiletPinIcon from '../../../assets/images/icon/toilet.png';
+import lotteryPinIcon from '../../../assets/images/icon/lottery.png';
+import computerPinIcon from '../../../assets/images/icon/computer.png';
 import communityPinIcon from '../../../assets/images/icon/community.png';
-import universityPinIcon from '../../../assets/images/icon/upv.png';
 import customPinIcon from '../../../assets/images/icon/save.png';
 
 // Getting Static Locations and Routing
@@ -52,15 +80,197 @@ const userIcon = new L.Icon({
     className: 'user-location-marker' 
 });
 
-const communityIcon = new L.Icon({
-    iconUrl: communityPinIcon,
+const restaurantIcon = new L.Icon({
+    iconUrl: restaurantPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30], // tip of pin sits on coordinate
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const cafeIcon = new L.Icon({
+    iconUrl: cafePinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const bakeryIcon = new L.Icon({
+    iconUrl: bakeryPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const groceryIcon = new L.Icon({
+    iconUrl: groceryPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const giftIcon = new L.Icon({
+    iconUrl: giftPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const hardwareIcon = new L.Icon({
+    iconUrl: hardwarePinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const printingIcon = new L.Icon({
+    iconUrl: printingPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const beautyIcon = new L.Icon({
+    iconUrl: beautyPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const medicalIcon = new L.Icon({
+    iconUrl: medicalPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const pharmacyIcon = new L.Icon({
+    iconUrl: pharmacyPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const financialIcon = new L.Icon({
+    iconUrl: financialPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
     className: 'user-location-marker' 
 });
 
 const universityIcon = new L.Icon({
     iconUrl: universityPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const schoolsIcon = new L.Icon({
+    iconUrl: schoolsPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const accommodationIcon = new L.Icon({
+    iconUrl: accommodationPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const automotiveIcon = new L.Icon({
+    iconUrl: automotivePinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const laundryIcon = new L.Icon({
+    iconUrl: laundryPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const tourismIcon = new L.Icon({
+    iconUrl: tourismPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const religiousIcon = new L.Icon({
+    iconUrl: religiousPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const entertainmentIcon = new L.Icon({
+    iconUrl: entertainmentPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const governmentIcon = new L.Icon({
+    iconUrl: governmentPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const informationIcon = new L.Icon({
+    iconUrl: informationPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const recyclingIcon = new L.Icon({
+    iconUrl: recyclingPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const funeralIcon = new L.Icon({
+    iconUrl: funeralPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const shelterIcon = new L.Icon({
+    iconUrl: shelterPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const toiletIcon = new L.Icon({
+    iconUrl: toiletPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const lotteryIcon = new L.Icon({
+    iconUrl: lotteryPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const computerIcon = new L.Icon({
+    iconUrl: computerPinIcon,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    className: 'user-location-marker' 
+});
+
+const communityIcon = new L.Icon({
+    iconUrl: communityPinIcon,
     iconSize: [30, 30],
     iconAnchor: [15, 30], // tip of pin sits on coordinate
     className: 'user-location-marker' 
@@ -72,6 +282,37 @@ const customIcon = new L.Icon({
     iconAnchor: [15, 30], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
+
+const iconMapping = {
+  restaurant: restaurantIcon,
+  cafe: cafeIcon,
+  bakery: bakeryIcon,
+  grocery: groceryIcon,
+  gift: giftIcon,
+  hardware: hardwareIcon,
+  printing: printingIcon,
+  beauty: beautyIcon,
+  medical: medicalIcon,
+  pharmacy: pharmacyIcon,
+  financial: financialIcon,
+  university: universityIcon,
+  schools: schoolsIcon,
+  accommodation: accommodationIcon,
+  automotive: automotiveIcon,
+  laundry: laundryIcon,
+  tourism: tourismIcon,
+  religious: religiousIcon,
+  entertainment: entertainmentIcon,
+  government: governmentIcon,
+  information: informationIcon,
+  recycling: recyclingIcon,
+  funeral: funeralIcon,
+  shelter: shelterIcon,
+  toilet: toiletIcon,
+  lottery: lotteryIcon,
+  computer: computerIcon,
+  community: communityIcon // Default fallback
+};
 
 // function LocationMarker({ tempLocation, selectedMarkerInfo, setTempLocation, setSelectedMarkerInfo }) {
 //   // listen for a click event on the map
@@ -564,6 +805,57 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     setRouteInfo(null);
   };
 
+  const getFacilityIcon = (tags) => {
+    // Safe parsing fallback if tags are null/undefined
+    if (!tags) return communityIcon;
+    
+    let parsedTags = [];
+    try {
+      parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
+    } catch (e) {
+      console.error("Failed to parse facility tags JSON array", e);
+      return communityIcon;
+    }
+
+    // Ensure parsedTags is an array before checking
+    if (!Array.isArray(parsedTags)) return communityIcon;
+
+    // Normalize array to lowercase to avoid case-sensitivity bugs
+    const activeTags = parsedTags.map(t => String(t).toLowerCase());
+
+    // Match active tags against your specific subcategory lists
+    if (activeTags.some(t => ["restaurant", "fast_food", "seafood"].includes(t))) return iconMapping.restaurant;
+    if (activeTags.some(t => ["cafe", "beverages"].includes(t))) return iconMapping.cafe;
+    if (activeTags.some(t => ["bakery", "pastry"].includes(t))) return iconMapping.bakery;
+    if (activeTags.some(t => ["convenience", "variety_store", "marketplace"].includes(t))) return iconMapping.grocery;
+    if (activeTags.some(t => ["clothes", "gift", "florist"].includes(t))) return iconMapping.gift;
+    if (activeTags.some(t => ["trade", "furniture", "electronics"].includes(t))) return iconMapping.hardware;
+    if (activeTags.some(t => ["doityourself"].includes(t))) return iconMapping.printing;
+    if (activeTags.some(t => ["beauty"].includes(t))) return iconMapping.beauty;
+    if (activeTags.some(t => ["hospital", "clinic", "health_post", "doctors", "dentist"].includes(t))) return iconMapping.medical;
+    if (activeTags.some(t => ["pharmacy"].includes(t))) return iconMapping.pharmacy;
+    if (activeTags.some(t => ["bank", "money_transfer", "pawnbroker"].includes(t))) return iconMapping.financial;
+    if (activeTags.some(t => ["university", "college", "research_institute"].includes(t))) return iconMapping.university;
+    if (activeTags.some(t => ["school", "kindergarten", "childcare"].includes(t))) return iconMapping.schools;
+    if (activeTags.some(t => ["student_accommodation", "dormitory", "apartment"].includes(t))) return iconMapping.accommodation;
+    if (activeTags.some(t => ["car_repair", "motorcycle", "tyres", "fuel", "car_wash", "bicycle", "parking"].includes(t))) return iconMapping.automotive;
+    if (activeTags.some(t => ["laundry"].includes(t))) return iconMapping.laundry;
+    if (activeTags.some(t => ["attraction", "museum", "artwork"].includes(t))) return iconMapping.tourism;
+    if (activeTags.some(t => ["place_of_worship"].includes(t))) return iconMapping.religious;
+    if (activeTags.some(t => ["karaoke_box", "events_venue", "bar"].includes(t))) return iconMapping.entertainment;
+    if (activeTags.some(t => ["townhall", "police", "fire_station", "social_facility", "garden_centre"].includes(t))) return iconMapping.government;
+    if (activeTags.some(t => ["information", "post_office"].includes(t))) return iconMapping.information;
+    if (activeTags.some(t => ["recycling"].includes(t))) return iconMapping.recycling;
+    if (activeTags.some(t => ["funeral_directors"].includes(t))) return iconMapping.funeral;
+    if (activeTags.some(t => ["shelter"].includes(t))) return iconMapping.shelter;
+    if (activeTags.some(t => ["toilets"].includes(t))) return iconMapping.toilet;
+    if (activeTags.some(t => ["lottery"].includes(t))) return iconMapping.lottery;
+    if (activeTags.some(t => ["internet_cafe"].includes(t))) return iconMapping.computer;
+
+    // Default fallback if no match is found
+    return communityIcon;
+  };
+
   return (
     <div className="MapView">
       <MapContainer 
@@ -658,7 +950,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           <Marker
             key={facility.id}
             position={[parseFloat(facility.latitude), parseFloat(facility.longitude)]}
-            icon={facility.location_type === "campus" ? universityIcon : communityIcon}
+            icon={getFacilityIcon(facility.tags)}
             eventHandlers={{ click: () => {
               handleMarkerClick(
                 { ...facility, type: facility.location_type },
