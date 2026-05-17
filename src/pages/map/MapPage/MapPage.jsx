@@ -1,6 +1,7 @@
 import './MapPage.css';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
+import Fuse from 'fuse.js';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { TAG_GROUPS } from './../../../utils/servicecoding.js'
 import { Button, CircularButton, InputField } from './../../../components/form/';
@@ -45,9 +46,20 @@ export default function MapPage() {
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearching, setSearching] = useState(false);
-    const filteredServices = services.filter((service) => {
-        return service.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    });
+    const serviceSearch = useMemo(() => new Fuse(services, {
+        keys: [
+            { name: 'name', weight: 2 },
+            { name: 'address', weight: 1 },
+            { name: 'tags', weight: 1 },
+        ],
+        threshold: 0.35,
+        ignoreLocation: true,
+        minMatchCharLength: 2,
+    }), [services]);
+    const trimmedSearchQuery = searchQuery.trim();
+    const filteredServices = trimmedSearchQuery
+        ? serviceSearch.search(trimmedSearchQuery).map((result) => result.item)
+        : services;
 
     // Search history (persisted to localStorage)
     const HISTORY_KEY = 'updi_search_history';

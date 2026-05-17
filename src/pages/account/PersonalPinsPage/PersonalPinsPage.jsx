@@ -26,6 +26,10 @@ export default function PersonalPinsPage() {
         setPins((prev) => prev.filter((p) => p.id !== pinId));
     }
 
+    function handleOpenPin(pinId) {
+        navigate(`/map/${pinId}`);
+    }
+
     if (loading) return null;
 
     return (
@@ -48,7 +52,19 @@ export default function PersonalPinsPage() {
                         </div>
                     ) : (
                         pins.map((pin) => (
-                            <div key={pin.id} className='pin-card flex gap-medium p-medium border-rounded bg-component'>
+                            <div
+                                key={pin.id}
+                                className='pin-card flex gap-medium p-medium border-rounded bg-component cursor-pointer'
+                                role='button'
+                                tabIndex={0}
+                                onClick={() => handleOpenPin(pin.id)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        handleOpenPin(pin.id);
+                                    }
+                                }}
+                            >
                                 <Icon name='map' size='large' />
                                 <div className='flex flex-col' style={{ flex: 1 }}>
                                     <Text><em className='fw-bold'>{pin.locationName}</em></Text>
@@ -59,7 +75,10 @@ export default function PersonalPinsPage() {
                                     name='delete'
                                     size='small'
                                     className='cursor-pointer'
-                                    onClick={() => handleDelete(pin.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(pin.id);
+                                    }}
                                 />
                             </div>
                         ))
