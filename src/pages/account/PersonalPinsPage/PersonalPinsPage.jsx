@@ -12,13 +12,35 @@ export default function PersonalPinsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        getCurrentUser().then(async (u) => {
-            if (!u) { navigate('/account/login'); return; }
-            setUser(u);
-            const locations = await getPinnedLocationsFromDB(u.id);
-            setPins(locations);
-            setLoading(false);
-        });
+        let mounted = true;
+
+        async function loadPins() {
+            try {
+                const u = await getCurrentUser();
+                if (!mounted) return;
+
+                if (!u) {
+                    navigate('/account/login', { replace: true });
+                    return;
+                }
+
+                setUser(u);
+                const locations = await getPinnedLocationsFromDB(u.id);
+                if (!mounted) return;
+                setPins(locations);
+            } catch (error) {
+                console.error('Failed to load personal pins:', error);
+                if (mounted) setPins([]);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        }
+
+        loadPins();
+
+        return () => {
+            mounted = false;
+        };
     }, [navigate]);
 
     async function handleDelete(pinId) {

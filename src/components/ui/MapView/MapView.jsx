@@ -10,7 +10,7 @@ import "leaflet-rotate";
 
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
+import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography'
 
 // Placeholder Icons from Leaflet
@@ -58,9 +58,8 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 // Getting Static Locations and Routing
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
-import { onAuthStateChangedListener, getPinnedLocationsFromDB, addPinnedLocationToDB, supabase, getCurrentUser } from "../../../services/supabase.js";
+import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from "../../../services/reviewsService.js";
-import Yu from './../../../assets/images/profile/profile.jpg'
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
 
 
@@ -512,33 +511,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeDestination, setRouteDestination] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
-
-  // States for saving — wired to addPinnedLocationToDB
-  const [isSaved, setSaved] = useState(false);
-  const [isSavingPin, setIsSavingPin] = useState(false);
-
-  async function toggleSaveButton() {
-    if (!user || !selectedMarkerInfo || isSavingPin) return;
-    if (isSaved) { setSaved(false); return; }
-    setIsSavingPin(true);
-    try {
-      await addPinnedLocationToDB(user.id, {
-        locationName: selectedMarkerInfo.name,
-        address: selectedMarkerInfo.address || 'Miagao, Iloilo',
-        latitude: parseFloat(selectedMarkerInfo.latitude),
-        longitude: parseFloat(selectedMarkerInfo.longitude),
-        description: selectedMarkerInfo.additional_info?.text_based?.[0] || '',
-        tags: selectedMarkerInfo.tags || [],
-        imageUrl: selectedMarkerInfo.images?.[0] || null,
-      });
-      setSaved(true);
-    } catch (e) {
-      console.error('Save pin failed:', e);
-    } finally {
-      setIsSavingPin(false);
-    }
-  }
-
   // user auth
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true); 
@@ -896,6 +868,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     return communityIcon;
   };
 
+  const isLocationVisibleForActiveTag = (location) => {
+    if (activeTag === 'All') return true;
+    const allowedTags = TAG_GROUPS[activeTag]?.tags || [];
+    const tags = Array.isArray(location.tags)
+      ? location.tags.map((tag) => String(tag).toLowerCase())
+      : [];
+    return tags.some((tag) => allowedTags.includes(tag));
+  };
+
   return (
     <div className="MapView">
       <MapContainer 
@@ -965,18 +946,14 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         {/* <Marker position={center}>
           <Popup>You are here</Popup>
         </Marker> */}
-        {pinnedLocations.map((pin) => (
+        {pinnedLocations.filter(isLocationVisibleForActiveTag).map((pin) => (
           <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={customIcon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
             {/* <Popup>{pin.name}</Popup> */}
           </Marker>
         ))}
         {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
        {staticLocations
-          .filter(pin => {
-              if (activeTag === "All") return true;
-              const allowedTags = TAG_GROUPS[activeTag]?.tags || [];
-              return (pin.tags || []).some(tag => allowedTags.includes(tag));
-          })
+          .filter(isLocationVisibleForActiveTag)
           .filter(shouldShowMarker)
           .filter(facility => {
             const lat = parseFloat(facility.latitude);
@@ -1062,22 +1039,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           </div>
 
           <div className="flex gap-small">
-            {/* Get Directions & Save Buttons*/}
+            {/* Get Directions */}
             <div className="my-small">
               <Button onClick={() => handleGetDirections(selectedMarkerInfo)}>
                 <Icon name="direction" size="small" />
                 <Caption>{isLoadingRoute ? "Loading..." : "Get Directions"}</Caption>
               </Button>
             </div>
-            
-            {user && (
-                <div className="my-small">
-                  <Button toggled={isSaved} onClick={toggleSaveButton} disabled={isSavingPin} className="items-center gap-small">
-                    <Icon name="save" size="small" />
-                    <Caption>{isSavingPin ? "Saving..." : isSaved ? "Saved" : "Save"}</Caption>
-                  </Button>
-                </div>
-            )}
             {user && (
                 <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
                     <Icon name="darkstar" size="small" />
@@ -1197,3 +1165,4 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   )
 };
 
+  

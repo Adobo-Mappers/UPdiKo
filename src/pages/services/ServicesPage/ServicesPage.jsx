@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { InputField, Dropdown } from './../../../components/form/';
 import { Heading, Text, Title } from './../../../components/typography/';
-import { Icon, Card, Profile } from './../../../components/ui/';
+import { Icon, Card } from './../../../components/ui/';
 import { getCurrentUser } from './../../../services/supabase.js';
 import { hasServiceCache, fetchServicesFromServer, getAllServicesFromCache } from './../../../services/service-handler.js';
 import { usePublicLocations } from '../../../hooks/useUnifiedLocations.js';
@@ -45,17 +45,16 @@ export default function ServicesPage() {
     console.log(filteredCategories);
     return (
         <div className='services-page'>
-            <br></br>
+            <div className='flex gap-medium my-medium'>
+                <WeatherView />
+                {/* <EventDisplay /> */}
+            </div>
+
             <main className='p-large'>
                 <Title>Good Day <br/><span className='text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</span></Title>
                 <Heading>What services do you want to find.</Heading>
 
                 {/* Weather + Event cards side by side — matches design */}
-                {/* <div className='flex gap-medium my-medium'>
-                    <WeatherView />
-                    <EventDisplay />
-                </div> */}
-
                 <div className='my-large'>
                     <InputField
                         className='border-roundify py-medium'
@@ -76,7 +75,6 @@ export default function ServicesPage() {
                         </Link>
                     ))}
                 </div>
-
             </main>
         </div>
     );

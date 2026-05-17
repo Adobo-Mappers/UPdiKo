@@ -17,3 +17,9 @@
 }
 .account-page > * { position: relative; z-index: 2; }
 .option-card { cursor: pointer; }
+
+.account-profile-icon {
+    width: 48px !important;
+    height: 48px !important;
+    flex-shrink: 0;
+}

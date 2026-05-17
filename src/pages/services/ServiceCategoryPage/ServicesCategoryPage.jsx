@@ -1,22 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
 import { usePublicLocations } from '../../../hooks/useUnifiedLocations.js';
 import { Heading, Text, Title } from '../../../components/typography/index.js';
-import { Icon, Card, Profile } from '../../../components/ui/index.js';
+import { Icon, Card } from '../../../components/ui/index.js';
 import { InputField } from '../../../components/form/';
 import Fuse from 'fuse.js';
-import { useState, useEffect, useMemo } from 'react';
-import { getCurrentUser } from '../../../services/supabase.js';
+import { useState, useMemo } from 'react';
 import { TAG_GROUPS } from '../../../utils/servicecoding.js';
 
 export default function ServiceCategoryPage() {
     const { category } = useParams();
     const { data: services, isLoading } = usePublicLocations();
-    const [user, setUser] = useState(null);
     const [searchQuery, setSearchQuery] = useState(''); // New search state
-
-    useEffect(() => {
-        getCurrentUser().then(setUser);
-    }, []);
 
     const groupData = TAG_GROUPS[category];
     const allowedTags = groupData?.tags || [];
@@ -44,12 +38,11 @@ export default function ServiceCategoryPage() {
 
     return (
         <div className='services-page'>
-            <header className='flex justify-between items-center px-large py-medium'>
+            <header className='flex items-center px-large py-medium'>
                 <Link to="/service" className='flex items-center gap-small text-inherit'>
                     <Icon name="back" size='small' />
                     <Text className="fw-bold">Back</Text>
                 </Link>
-                <Profile user={user} />
             </header>
 
             <main className='p-large'>

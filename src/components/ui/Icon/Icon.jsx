@@ -1,5 +1,15 @@
 import "./Icon.css";
 
+import accommodationIcon from "../../../assets/images/icon/accommodation.png";
+import communityIcon from "../../../assets/images/icon/community.png";
+import financialIcon from "../../../assets/images/icon/financial.png";
+import governmentIcon from "../../../assets/images/icon/government.png";
+import groceryIcon from "../../../assets/images/icon/grocery.png";
+import laundryIcon from "../../../assets/images/icon/laundry.png";
+import medicalIcon from "../../../assets/images/icon/medical.png";
+import restaurantIcon from "../../../assets/images/icon/restaurant.png";
+import tourismIcon from "../../../assets/images/icon/tourism.png";
+import universityIcon from "../../../assets/images/icon/university.png";
 import accountNavlinkIcon from "../../../assets/images/icon/account-navlink-icon.png";
 import addressIcon from "../../../assets/images/icon/address-icon.png";
 import backIcon from "../../../assets/images/icon/back-icon.png";
@@ -50,7 +60,21 @@ export const iconMap = {
   save: saveIcon,
   search: searchIcon,
   star: starIcon,
+  sunflower: userImage,
   user: userIcon,
+
+  accommodation: accommodationIcon,
+  community: communityIcon,
+  education: universityIcon,
+  finance: financialIcon,
+  food: restaurantIcon,
+  grid: mapIcon,
+  health: medicalIcon,
+  other: mapIcon,
+  safety: governmentIcon,
+  services: laundryIcon,
+  shopping: groceryIcon,
+  tourism: tourismIcon,
 };
 
 export function Icon({ name="", size="medium", alt="alt-text", className="", ...otherProps }) {

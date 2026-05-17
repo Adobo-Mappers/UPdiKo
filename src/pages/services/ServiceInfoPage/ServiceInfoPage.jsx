@@ -2,9 +2,9 @@ import './ServiceInfoPage.css'
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag, Profile } from './../../../components/ui';
+import { Icon, Carousel, Tag } from './../../../components/ui';
 import { Text, Caption, Heading } from './../../../components/typography';
-import { getCurrentUser, addPinnedLocationToDB, onAuthStateChangedListener } from './../../../services/supabase.js';
+import { getCurrentUser, onAuthStateChangedListener } from './../../../services/supabase.js';
 import { getServiceFromCache, fetchServicesFromServer, hasServiceCache } from './../../../services/service-handler.js';
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from '../../../services/reviewsService.js';
 
@@ -38,33 +38,6 @@ export default function ServiceInfoPage() {
         }
         loadService();
     }, [id]);
-
-    // Save as personal pin
-    const [isSaved, setSaved] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-
-    async function toggleSaveButton() {
-        if (!user || !service || isSaving) return;
-        if (isSaved) { setSaved(false); return; } // future: implement unsave
-        setIsSaving(true);
-        try {
-            await addPinnedLocationToDB(user.id, {
-                locationName: service.name,
-                address: service.address || 'Miagao, Iloilo',
-                latitude: parseFloat(service.latitude),
-                longitude: parseFloat(service.longitude),
-                description: service.additional_info?.text_based?.[0] || '',
-                tags: service.tags || [],
-                imageUrl: service.images?.[0] || null,
-            });
-            setSaved(true);
-        } catch (e) {
-            console.error('Save pin failed:', e);
-        } finally {
-            setIsSaving(false);
-        }
-    }
-
     // B2: reviews
     const [reviews, setReviews] = useState([]);
     const [savedRating, setSavedRating] = useState(0);
@@ -167,12 +140,11 @@ export default function ServiceInfoPage() {
 
     return (
         <div className="service-info-page">
-            <header className='px-large py-medium flex justify-between'>
+            <header className='px-large py-medium flex'>
                 <Link to={`/service/${category}`} className='flex items-center gap-small'>
                     <Icon name="back" size='small' />
                     <Text>Back</Text>
                 </Link>
-                <Profile user={user} />
             </header>
 
             <main className='px-large py-medium'>
@@ -208,11 +180,6 @@ export default function ServiceInfoPage() {
                     <Button href={`/map/${id}`} className="items-center gap-small">
                         <Icon name='map' /><Caption>View in Map</Caption>
                     </Button>
-                    {user &&
-                        <Button className="items-center gap-small" toggled={isSaved} onClick={toggleSaveButton} disabled={isSaving}>
-                            <Icon name='save' /><Caption>{isSaving ? 'Saving...' : isSaved ? 'Saved' : 'Save'}</Caption>
-                        </Button>
-                    }
                 </div>
 
                 {/* B2: Tab switcher */}
