@@ -9,8 +9,12 @@ dotenv.config();
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const geminiApiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
+// const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+// const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
+const geminiModels = (process.env.GEMINI_MODELS || 'gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b')
+  .split(',')
+  .map(m => m.trim())
+  .filter(Boolean);
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -153,21 +157,35 @@ async function callGemini(body) {
     throw new Error('Missing GEMINI_API_KEY on the server.');
   }
 
-  const response = await fetch(`${geminiEndpoint}?key=${encodeURIComponent(geminiApiKey)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  let lastError;
 
-  const payload = await response.json();
+  for (const model of geminiModels) {
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-  if (!response.ok) {
-    throw new Error(payload?.error?.message || `Gemini request failed (${response.status})`);
+    try {
+      const response = await fetch(`${endpoint}?key=${encodeURIComponent(geminiApiKey)}`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload?.error?.message || `Gemini request failed (${response.status})`);
+      }
+
+      console.log(`Gemini responded using model: ${model}`);
+      return payload;
+    } catch (error) {
+      console.warn(`Gemini model "${model}" failed: ${error.message}`);
+      lastError = error;
+    }
   }
 
-  return payload;
+  throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
 }
 
 function extractText(responsePayload) {
