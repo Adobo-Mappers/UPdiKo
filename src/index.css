@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
 
 :root {
     /* colors */
@@ -13,7 +13,7 @@
     --fs-caption: 11px;
     --fs-text: 13px;
     --fs-heading: 16px;
-    --fs-title: 24px;
+    --fs-title: 32px;
 
     /* font-weight */
     --fw-regular: 400;
@@ -44,7 +44,7 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    font-family: 'Outfit', Arial, sans-serif;
+    font-family: 'Nunito', Arial, sans-serif;
 }
 
 body {
@@ -220,6 +220,14 @@ p, h1, h2, h3, h4, h5, h6 {
 .fw-bold {
     font-weight: var(--fw-bold) !important;
 }
+
+/* border */
+.border-white       { border: solid 1px white !important;}
+.border-main        { border: solid 1px var(--color-text-main) !important }
+.border-muted       { border: solid 1px var(--color-text-muted) !important }
+.border-accent      { border: solid 1px var(--color-accent-primary) !important }
+.border-accent-soft { border: solid 1px var(--color-accent-secondary) !important }
+
 
 /* cursor */
 .cursor-pointer {

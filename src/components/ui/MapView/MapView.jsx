@@ -632,37 +632,53 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   // Extract the zoom level if available (assuming MapSection passed it via userLocation)
   const mapZoom = userLocation?.zoom || 16;
 
-  // for dragging
+  // Bottom-sheet drag state for the marker info panel.
   const dragY = useRef(0);
   const startY = useRef(null);
+  const isDraggingPanel = useRef(false);
   const panelRef = useRef(null);
 
   function onDragStart(e) {
-      startY.current = e.touches?.[0]?.clientY ?? e.clientY;
-      panelRef.current.style.transition = 'none';
+      startY.current = e.clientY;
+      isDraggingPanel.current = true;
+      dragY.current = 0;
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+
+      if (panelRef.current) {
+          panelRef.current.style.transition = 'none';
+      }
   }
 
   function onDragMove(e) {
-      if (startY.current === null) return;
-      const delta = (e.touches?.[0]?.clientY ?? e.clientY) - startY.current;
-      if (delta < 0) return; // block dragging up
+      if (!isDraggingPanel.current || startY.current === null || !panelRef.current) return;
+
+      const delta = Math.max(0, e.clientY - startY.current);
       dragY.current = delta;
       panelRef.current.style.transform = `translateY(${delta}px)`;
   }
 
-  function onDragEnd() {
-    setSelectedMarkerInfo(null);
-      if (dragY.current > 200) {
+  function onDragEnd(e) {
+      if (!isDraggingPanel.current || !panelRef.current) return;
+
+      e.currentTarget.releasePointerCapture?.(e.pointerId);
+      panelRef.current.style.transition = 'transform 0.25s ease';
+
+      if (dragY.current > 140) {
+          panelRef.current.style.transform = 'translateY(100%)';
+          setTimeout(() => {
+              setSelectedMarkerInfo(null);
+              navigate('/map');
+          }, 200);
       } else {
-          panelRef.current.style.transition = 'transform 0.3s ease';
           panelRef.current.style.transform = 'translateY(0)';
       }
+
       dragY.current = 0;
       startY.current = null;
+      isDraggingPanel.current = false;
+
   }
 
-
-  
   // Function to handle the marker click logic
   const handleMarkerClick = (data, lat, lng, shouldRoute = false) => {
       // 1. Set the selected marker info panel
@@ -998,7 +1014,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                         key={n}
                         name={reviewRating >= n ? 'star' : 'darkstar'}
                         size='large'
-                        className='cursor-pointer's
+                        className='cursor-pointer'
                         onClick={() => setReviewRating(n)}
                     />
                 ))}
@@ -1028,15 +1044,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         <div className="marker-info p-large" ref={panelRef}>
 
           {/* Drag handle */}
-          <div
-            className="drag-handle"
-            onMouseDown={onDragStart}
-            onMouseMove={onDragMove}
-            onMouseUp={onDragEnd}
-            onTouchStart={onDragStart}
-            onTouchMove={onDragMove}
-            onTouchEnd={onDragEnd}
-          />
+          <div className="drag-region">
+            <div
+              className="drag-handle"
+              onPointerDown={onDragStart}
+              onPointerMove={onDragMove}
+              onPointerUp={onDragEnd}
+              onPointerCancel={onDragEnd}
+            />
+          </div>
 
           {/* Name + close */}
           

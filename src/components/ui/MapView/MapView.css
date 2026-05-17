@@ -21,13 +21,24 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  touch-action: pan-y;
+  will-change: transform;
 
-  .drag-handle {
+  .drag-region {
     display: flex;
     justify-content: center;
+    padding-bottom: var(--space-medium);
+    touch-action: none;
+    cursor: grab;
+  }
+
+  .drag-region:active {
+    cursor: grabbing;
+  }
+
+  .drag-handle {
     width: 100px;
     height: 6px;
-    margin: auto;
     background-color: var(--color-component-bg);
     border-radius: var(--border-roundify);
   }
