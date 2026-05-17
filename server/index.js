@@ -8,22 +8,60 @@ dotenv.config();
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
-const geminiApiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
-// const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
-// const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
-const geminiModels = (process.env.GEMINI_MODELS || 'gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b')
-  .split(',')
-  .map(m => m.trim())
-  .filter(Boolean);
+const parseCsv = (value = '') =>
+  String(value)
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+const geminiApiKeys = [
+  ...parseCsv(process.env.GEMINI_API_KEYS),
+  ...parseCsv(process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY),
+];
+
+const geminiModels = parseCsv(
+  process.env.GEMINI_MODELS ||
+    'gemini-2.5-flash,gemini-2.0-flash,gemini-2.0-flash-lite,gemini-1.5-flash'
+);
+const modelCatalogCache = new Map();
+const MODEL_CATALOG_TTL_MS = 10 * 60 * 1000;
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 const casieSessions = new Map();
 
-const CASIE_SYSTEM_PROMPT =
-  "You are Casie, UPdiKo's local guide for UP Visayas Miagao and nearby Miagao services. Keep answers concise, helpful, and location-focused. If a user asks for something outside navigation or local place discovery, reply that you can only help with UPV and Miagao places.";
+const CASIE_SYSTEM_PROMPT = `
+You are Casie, UPdiKo's local guide for UP Visayas Miagao and nearby Miagao services.
+Follow this priority order:
+1) Scope
+- Only help with UPV and Miagao places, navigation, local discovery, and personal-pin guidance.
+- If outside scope, say you can only help with UPV and Miagao places.
+
+2) Directions
+- If user asks for directions, route guidance, navigation, or how to get somewhere, call search_locations first with the best category/keyword guess.
+- If matches exist, return the best place name(s) and guide the user to navigate there.
+- If no matches exist, ask a short clarifying question (for example, which dorm name).
+- Do not refuse with "I can't show you the way" for valid local navigation requests.
+
+3) Personal Pins
+- If user asks how to create a personal pin, give concise step-by-step instructions (maximum 5 steps).
+- Mention login is required.
+- Use this flow: open Map, tap map to drop a pin, fill New Pin fields (name/address/tags/description, optional image), then tap Save Pin.
+
+4) Nearby Recommendations
+- If user asks for nearby places or local recommendations, call search_locations with broad relevant keywords.
+- Recommend only relevant places in Miagao / UPV context.
+
+5) Tone
+- Keep responses concise, clear, warm, and upbeat (friendly local buddy).
+- Use light positive wording (for example, "Sure thing!").
+- Avoid baby talk, emoji spam, or overexcited long messages.
+- Accuracy comes before style for directions and instructions.
+`;
 
 const searchLocationsTool = {
   functionDeclarations: [
@@ -109,8 +147,12 @@ function getDynamicContext(context = {}) {
  * @returns {Array<Record<string, any>>}
  */
 function queryLocations(locations, filters = {}) {
-  const category = String(filters.category || '').toLowerCase().trim();
-  const keyword = String(filters.keyword || '').toLowerCase().trim();
+  const category = String(filters.category || '')
+    .toLowerCase()
+    .trim();
+  const keyword = String(filters.keyword || '')
+    .toLowerCase()
+    .trim();
 
   return locations
     .filter((location) => {
@@ -149,43 +191,105 @@ async function loadPublicLocations() {
 }
 
 /**
+ * @param {string} apiKey
+ * @returns {Promise<string[]>}
+ */
+async function fetchGenerateModelsForKey(apiKey) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`
+  );
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || `ListModels failed (${response.status})`);
+  }
+
+  const available = (payload.models || [])
+    .filter((model) => Array.isArray(model.supportedGenerationMethods))
+    .filter((model) => model.supportedGenerationMethods.includes('generateContent'))
+    .map((model) => String(model.name || '').replace(/^models\//, ''))
+    .filter(Boolean);
+
+  if (available.length === 0) {
+    throw new Error('No generateContent-compatible Gemini models were returned for this API key.');
+  }
+
+  const preferredSet = new Set(geminiModels);
+  const preferred = geminiModels.filter((model) => available.includes(model));
+  const discoveredFlash = available.filter(
+    (model) => !preferredSet.has(model) && /flash/i.test(model)
+  );
+  const discoveredOther = available.filter(
+    (model) => !preferredSet.has(model) && !/flash/i.test(model)
+  );
+
+  return [...preferred, ...discoveredFlash, ...discoveredOther];
+}
+
+/**
+ * @param {string} apiKey
+ * @returns {Promise<string[]>}
+ */
+async function getModelsForKey(apiKey) {
+  const now = Date.now();
+  const cached = modelCatalogCache.get(apiKey);
+  if (cached && now - cached.fetchedAt < MODEL_CATALOG_TTL_MS && cached.models.length > 0) {
+    return cached.models;
+  }
+
+  const models = await fetchGenerateModelsForKey(apiKey);
+  modelCatalogCache.set(apiKey, { models, fetchedAt: now });
+  return models;
+}
+
+/**
  * @param {object} body
  * @returns {Promise<any>}
  */
 async function callGemini(body) {
-  if (!geminiApiKey) {
-    throw new Error('Missing GEMINI_API_KEY on the server.');
+  if (geminiApiKeys.length === 0) {
+    throw new Error('Missing GEMINI_API_KEY or GEMINI_API_KEYS on the server.');
   }
 
   let lastError;
 
-  for (const model of geminiModels) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  for (const apiKey of geminiApiKeys) {
+    let modelsToTry = geminiModels;
 
     try {
-      const response = await fetch(`${endpoint}?key=${encodeURIComponent(geminiApiKey)}`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body),
-      });
+      modelsToTry = await getModelsForKey(apiKey);
+    } catch (catalogError) {
+      console.warn(`Gemini model catalog lookup failed. Falling back to configured model list. ${catalogError.message}`);
+    }
 
-      const payload = await response.json();
+    for (const model of modelsToTry) {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-      if (!response.ok) {
-        throw new Error(payload?.error?.message || `Gemini request failed (${response.status})`);
+      try {
+        const response = await fetch(`${endpoint}?key=${encodeURIComponent(apiKey)}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+          throw new Error(payload?.error?.message || `Gemini request failed (${response.status})`);
+        }
+
+        console.log(`Gemini responded using model: ${model}`);
+        return payload;
+      } catch (error) {
+        console.warn(`Gemini key+model failed (${model}): ${error.message}`);
+        lastError = error;
       }
-
-      console.log(`Gemini responded using model: ${model}`);
-      return payload;
-    } catch (error) {
-      console.warn(`Gemini model "${model}" failed: ${error.message}`);
-      lastError = error;
     }
   }
 
-  throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
+  throw new Error(`All Gemini keys/models failed. Last error: ${lastError?.message}`);
 }
 
 function extractText(responsePayload) {

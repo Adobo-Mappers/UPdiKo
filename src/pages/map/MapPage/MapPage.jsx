@@ -11,6 +11,7 @@ import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getS
 import { reverseGeocode } from '../../../services/geocoding.js';
 import { uploadPinImage } from '../../../services/storageService.js';
 import CassieWidget from '../../../components/casie/CassieWidget.jsx';
+import CasieModal from '../../../components/casie/CasieModal.jsx';
 
 import Yu from './../../../assets/images/profile/profile.jpg';
 
@@ -77,6 +78,9 @@ export default function MapPage() {
     };
 
     const [selectedService, setSelectedService] = useState(getServiceFromCache(id));
+    const [pendingCasieLocation, setPendingCasieLocation] = useState(null);
+    const [routeRequest, setRouteRequest] = useState(null);
+    const routeRequestCounterRef = useRef(0);
 
     // map tracking logic
     const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
@@ -249,6 +253,31 @@ export default function MapPage() {
         animationRef.current = requestAnimationFrame(animate);
     }
 
+    function normalizeLocationForRoute(location) {
+        if (!location) return null;
+        const latitude = Number(location.latitude);
+        const longitude = Number(location.longitude);
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+        return {
+            ...location,
+            latitude,
+            longitude,
+        };
+    }
+
+    function triggerDirectionsForLocation(location) {
+        const normalized = normalizeLocationForRoute(location);
+        if (!normalized) {
+            alert('Selected location does not have valid coordinates.');
+            return;
+        }
+
+        setSelectedService(normalized);
+        handleCenterToPin(normalized.latitude, normalized.longitude);
+        routeRequestCounterRef.current += 1;
+        setRouteRequest({ id: routeRequestCounterRef.current, place: normalized });
+    }
+
     return (
         <div className="map-page">
             <MapView
@@ -256,6 +285,7 @@ export default function MapPage() {
                 currentCoords={userCurrentLocation}
                 trackingEnabled={trackingEnabled}
                 selectedService={selectedService}
+                onRouteNeeded={routeRequest}
                 handleMarkerClick={handleMarkerClick}
                 onMapClickForPin={handleMapClickForPin}   // FIX: was passing handleCenterToPin (wrong fn)
                 onMarkerClick={handleCenterToPin}         // FIX: was missing — centers map when a pin is clicked
@@ -450,12 +480,22 @@ export default function MapPage() {
                         selectedService={selectedService}
                         userLocation={userCurrentLocation}
                         onNavigateToLocation={(location) => {
-                            setSelectedService(location);
-                            handleCenterToPin(Number(location.latitude), Number(location.longitude));
+                            setPendingCasieLocation(location);
                         }}
                     />
                 </div>
             </main>
+
+            {pendingCasieLocation && (
+                <CasieModal
+                    place={pendingCasieLocation}
+                    onCancel={() => setPendingCasieLocation(null)}
+                    onConfirm={() => {
+                        triggerDirectionsForLocation(pendingCasieLocation);
+                        setPendingCasieLocation(null);
+                    }}
+                />
+            )}
         </div>
     );
 }

@@ -254,6 +254,7 @@ function RotationController({ bearing, setBearing }) {
 // // main map element
 export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded, setRatingSession, isRating, setRating, activeTag}) {
   const navigate = useNavigate();
+  const lastHandledRouteIdRef = useRef(null);
 
   const defaultCenter = [10.641944, 122.235556];
   const [center, setCenter] = useState(defaultCenter);
@@ -441,18 +442,50 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       }
   };
 
-  const handleServiceClick = (selectedService) => {
+  const handleServiceClick = (selectedService, shouldRoute = false) => {
     if (!selectedService) return;
     handleMarkerClick(
       { ...selectedService, type: selectedService.location_type ?? "community" },
       parseFloat(selectedService.latitude),
-      parseFloat(selectedService.longitude)
+      parseFloat(selectedService.longitude),
+      shouldRoute
     );
-  }
+  };
 
   useEffect(() => {
-      handleServiceClick(selectedService)
-  }, [selectedService])
+      if (!selectedService) return;
+
+      const requestedRouteId = onRouteNeeded?.id;
+      const requestedPlace = onRouteNeeded?.place;
+      const requestedLat = Number(requestedPlace?.latitude);
+      const requestedLng = Number(requestedPlace?.longitude);
+      const selectedLat = Number(selectedService?.latitude);
+      const selectedLng = Number(selectedService?.longitude);
+
+      const samePlaceById =
+        requestedPlace?.id != null &&
+        selectedService?.id != null &&
+        String(requestedPlace.id) === String(selectedService.id);
+      const samePlaceByCoords =
+        Number.isFinite(requestedLat) &&
+        Number.isFinite(requestedLng) &&
+        Number.isFinite(selectedLat) &&
+        Number.isFinite(selectedLng) &&
+        requestedLat === selectedLat &&
+        requestedLng === selectedLng;
+
+      const shouldRoute =
+        requestedRouteId != null &&
+        requestedRouteId !== lastHandledRouteIdRef.current &&
+        (samePlaceById || samePlaceByCoords);
+
+      handleServiceClick(selectedService, shouldRoute);
+
+      if (shouldRoute) {
+        lastHandledRouteIdRef.current = requestedRouteId;
+      }
+  }, [selectedService, onRouteNeeded]);
+
   useEffect(() => {
     if (userLocation) {
       setCenter([userLocation.lat, userLocation.lng]);
@@ -864,4 +897,3 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     </div>
   )
 };
-
