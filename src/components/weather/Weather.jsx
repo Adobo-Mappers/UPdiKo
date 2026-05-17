@@ -51,7 +51,7 @@ function WeatherView() {
         <div className='weather-card mx-medium'>
             <div className='weather-icon' aria-hidden='true'></div>
             <div className='weather-copy'>
-                <p className='weather-title'>{getWeatherLabel(today.code)}</p>
+                <h3 className='weather-title'>{getWeatherLabel(today.code)}</h3>
                 <p className='weather-day'>{dayName}</p>
             </div>
         </div>
