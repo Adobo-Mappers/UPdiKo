@@ -75,211 +75,211 @@ L.Icon.Default.mergeOptions({
 // Custom icon for the user's location (assuming a simple blue dot or custom image)
 const userIcon = new L.Icon({
     iconUrl: userPinIcon,
-    iconSize: [50, 50],
-    iconAnchor: [25, 50], // tip of pin sits on coordinate
+    iconSize: [60, 60],
+    iconAnchor: [30, 30], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
 const restaurantIcon = new L.Icon({
     iconUrl: restaurantPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const cafeIcon = new L.Icon({
     iconUrl: cafePinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const bakeryIcon = new L.Icon({
     iconUrl: bakeryPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const groceryIcon = new L.Icon({
     iconUrl: groceryPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const giftIcon = new L.Icon({
     iconUrl: giftPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const hardwareIcon = new L.Icon({
     iconUrl: hardwarePinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const printingIcon = new L.Icon({
     iconUrl: printingPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const beautyIcon = new L.Icon({
     iconUrl: beautyPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const medicalIcon = new L.Icon({
     iconUrl: medicalPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const pharmacyIcon = new L.Icon({
     iconUrl: pharmacyPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const financialIcon = new L.Icon({
     iconUrl: financialPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const universityIcon = new L.Icon({
     iconUrl: universityPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const schoolsIcon = new L.Icon({
     iconUrl: schoolsPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const accommodationIcon = new L.Icon({
     iconUrl: accommodationPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const automotiveIcon = new L.Icon({
     iconUrl: automotivePinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const laundryIcon = new L.Icon({
     iconUrl: laundryPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const tourismIcon = new L.Icon({
     iconUrl: tourismPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const religiousIcon = new L.Icon({
     iconUrl: religiousPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const entertainmentIcon = new L.Icon({
     iconUrl: entertainmentPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const governmentIcon = new L.Icon({
     iconUrl: governmentPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const informationIcon = new L.Icon({
     iconUrl: informationPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const recyclingIcon = new L.Icon({
     iconUrl: recyclingPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const funeralIcon = new L.Icon({
     iconUrl: funeralPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const shelterIcon = new L.Icon({
     iconUrl: shelterPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const toiletIcon = new L.Icon({
     iconUrl: toiletPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const lotteryIcon = new L.Icon({
     iconUrl: lotteryPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const computerIcon = new L.Icon({
     iconUrl: computerPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30],
+    iconAnchor: [15, 15],
     className: 'user-location-marker' 
 });
 
 const communityIcon = new L.Icon({
     iconUrl: communityPinIcon,
     iconSize: [30, 30],
-    iconAnchor: [15, 30], // tip of pin sits on coordinate
+    iconAnchor: [15, 15], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
 const customIcon = new L.Icon({
     iconUrl: customPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30], // tip of pin sits on coordinate
+    iconSize: [40, 40],
+    iconAnchor: [20, 20], // tip of pin sits on coordinate
     className: 'user-location-marker' 
 });
 
@@ -468,6 +468,7 @@ function UserLocationMarker({ coords, trackingEnabled }) {
             position={position}
             icon={userIcon}
             ref={markerRef}
+            zIndexOffset={10} 
         >
             <Popup autoPan={false}>
                 You are here.
@@ -910,7 +911,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         />
         {tempLocation && (
           <Marker 
-            icon={userIcon} 
+            icon={customIcon} 
             position={[tempLocation.latitude, tempLocation.longitude]} 
             eventHandlers={{ click: () => {handleMarkerClick(tempLocation, tempLocation.latitude, tempLocation.longitude)} }}
           >
