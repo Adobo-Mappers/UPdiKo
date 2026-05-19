@@ -35,6 +35,14 @@ import showPasswordIcon from "../../../assets/images/icon/peeping-tom-icon.png";
 import starIcon from "../../../assets/images/icon/star-icon.png";
 import userIcon from "../../../assets/images/icon/user-icon.png";
 import userImage from "../../../assets/images/icon/user.png";
+import frontIcon from "../../../assets/images/icon/front-icon.png"
+
+import sunnyIcon from "../../../assets/images/icon/sunny-weather-icon.png"
+import fairIcon from "../../../assets/images/icon/partly-cloudy-icon.png"
+import cloudyIcon from "../../../assets/images/icon/cloudy-weather-icon.png"
+import rainyIcon from "../../../assets/images/icon/drizzle.png"
+import stormyIcon from "../../../assets/images/icon/rainy-icon.png"
+
 
 export const iconMap = {
   accountNavlink: accountNavlinkIcon,
@@ -51,6 +59,7 @@ export const iconMap = {
   direction: directionsIcon,
   edit: editIcon,
   eye: showPasswordIcon,
+  front: frontIcon,
   hide: hidePasswordIcon,
   logout: logoutIcon,
   mail: mailIcon,  
@@ -75,13 +84,19 @@ export const iconMap = {
   services: laundryIcon,
   shopping: groceryIcon,
   tourism: tourismIcon,
+
+  sunny: sunnyIcon,
+  fair: fairIcon,
+  cloudy: cloudyIcon,
+  rainy: rainyIcon,
+  stormy: stormyIcon,
 };
 
 export function Icon({ name="", size="medium", alt="alt-text", className="", ...otherProps }) {
     /**
      * Icon property types
      * name: name of the icon (use keys from iconMap)
-     * size: small, medium, or large
+     * size: small, medium, large, or xlarge 
      * alt: alternative text for the icon
      * className: additional CSS classes for the icon
      */

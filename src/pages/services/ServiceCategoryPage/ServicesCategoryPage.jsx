@@ -38,14 +38,14 @@ export default function ServiceCategoryPage() {
 
     return (
         <div className='services-page'>
-            <header className='flex items-center px-large py-medium'>
+            <header className='flex items-center px-large mx-medium py-medium'>
                 <Link to="/service" className='flex items-center gap-small text-inherit'>
                     <Icon name="back" size='small' />
                     <Text className="fw-bold">Back</Text>
                 </Link>
             </header>
 
-            <main className='p-large'>
+            <main className='px-large mx-medium'>
                 <div className="mb-large">
                     <div className="flex items-center gap-small mb-xsmall">
                         <Title>{category}</Title>
@@ -77,7 +77,7 @@ export default function ServiceCategoryPage() {
                                 to={`/service/${encodeURIComponent(category)}/${service.id}`} 
                                 className='text-inherit'
                             >
-                                <Card service={service} />
+                                <Card service={service} className="border-solid border-roundify my-xsmall"/>
                             </Link>
                         ))
                     ) : (
