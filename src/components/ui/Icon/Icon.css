@@ -16,4 +16,9 @@
         width: 24px;
         height: 24px;
     }
+
+    &.large{
+        width: 32px;
+        height: 32px;
+    }
 }

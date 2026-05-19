@@ -20,6 +20,7 @@
     --fw-medium: 500;
     --fw-semi-bold: 600;
     --fw-bold: 700;
+    --fw-extra-bold: 800;
 
     /* spacing */
     --space-xsmall: 4px;
@@ -45,18 +46,25 @@
     margin: 0;
     box-sizing: border-box;
     font-family: 'Nunito', Arial, sans-serif;
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+}
+
+*::-webkit-scrollbar {
+    display: none;
 }
 
 body {
     background-color: black;
+    min-height: 100vh;
 }
 
 em {
-    font-style: normal;
+    font-style: italic;
 }
 
 strong {
-    font-style: var(--fw-bold);
+    font-weight: var(--fw-bold); 
 }
 
 a {
@@ -68,7 +76,6 @@ a {
 a > * {
     font-weight: var(--fw-bold);    
     color: var(--color-text-main);
-
 }
 
 p, h1, h2, h3, h4, h5, h6 {
@@ -79,11 +86,8 @@ p, h1, h2, h3, h4, h5, h6 {
     color: var(--color-text-muted);
 }
 
-*::-webkit-scrollbar {
-    display: none;
-}
-
 /** Util Classes **/
+
 /* flex display */
 .flex         { display: flex !important}
 .inline-flex  { display: inline-flex !important}
@@ -117,33 +121,66 @@ p, h1, h2, h3, h4, h5, h6 {
 .overflow-x { overflow-x: auto !important}
 .overflow-y { overflow-y: auto !important}
 
-/* padding */
+/* --- PADDING UTILITIES --- */
+/* Global Padding */
 .p-xsmall { padding: var(--space-xsmall) !important}
 .p-small  { padding: var(--space-small) !important}
 .p-medium { padding: var(--space-medium) !important}
 .p-large  { padding: var(--space-large) !important}
 .p-xlarge { padding: var(--space-xlarge) !important}
 
+/* Padding X-Axis (Left & Right) */
 .px-xsmall { padding-inline: var(--space-xsmall) !important}
 .px-small  { padding-inline: var(--space-small) !important}
 .px-medium { padding-inline: var(--space-medium) !important}
 .px-large  { padding-inline: var(--space-large) !important}
 .px-xlarge { padding-inline: var(--space-xlarge) !important}
 
+/* Padding Y-Axis (Top & Bottom) */
 .py-xsmall { padding-block: var(--space-xsmall) !important}
 .py-small  { padding-block: var(--space-small) !important}
 .py-medium { padding-block: var(--space-medium) !important}
 .py-large  { padding-block: var(--space-large) !important}
 .py-xlarge { padding-block: var(--space-xlarge) !important}
 
+/* Padding Top */
+.pt-xsmall { padding-block-start: var(--space-xsmall) !important}
+.pt-small  { padding-block-start: var(--space-small) !important}
+.pt-medium { padding-block-start: var(--space-medium) !important}
+.pt-large  { padding-block-start: var(--space-large) !important}
+.pt-xlarge { padding-block-start: var(--space-xlarge) !important}
 
-/* margin */
+/* Padding Bottom */
+.pb-xsmall { padding-block-end: var(--space-xsmall) !important}
+.pb-small  { padding-block-end: var(--space-small) !important}
+.pb-medium { padding-block-end: var(--space-medium) !important}
+.pb-large  { padding-block-end: var(--space-large) !important}
+.pb-xlarge { padding-block-end: var(--space-xlarge) !important}
+
+/* Padding Left (Start) */
+.pl-xsmall { padding-inline-start: var(--space-xsmall) !important}
+.pl-small  { padding-inline-start: var(--space-small) !important}
+.pl-medium { padding-inline-start: var(--space-medium) !important}
+.pl-large  { padding-inline-start: var(--space-large) !important}
+.pl-xlarge { padding-inline-start: var(--space-xlarge) !important}
+
+/* Padding Right (End) */
+.pr-xsmall { padding-inline-end: var(--space-xsmall) !important}
+.pr-small  { padding-inline-end: var(--space-small) !important}
+.pr-medium { padding-inline-end: var(--space-medium) !important}
+.pr-large  { padding-inline-end: var(--space-large) !important}
+.pr-xlarge { padding-inline-end: var(--space-xlarge) !important}
+
+
+/* --- MARGIN UTILITIES --- */
+/* Global Margin */
 .m-xsmall { margin: var(--space-xsmall) !important}
 .m-small  { margin: var(--space-small) !important}
 .m-medium { margin: var(--space-medium) !important}
 .m-large  { margin: var(--space-large) !important}
 .m-xlarge { margin: var(--space-xlarge) !important}
 
+/* Margin X-Axis (Left & Right) */
 .mx-xsmall { margin-inline: var(--space-xsmall) !important}
 .mx-small  { margin-inline: var(--space-small) !important}
 .mx-medium { margin-inline: var(--space-medium) !important}
@@ -151,11 +188,41 @@ p, h1, h2, h3, h4, h5, h6 {
 .mx-xlarge { margin-inline: var(--space-xlarge) !important}
 .mx-auto   { margin-inline: auto !important}
 
+/* Margin Y-Axis (Top & Bottom) */
 .my-xsmall { margin-block: var(--space-xsmall) !important}
 .my-small  { margin-block: var(--space-small) !important}
 .my-medium { margin-block: var(--space-medium) !important}
 .my-large  { margin-block: var(--space-large) !important}
 .my-xlarge { margin-block: var(--space-xlarge) !important}
+
+/* Margin Top */
+.mt-xsmall { margin-block-start: var(--space-xsmall) !important}
+.mt-small  { margin-block-start: var(--space-small) !important}
+.mt-medium { margin-block-start: var(--space-medium) !important}
+.mt-large  { margin-block-start: var(--space-large) !important}
+.mt-xlarge { margin-block-start: var(--space-xlarge) !important}
+
+/* Margin Bottom */
+.mb-xsmall { margin-block-end: var(--space-xsmall) !important}
+.mb-small  { margin-block-end: var(--space-small) !important}
+.mb-medium { margin-block-end: var(--space-medium) !important}
+.mb-large  { margin-block-end: var(--space-large) !important}
+.mb-xlarge { margin-block-end: var(--space-xlarge) !important}
+
+/* Margin Left (Start) */
+.ml-xsmall { margin-inline-start: var(--space-xsmall) !important}
+.ml-small  { margin-inline-start: var(--space-small) !important}
+.ml-medium { margin-inline-start: var(--space-medium) !important}
+.ml-large  { margin-inline-start: var(--space-large) !important}
+.ml-xlarge { margin-inline-start: var(--space-xlarge) !important}
+
+/* Margin Right (End) */
+.mr-xsmall { margin-inline-end: var(--space-xsmall) !important}
+.mr-small  { margin-inline-end: var(--space-small) !important}
+.mr-medium { margin-inline-end: var(--space-medium) !important}
+.mr-large  { margin-inline-end: var(--space-large) !important}
+.mr-xlarge { margin-inline-end: var(--space-xlarge) !important}
+
 
 /* gap */
 .gap-xsmall { gap: var(--space-xsmall) !important}
@@ -176,27 +243,69 @@ p, h1, h2, h3, h4, h5, h6 {
 .row-gap-large  { row-gap: var(--space-large) !important}
 .row-gap-xlarge { row-gap: var(--space-xlarge) !important}
 
-/* border radius */
+
+/* --- BORDER RADIUS UTILITIES --- */
+/* Global Border Radius */
 .border-circlify  { border-radius: var(--border-circlify) !important}
 .border-roundify  { border-radius: var(--border-roundify) !important}
-.border-rounded { border-radius: var(--border-rounded) !important}
-.border-none { border: none !important}
+.border-rounded   { border-radius: var(--border-rounded) !important}
+.border-none      { border: none !important}
+
+/* Top-Left Border Radius */
+.border-tl-circlify  { border-start-start-radius: var(--border-circlify) !important}
+.border-tl-roundify  { border-start-start-radius: var(--border-roundify) !important}
+.border-tl-rounded   { border-start-start-radius: var(--border-rounded) !important}
+
+/* Top-Right Border Radius */
+.border-tr-circlify  { border-start-end-radius: var(--border-circlify) !important}
+.border-tr-roundify  { border-start-end-radius: var(--border-roundify) !important}
+.border-tr-rounded   { border-start-end-radius: var(--border-rounded) !important}
+
+/* Bottom-Left Border Radius */
+.border-bl-circlify  { border-end-start-radius: var(--border-circlify) !important}
+.border-bl-roundify  { border-end-start-radius: var(--border-roundify) !important}
+.border-bl-rounded   { border-end-start-radius: var(--border-rounded) !important}
+
+/* Bottom-Right Border Radius */
+.border-br-circlify  { border-end-end-radius: var(--border-circlify) !important}
+.border-br-roundify  { border-end-end-radius: var(--border-roundify) !important}
+.border-br-rounded   { border-end-end-radius: var(--border-rounded) !important}
+
+/* Combined Top Corners Only */
+.border-t-roundify {
+    border-start-start-radius: var(--border-roundify) !important;
+    border-start-end-radius: var(--border-roundify) !important;
+}
+.border-t-rounded {
+    border-start-start-radius: var(--border-rounded) !important;
+    border-start-end-radius: var(--border-rounded) !important;
+}
+
+/* Combined Bottom Corners Only */
+.border-b-roundify {
+    border-end-start-radius: var(--border-roundify) !important;
+    border-end-end-radius: var(--border-roundify) !important;
+}
+.border-b-rounded {
+    border-end-start-radius: var(--border-rounded) !important;
+    border-end-end-radius: var(--border-rounded) !important;
+}
+
 
 /* background color */
-.bg-white    { background-color: white !important}
-.bg-component    { background-color: var(--color-component-bg) !important}
+.bg-white          { background-color: white !important}
+.bg-component      { background-color: var(--color-component-bg) !important}
 .bg-component-dark { background-color: var(--color-text-main) !important;}
-.bg-accent       { background-color: var(--color-accent-primary) !important}
-.bg-accent-soft  { background-color: var(--color-accent-secondary) !important}
+.bg-accent         { background-color: var(--color-accent-primary) !important}
+.bg-accent-soft    { background-color: var(--color-accent-secondary) !important}
 .bg-accent-softer  { background-color: var(--color-accent-tertiary) !important}
 
-
 /* text color */
-.text-white      { color: white !important;}
-.text-main       { color: var(--color-text-main) !important }
-.text-muted      { color: var(--color-text-muted) !important }
-.text-accent     { color: var(--color-accent-primary) !important }
-.text-accent-soft{ color: var(--color-accent-secondary) !important }
+.text-white       { color: white !important;}
+.text-main        { color: var(--color-text-main) !important }
+.text-muted       { color: var(--color-text-muted) !important }
+.text-accent      { color: var(--color-accent-primary) !important }
+.text-accent-soft { color: var(--color-accent-secondary) !important }
 
 /* text-indent */
 .text-indent {
@@ -208,29 +317,21 @@ p, h1, h2, h3, h4, h5, h6 {
 .opaque      { opacity: 1 !important}
 
 /* font weight */
-.fw-regular {
-    font-weight: var(--fw-regular) !important;
-}
-.fw-medium {
-    font-weight: var(--fw-medium) !important;
-}
-.fw-semibold {
-    font-weight: var(--fw-semi-bold) !important;
-}
-.fw-bold {
-    font-weight: var(--fw-bold) !important;
-}
+.fw-regular    { font-weight: var(--fw-regular) !important; }
+.fw-medium     { font-weight: var(--fw-medium) !important; }
+.fw-semibold   { font-weight: var(--fw-semi-bold) !important; }
+.fw-bold       { font-weight: var(--fw-bold) !important; }
+.fw-extra-bold { font-weight: var(--fw-extra-bold) !important; }
 
-/* border */
+/* border styling */
+.border-solid       { border: solid 2px var(--color-text-muted) !important;}
 .border-white       { border: solid 1px white !important;}
 .border-main        { border: solid 1px var(--color-text-main) !important }
 .border-muted       { border: solid 1px var(--color-text-muted) !important }
 .border-accent      { border: solid 1px var(--color-accent-primary) !important }
 .border-accent-soft { border: solid 1px var(--color-accent-secondary) !important }
 
-
 /* cursor */
 .cursor-pointer {
     cursor: pointer !important;
 }
-

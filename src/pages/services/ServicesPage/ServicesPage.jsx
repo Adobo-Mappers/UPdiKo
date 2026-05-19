@@ -42,35 +42,31 @@ export default function ServicesPage() {
         ? categorySearch.search(trimmedSearchQuery).map((result) => result.item)
         : serviceCategories;
 
-    console.log(filteredCategories);
     return (
-        <div className='services-page'>
-            <div className='flex gap-medium my-medium'>
-                <WeatherView />
+        <div className='services-page p-medium'>
+            <div className='flex gap-medium my-medium py-large'>
                 {/* <EventDisplay /> */}
             </div>
 
-            <main className='p-large'>
-                <Title>Good Day <br/><span className='text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</span></Title>
-                <Heading>What services do you want to find.</Heading>
+            <main className='px-large'>
+                <Title className='fw-bold' style={{"position" : "relative", "top" : "10px"}}>Good Day</Title>
+                <Title className='fw-bold text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</Title>
+                <Heading className=''>What services do you want to find.</Heading>
+                
+                <WeatherView />
 
-                {/* Weather + Event cards side by side — matches design */}
-                <div className='my-large'>
-                    <InputField
-                        className='border-roundify py-medium'
-                        icon='search'
-                        placeholder='Search services...'
-                        value={searchQuery}
-                        onChange={setSearchQuery}
-                    />
-                </div>
 
-                <div id="service-list" className='gap-medium overflow-y'>
+                <div id="service-list" className='overflow-y'>
                     {filteredCategories.map(({ groupName, description }) => (
                         <Link key={groupName} to={`/service/${groupName}/`} className='text-inherit'>
-                            <div className="my-medium bg-component px-xlarge py-large border-roundify">
-                                <Heading>{groupName}</Heading>
-                                <Text className='fw-regular'>{description}</Text>
+                            <div className="flex my-large px-large gap-large py-medium border-roundify border-solid"> 
+                                <div className='items-center'>
+                                    <Heading>{groupName}</Heading>
+                                    <Text className='fw-regular py-xsmall'>{description}</Text>
+                                </div>
+                                <div className=' flex items-center'>
+                                    <Icon name='front'/>
+                                </div>
                             </div>
                         </Link>
                     ))}

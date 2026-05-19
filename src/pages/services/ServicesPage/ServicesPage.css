@@ -2,7 +2,7 @@
     position: relative;
     display: grid;
     grid-template-columns: 100%;
-    grid-template-rows: 150px 1fr var(--footer-height);
+    grid-template-rows: 1fr 4fr var(--footer-height);
     width: inherit;     
     height: inherit;
     overflow: hidden;
