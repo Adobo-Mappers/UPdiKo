@@ -17,8 +17,8 @@
         height: 24px;
     }
 
-    &.large{
-        width: 32px;
-        height: 32px;
+    &.xlarge{
+        width: 48px;
+        height: 48px;
     }
 }

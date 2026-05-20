@@ -3,5 +3,6 @@
     margin: auto;
     width: var(--screen-width);
     height: 100dvh;
+    overflow: auto;
 }
 

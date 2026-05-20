@@ -5,11 +5,11 @@ import { useEffect, useState } from 'react';
 
 // WMO weather code → label
 function getWeatherLabel(code) {
-    if (code === 0) return "It's Sunny Today";
-    if (code <= 2) return "It's Partly Cloudy Today";
-    if (code === 3) return "It's Cloudy Today";
-    if (code <= 67) return "It's Rainy Today";
-    if (code <= 99) return "There's a Thunderstorm Today";
+    if (code === 0) return "Sunny Today";
+    if (code <= 2) return "Partly Cloudy Today";
+    if (code === 3) return "Cloudy Today";
+    if (code <= 67) return "Rainy Today";
+    if (code <= 99) return "Thunderstorm Today";
     return 'Interesting Weather Today';
 }
 function getWeatherName(code) {
@@ -55,13 +55,13 @@ function WeatherView() {
     const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
     return (
-        <div className='weather-card my-small'>
+        <div className='weather-card my-small px-large py-large border-solid border-roundify'>
             <div className='weather-icon flex justify-center items-center' aria-hidden='true'>
-                <Icon name={getWeatherName(today.code)} size='large'/>
+                <Icon name={getWeatherName(today.code)} size='xlarge'/>
             </div>
             <div className='weather-copy'>
-                <Heading className='fw-extra-bold text-white'>{getWeatherLabel(today.code)}</Heading>
-                <Heading className='text-white'>{dayName}</Heading>
+                <Heading className='fw-extra-bold'>{getWeatherLabel(today.code)}</Heading>
+                <Heading>{dayName}</Heading>
             </div>
         </div>
     );

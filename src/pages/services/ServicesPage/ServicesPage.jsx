@@ -15,54 +15,28 @@ import WeatherView from '../../../components/weather/Weather.jsx';
 export default function ServicesPage() {
     // user auth
     const [user, setUser] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
     useEffect(() => {
         getCurrentUser().then(setUser);
     }, []);
     
-    const serviceCategories = useMemo(() => {
-        return Object.entries(TAG_GROUPS).map(([groupName, groupData]) => ({
-            groupName,
-            description: groupData.description,
-            tags: groupData.tags || [],
-        }));
-    }, []);
-    const categorySearch = useMemo(() => new Fuse(serviceCategories, {
-        keys: [
-            { name: 'groupName', weight: 2 },
-            { name: 'description', weight: 1 },
-            { name: 'tags', weight: 1 },
-        ],
-        threshold: 0.35,
-        ignoreLocation: true,
-        minMatchCharLength: 2,
-    }), [serviceCategories]);
-    const trimmedSearchQuery = searchQuery.trim();
-    const filteredCategories = trimmedSearchQuery
-        ? categorySearch.search(trimmedSearchQuery).map((result) => result.item)
-        : serviceCategories;
-
     return (
-        <div className='services-page p-medium'>
-            <div className='flex gap-medium my-medium py-large'>
-                {/* <EventDisplay /> */}
-            </div>
-
-            <main className='px-large'>
+        <div className='services-page'>
+            <main className='p-xlarge'>
                 <Title className='fw-bold' style={{"position" : "relative", "top" : "10px"}}>Good Day</Title>
-                <Title className='fw-bold text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</Title>
-                <Heading className=''>What services do you want to find.</Heading>
-                
+                <Title className='fw-bold text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</Title>                
                 <WeatherView />
-
-
-                <div id="service-list" className='overflow-y'>
-                    {filteredCategories.map(({ groupName, description }) => (
-                        <Link key={groupName} to={`/service/${groupName}/`} className='text-inherit'>
+                
+                <Heading className='fw-bold pt-large'>What services do you want to find?</Heading>
+                <div id="service-list">
+                    {Object.entries(TAG_GROUPS).map(([name, value ]) => (
+                        <Link key={name} to={`/service/${name}/`} className='text-inherit'>
                             <div className="flex my-large px-large gap-large py-medium border-roundify border-solid"> 
-                                <div className='items-center'>
-                                    <Heading>{groupName}</Heading>
-                                    <Text className='fw-regular py-xsmall'>{description}</Text>
+                                <div className=' flex items-center'>
+                                    <Icon name={value.icon} size='xlarge'/>
+                                </div>
+                                <div>
+                                    <Heading>{name}</Heading>
+                                    <Text className='fw-regular py-xsmall'>{value.description}</Text>
                                 </div>
                                 <div className=' flex items-center'>
                                     <Icon name='front'/>
@@ -71,7 +45,7 @@ export default function ServicesPage() {
                         </Link>
                     ))}
                 </div>
-            </main>
+            </main> 
         </div>
     );
 }
