@@ -2,21 +2,5 @@
     display: flex;
     align-items: center;
     gap: var(--space-medium);
-    padding:  var(--space-large);
-    background-color: var(--color-accent-primary);
-    border-radius: 30px;
-    color: white;
 }
 
-.weather-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: var(--border-circlify);
-    background-color: white
-}
-
-.weather-day {
-    margin-top: 2px;
-    font-size: var(--fs-text);
-    font-weight: var(--fw-regular);
-}
