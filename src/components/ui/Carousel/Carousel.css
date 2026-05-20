@@ -36,7 +36,7 @@
         border: none;
         border-radius: 50%;
         cursor: pointer;  
-        background-color: rgb(59, 56, 56, 0.5);
+        background-color: rgb(21, 21, 21, 0.9);
     }
 
     .next-button, .prev-button {
@@ -53,7 +53,7 @@
         display: flex;
         gap: 8px;
         transform: translateX(-50%);
-        background-color: rgb(59, 56, 56, 0.5);
+        background-color: rgb(21, 21, 21, 0.9);
         padding: var(--space-xsmall) var(--space-small);
         border-radius: 30px;
         z-index: 4;
@@ -64,7 +64,7 @@
         height: 10px;
         border-radius: 50%;
         border: none;
-        background-color: var(--color-text-main);
+        background-color: gray;
         cursor: pointer;
     }
 
