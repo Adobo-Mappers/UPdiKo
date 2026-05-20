@@ -20,17 +20,17 @@ export default function ServicesPage() {
     }, []);
     
     return (
-        <div className='services-page'>
-            <main className='p-xlarge'>
-                <Title className='fw-bold' style={{"position" : "relative", "top" : "10px"}}>Good Day</Title>
-                <Title className='fw-bold text-accent'>{user ? (user.user_metadata?.display_name?.split(' ')[0] + '!') : ''}</Title>                
-                <WeatherView />
-                
-                <Heading className='fw-bold pt-large'>What services do you want to find?</Heading>
+        <div className='services-page px-xlarge'>
+            <main>
+                <div className='flex flex-col justify-center p-xlarge bg-white border-roundify'>
+                    <Title className='fw-extra-bold lh-large pt-medium'>Good Day {user ? (user.user_metadata?.display_name?.split(' ')[0]) : "" }!</Title>
+                    <WeatherView />
+                    <Heading className='pt-small px-small'>What services do you want to find?</Heading>
+                </div>
                 <div id="service-list">
-                    {Object.entries(TAG_GROUPS).map(([name, value ]) => (
+                    {Object.entries(TAG_GROUPS).map(([name, value], index) => (
                         <Link key={name} to={`/service/${name}/`} className='text-inherit'>
-                            <div className="flex my-large px-large gap-large py-medium border-roundify border-solid"> 
+                            <div className={`flex my-xlarge mx-small px-large gap-large py-medium border-roundify bg-white ${ (index % 2 == 0) ? 'rotate-left': 'rotate-right'}`}> 
                                 <div className=' flex items-center'>
                                     <Icon name={value.icon} size='xlarge'/>
                                 </div>
