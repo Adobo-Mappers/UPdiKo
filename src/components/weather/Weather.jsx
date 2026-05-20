@@ -55,7 +55,7 @@ function WeatherView() {
     const dayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
     return (
-        <div className='weather-card my-small px-large py-large border-solid border-roundify'>
+        <div className='weather-card my-small px-small pt-large'>
             <div className='weather-icon flex justify-center items-center' aria-hidden='true'>
                 <Icon name={getWeatherName(today.code)} size='xlarge'/>
             </div>

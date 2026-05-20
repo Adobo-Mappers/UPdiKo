@@ -310,7 +310,16 @@ em {
 
 /* Width  */
 .w-100 {
-    width: 100%;
+    width: 100% !important;
+}
+
+/* Transformations */
+.rotate-left {
+    transform: rotate(1deg) !important;
+}
+
+.rotate-right{
+    transform: rotate(-1deg) !important;
 }
 
 /* background color */
