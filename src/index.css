@@ -9,6 +9,13 @@
     --color-accent-secondary: #FFD271;
     --color-accent-tertiary: #FDFAD5;
 
+    --color-text-success: #226130;
+    --color-bg-success: #D4EDDA;
+
+    --color-text-danger: #721C24;
+    --color-bg-danger: #F8D7DA;
+
+
     /* font-size */
     --fs-caption: 11px;
     --fs-text: 13px;
@@ -313,6 +320,8 @@ em {
 .bg-accent         { background-color: var(--color-accent-primary) !important}
 .bg-accent-soft    { background-color: var(--color-accent-secondary) !important}
 .bg-accent-softer  { background-color: var(--color-accent-tertiary) !important}
+.bg-success        { background-color: var(--color-bg-success) !important}
+.bg-danger         { background-color: var(--color-bg-danger) !important}
 
 /* text color */
 .text-white       { color: white !important;}
@@ -320,6 +329,8 @@ em {
 .text-muted       { color: var(--color-text-muted) !important }
 .text-accent      { color: var(--color-accent-primary) !important }
 .text-accent-soft { color: var(--color-accent-secondary) !important }
+.text-success     { color: var(--color-text-success) !important}
+.text-danger      { color: var(--color-text-danger) !important}
 
 /* text-indent */
 .text-indent {

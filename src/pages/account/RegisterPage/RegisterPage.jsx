@@ -118,8 +118,8 @@ export default function RegisterPage() {
             </main>
             
             {errorMessage && (
-                <div id="error-message-toast" className='flex justify-between items-center bg-accent-softer py-medium px-large m-xlarge border-roundify'>
-                    <Text className='mr-xlarge'>{errorMessage}</Text>
+                <div id="error-message-toast" className=' toast flex justify-between items-center bg-danger py-medium px-large m-xlarge border-roundify'>
+                    <Text className='mr-xlarge text-danger'>{errorMessage}</Text>
                     <Icon name='close' size='small' className='cursor-pointer' onClick={() => setErrorMessage("")}/>
                 </div>
             )}
