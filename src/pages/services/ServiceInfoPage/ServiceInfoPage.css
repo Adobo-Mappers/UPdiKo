@@ -14,7 +14,21 @@
     main {
         height: 100dvh;
         width: 100%; 
-        overflow: auto;
+    }
+
+    .modal-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: inherit;
+        height: 100dvh;
+        z-index: 100;
+        background-color: rgba(225, 210, 113, 0.67);
+    }
+
+    textarea {
+        height: 100px;
+        resize: none;
     }
 }
 
@@ -33,7 +47,7 @@
     background-position: center;
     background-size: cover;
     background-repeat: repeat;
-    opacity: 0.05;
+    opacity: 0.1;
 }
 
 .service-info-page * {
