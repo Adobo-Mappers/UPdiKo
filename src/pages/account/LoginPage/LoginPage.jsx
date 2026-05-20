@@ -14,6 +14,7 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    
     useEffect(() => {
         if (errorMessage === "") { 
             return;
@@ -85,7 +86,7 @@ export default function LoginPage() {
             {errorMessage && (
                 <div id="error-message-toast" className='flex justify-between items-center bg-accent-softer py-medium px-large m-xlarge border-roundify'>
                     <Text className='mr-xlarge'>{errorMessage}</Text>
-                    <Icon name='close' size='small'/>
+                    <Icon name='close' size='small' className='cursor-pointer' onClick={() => setErrorMessage("")}/>
                 </div>
             )}
         </div>
