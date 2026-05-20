@@ -38,6 +38,7 @@ export default function ServiceInfoPage() {
         }
         loadService();
     }, [id]);
+    
     // B2: reviews
     const [reviews, setReviews] = useState([]);
     const [savedRating, setSavedRating] = useState(0);

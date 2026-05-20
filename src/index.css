@@ -315,11 +315,11 @@ em {
 
 /* Transformations */
 .rotate-left {
-    transform: rotate(1deg) !important;
+    transform: rotate(2deg) !important;
 }
 
 .rotate-right{
-    transform: rotate(-1deg) !important;
+    transform: rotate(-2deg) !important;
 }
 
 /* background color */

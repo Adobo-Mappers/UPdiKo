@@ -12,8 +12,9 @@
     background-color: var(--color-accent-secondary);
 
     main {
-        margin-block: 100px;
+        height: 100dvh;
         width: 100%; 
+        overflow: auto;
     }
 }
 
@@ -24,15 +25,15 @@
     object-fit: contain;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 250vh;
+    width: 100dvw;
+    height: 100dvh;
     
     z-index: 1;
     background-image: url("./../../../assets/images/bg/upv-bg.jpg");
     background-position: center;
     background-size: cover;
-    background-repeat: no-repeat;
-    opacity: 0.2;
+    background-repeat: repeat;
+    opacity: 0.1;
 }
 
 .services-page * {
