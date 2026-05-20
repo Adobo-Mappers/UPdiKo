@@ -37,52 +37,76 @@ export default function ServiceCategoryPage() {
         : categoryServices;
 
     return (
-        <div className='services-page'>
-            <header className='flex items-center px-large mx-medium py-medium'>
-                <Link to="/service" className='flex items-center gap-small text-inherit'>
-                    <Icon name="back" size='small' />
-                    <Text className="fw-bold">Back</Text>
-                </Link>
-            </header>
-
-            <main className='px-large mx-medium'>
-                <div className="mb-large">
-                    <div className="flex items-center gap-small mb-xsmall">
-                        <Title>{category}</Title>
+        <div className='services-page px-xlarge'>
+            <main className='py-xlarge'>
+                <div className="flex flex-col bg-white p-xlarge border-roundify">
+                    <Link to="/service/" className='flex items-center gap-small text-inherit'>
+                        <Icon name="back" size='small' />
+                        <Text>Back</Text>
+                    </Link>
+                    <Title className='mt-large fw-extra-bold'>{category}</Title>
+                    <div className='px-small'>
+                        <Heading>
+                            {groupData?.description || `Explore ${category} services.`}
+                        </Heading>
+                        <div className='mt-large'>
+                            <InputField
+                                className='border-roundify py-medium'
+                                icon='search'
+                                placeholder={`Search in ${category}...`}
+                                value={searchQuery}
+                                onChange={setSearchQuery}
+                            />
+                        </div>
                     </div>
-                    <Heading className="text-muted">
-                        {groupData?.description || `Explore ${category} services.`}
-                    </Heading>
                 </div>
 
-                <div className='my-large'>
-                    <InputField
-                        className='border-roundify py-medium'
-                        icon='search'
-                        placeholder={`Search in ${category}...`}
-                        value={searchQuery}
-                        onChange={setSearchQuery}
-                    />
-                </div>
-
-                <div id="service-list" className='flex flex-col gap-medium'>
+                <div id="service-list" className='flex flex-col gap-medium mt-medium mx-large'>
                     {isLoading ? (
                         <div className="flex justify-center py-xlarge">
                              <div className="spinner"></div> {/* Use your existing spinner */}
                         </div>
                     ) : filteredServices.length > 0 ? (
-                        filteredServices.map((service) => (
+                        filteredServices.map((service, index) => (
                             <Link 
                                 key={service.id} 
-                                to={`/service/${encodeURIComponent(category)}/${service.id}`} 
-                                className='text-inherit'
-                            >
-                                <Card service={service} className="border-solid border-roundify my-xsmall"/>
+                                to={`/service/${encodeURIComponent(category)}/${service.id}`}
+                                className='flex'
+                                style={{"width": "300px", "alignSelf": `${(index % 2 === 0) ? "start" : "end"}`}} 
+                            >   
+                                <div className={`w-100 bg-white my-small border-roundify p-medium ${(index % 2 == 0)? "rotate-left": "rotate-right"}`}>
+                                    { service.images[0] ? ( 
+                                        <img
+                                            src={service.images[0]}
+                                            style={{"width": "100%", "height": "170px", "objectFit": "cover"}}
+                                            className='border-roundify'
+                                        />
+                                        ) : (
+                                        <div
+                                            style={{"width": "100%", "height": "170px", "objectFit": "cover", "backgroundColor": "#212121"}}
+                                            className='border-roundify'
+                                        ></div>
+                                        )
+                                    }
+                                    
+                                    <div className='py-small px-medium'>
+                                        <Heading className='fw-bold'>{service.name}</Heading>
+                                        <div className='flex items-center gap-xsmall p-xsmall'>
+                                            <Icon name='address' size='small' />
+                                            <Text className='fw-regular'>{service.address}</Text>
+                                        </div>
+                                    </div>    
+
+                                    <div className='flex justify-end items-center gap-xsmall'>
+                                        <Text>See More</Text>    
+                                        <Icon name='front' size='small' />    
+                                    </div>                          
+                                </div>
                             </Link>
                         ))
                     ) : (
-                        <div className="px-large py-medium text-center border-rounded bg-component">
-                            <Text className="text-muted">No locations found in this category.</Text>
+                        <div className="px-large py-large text-center border-roundify bg-white">
+                            <Text>No locations found while searching...</Text>
                         </div>
                     )}
                 </div>

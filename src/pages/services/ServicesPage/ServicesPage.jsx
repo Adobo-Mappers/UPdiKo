@@ -21,7 +21,7 @@ export default function ServicesPage() {
     
     return (
         <div className='services-page px-xlarge'>
-            <main>
+            <main className='py-xlarge'>
                 <div className='flex flex-col justify-center p-xlarge bg-white border-roundify'>
                     <Title className='fw-extra-bold lh-large pt-medium'>Good Day {user ? (user.user_metadata?.display_name?.split(' ')[0]) : "" }!</Title>
                     <WeatherView />
