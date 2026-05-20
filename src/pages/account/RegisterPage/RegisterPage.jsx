@@ -1,6 +1,6 @@
 import './RegisterPage.css';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, InputField, PasswordField } from '../../../components/form';
 import { Icon, Carousel, Tag } from '../../../components/ui';
 import { Text, Caption, Heading, Title } from '../../../components/typography'
@@ -14,8 +14,20 @@ export default function RegisterPage() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    useEffect(() => {
+        if (errorMessage === "") { 
+            return;
+        }
+        
+        const timer = setTimeout(() => {
+            setErrorMessage("");
+        }, 15000);
+        
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
+    
+
 
     // map supabase errors to be displayed 
     function mapSupabaseError(error) {
@@ -35,7 +47,7 @@ export default function RegisterPage() {
     async function handleRegister() {
         setErrorMessage('');
         console.log("hello");
-        if (!username || !email || !password || !confirmPassword) {
+        if (!username || !email || !password) {
             setErrorMessage("Please fill in all the required fields.");
             return;
         }
@@ -58,23 +70,14 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="register-page">
-            <main className='flex flex-col justify-center px-large py-medium'>
-                <div className='py-medium'>
-                    <Link to="/account/login" className='flex items-center gap-small'>
-                        <Icon name="back" size='small'/>
-                        <Text>Back</Text>
-                    </Link>               
+        <div className="register-page px-xlarge">
+            <main className='flex flex-col justify-center p-xlarge bg-white border-roundify'>
+                <div>
+                    <Heading className='fw-extra-bold py-xsmall'>User</Heading>
+                    <Title className='fw-extra-bold lh-large'>Sign Up</Title>
                 </div>
-                <Title>User <em className='text-accent'>Sign Up</em></Title>
 
-                {errorMessage && (
-                    <div className='my-medium p-medium border-roundify bg-accent-softer'>
-                        <Text>{errorMessage}</Text>
-                    </div>
-                )}
-
-                <form>
+                <form className='pt-small px-small'>
                     <div className='my-medium'>
                         <InputField 
                             className='border-roundify py-medium' 
@@ -104,17 +107,8 @@ export default function RegisterPage() {
                         />
                     </div>
                     
-                    <div className='my-medium'>
-                        <PasswordField 
-                            className='border-roundify py-medium' 
-                            placeholder="Confirm Password" 
-                            value={confirmPassword}
-                            onChange={setConfirmPassword}
-                        />
-                    </div>
-        
                     <div className='flex justify-center my-large'>
-                        <Button type="button" className='py-medium' width='200px' onClick = {() => handleRegister()}>Register</Button>
+                        <Button type="button" className='py-medium bg-color-none border-solid fs-heading' width='250px' onClick = {() => handleRegister()}>Register</Button>
                     </div>
                     
                     <div className='flex justify-center my-large'>
@@ -122,6 +116,14 @@ export default function RegisterPage() {
                     </div>
                 </form>
             </main>
+            
+            {errorMessage && (
+                <div id="error-message-toast" className='flex justify-between items-center bg-accent-softer py-medium px-large m-xlarge border-roundify'>
+                    <Text className='mr-xlarge'>{errorMessage}</Text>
+                    <Icon name='close' size='small' className='cursor-pointer' onClick={() => setErrorMessage("")}/>
+                </div>
+            )}
+
         </div>
     );
 }   
