@@ -40,7 +40,7 @@ function CassieWidget({
         <div className="cassie-chat">
           <div className="cassie-header">
             <div className="cassie-header-info">
-              <img src={chatIcon} style={{"filter" : "invert(1)"}} alt="Casie" className="cassie-avatar" />
+              <img src={cassIcon} alt="Casie" className="cassie-avatar" />
               <div>
                 <h3>Casie</h3>
                 <span className="cassie-status">AI Assistant</span>
@@ -128,7 +128,7 @@ function CassieWidget({
       )}
 
       <button
-        className="cassie-toggle"
+        className="cassie-toggle bg-accent-softer"
         onClick={() => setIsOpen((previous) => !previous)}
         aria-label={isOpen ? 'Close Casie' : 'Open Casie'}
       >

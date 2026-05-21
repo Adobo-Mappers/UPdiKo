@@ -180,10 +180,12 @@ export default function MapPage() {
 
         if (newTrackingState && userCurrentLocation) {
             setMapCenter(userCurrentLocation);
+            smoothResetBearing();
         } else if (!userCurrentLocation) {
             alert("User location is not available.");
             setTrackingEnabled(false);
         }
+
     }
 
     // B2: open pin form with reverse geocoding to auto-fill address
@@ -588,7 +590,7 @@ export default function MapPage() {
 
             <main className='map-utils'>
                 <div className='main-controls flex flex-col gap-small'>
-                    <CircularButton width='55px' className='bg-component-dark' onClick={handleRecenter}>
+                    <CircularButton width='64px' className='bg-component-dark' onClick={handleRecenter}>
                         <Icon name='compass' size='large' />
                     </CircularButton>
                     <CassieWidget
