@@ -358,22 +358,14 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               setReviewRating(0);
               setSavedRating(0);
           });
-<<<<<<< HEAD
-  }, [authLoading, id, user]);
-=======
   }, [authLoading, user?.id, id])
->>>>>>> 292bef2a77364fd96b972356bc433575d629df2c
 
   useEffect(() => {
       if (reviewModal === false) {
           setReviewRating(savedRating);
           setReviewComment(savedComment);
       }
-<<<<<<< HEAD
-  }, [reviewModal, savedRating]);
-=======
   }, [reviewModal, savedRating, savedComment])
->>>>>>> 292bef2a77364fd96b972356bc433575d629df2c
 
   async function handleSubmitReview() {
       if (!user || !id) {
@@ -473,7 +465,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               setSelectedMarkerInfo(null);
               navigate('/map');
           }, 200);
-      } else {
+      } else {g
           panelRef.current.style.transform = 'translateY(0)';
       }
       dragY.current = 0;
@@ -934,11 +926,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* Tabs */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-<<<<<<< HEAD
-            {["About", "Photos", "Reviews"].map(tab => (
-=======
             {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos"].map(tab => (
->>>>>>> 292bef2a77364fd96b972356bc433575d629df2c
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
