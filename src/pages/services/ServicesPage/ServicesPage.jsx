@@ -28,6 +28,7 @@ export default function ServicesPage() {
                 </div>
                 <div id="service-list">
                     {Object.entries(TAG_GROUPS).map(([name, value], index) => (
+                        (name !== "All") &&
                         <Link key={name} to={`/service/${name}/`} className='text-inherit'>
                             <div className={`flex my-xlarge mx-small px-large gap-large py-medium border-roundify bg-white ${ (index % 2 == 0) ? 'rotate-left': 'rotate-right'}`}> 
                                 <div className=' flex items-center'>
