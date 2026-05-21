@@ -62,6 +62,7 @@ import { getStaticLocations, getRoute } from "../../../services/locations.js";
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser, deleteLocationReview} from "../../../services/reviewsService.js";
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
+import { NOTIFICATION_ACTIONS, notify, notifyAction } from '../../../services/notificationCenter.js';
 
 
 // fixes icon
@@ -550,26 +551,42 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   }, [id]);
 
   useEffect(() => {
-      if (!user) return;
+      if (authLoading || !user || !id) return;
       getLocationReviewOfUser(id, user.id)
           .then(data => { 
-              setReviewRating(data); 
-              setSavedRating(data); 
+              setReviewComment(data?.comment || '');
+              setSavedComment(data?.comment || '');
+              setReviewRating(data?.rating || 0);
+              setSavedRating(data?.rating || 0);
           })
           .catch(() => {
+              setReviewComment('');
+              setSavedComment('');
               setReviewRating(0);
               setSavedRating(0);
           });
-  }, [authLoading])
+  }, [authLoading, user?.id, id])
 
   useEffect(() => {
       if (reviewModal === false) {
           setReviewRating(savedRating);
+          setReviewComment(savedComment);
       }
-  }, [reviewModal])
+  }, [reviewModal, savedRating, savedComment])
 
   async function handleSubmitReview() {
-      if (!user || reviewRating === 0) return;
+      if (!user || !id) {
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
+          return;
+      }
+
+      if (!reviewRating) {
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error', {
+              message: 'Please select a rating first',
+          });
+          return;
+      }
+
       setSubmittingReview(true);
       try {
           await submitLocationReview({
@@ -582,11 +599,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           const updated = await getLocationReviews(Number(id));
           setReviews(updated);
           setSavedRating(reviewRating);
-          setReviewComment('');
+          setSavedComment(reviewComment);
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'success');
+          setReviewModal(false);
       } catch (e) {
           console.error('Review submit failed:', e);
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
       } finally {
-        setReviewModal(false);
         setSubmittingReview(false); 
       }
   }
@@ -610,8 +629,12 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         
         // 4. Shut the modal view container 
         setReviewModal(false);
+        notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'success', {
+            message: 'Map rating cleared',
+        });
     } catch (e) {
         console.error('Failed to remove review:', e);
+        notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
     } finally {
         setSubmittingReview(false);
     }
@@ -790,7 +813,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   // NEW COMPONENT: Gets the direction to the location selected from user's current location
   const handleGetDirections = async (destination) => {
     if (!currentCoords) {
-      alert("Your location is not available yet.");
+      notify({ message: 'Your location is not available yet', type: 'error' });
       return;
     }
 
