@@ -7,6 +7,7 @@ import { Text, Caption, Heading, Title } from './../../../components/typography'
 import { getCurrentUser, onAuthStateChangedListener } from './../../../services/supabase.js';
 import { getServiceFromCache, fetchServicesFromServer, hasServiceCache } from './../../../services/service-handler.js';
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser, deleteLocationReview } from '../../../services/reviewsService.js';
+import { NOTIFICATION_ACTIONS, notifyAction } from '../../../services/notificationCenter.js';
 
 export default function ServiceInfoPage() {
     // User Auth
@@ -80,6 +81,13 @@ export default function ServiceInfoPage() {
 
     async function handleSubmitReview() {
         if (!user || !id) return;
+        if (!reviewRating) {
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'error', {
+                message: 'Please select a rating first',
+            });
+            return;
+        }
+
         setSubmittingReview(true);
         try {
             await submitLocationReview({
@@ -94,8 +102,10 @@ export default function ServiceInfoPage() {
             setSavedRating(reviewRating);
             setSavedComment(reviewComment);
             setReviewModal(false);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'success');
         } catch (e) {
             console.error('Review submit failed:', e);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'error');
         } finally {
             setSubmittingReview(false);
         }
@@ -120,8 +130,12 @@ export default function ServiceInfoPage() {
             
             // 4. Shut the modal view container 
             setReviewModal(false);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'success', {
+                message: 'Service rating cleared',
+            });
         } catch (e) {
             console.error('Failed to remove review:', e);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'error');
         } finally {
             setSubmittingReview(false);
         }

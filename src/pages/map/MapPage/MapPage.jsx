@@ -11,6 +11,8 @@ import { getCurrentUser, addPinnedLocationToDB } from './../../../services/supab
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
 import { reverseGeocode } from '../../../services/geocoding.js';
 import { uploadPinImage } from '../../../services/storageService.js';
+import { submitLocationReview } from '../../../services/reviewsService.js';
+import { NOTIFICATION_ACTIONS, notify, notifyAction } from '../../../services/notificationCenter.js';
 import CassieWidget from '../../../components/casie/CassieWidget.jsx';
 
 export default function MapPage() {
@@ -121,6 +123,7 @@ export default function MapPage() {
     // modal logic
     const [rating, setRating] = useState(0);
     const [isRating, setRatingAction] = useState(false);
+    const [isSubmittingMapRating, setSubmittingMapRating] = useState(false);
 
     // B2: pin creation state — opened when user taps the map to drop a personal pin
     const queryClient = useQueryClient();
@@ -190,7 +193,7 @@ export default function MapPage() {
             setMapCenter(userCurrentLocation);
             smoothResetBearing();
         } else if (!userCurrentLocation) {
-            alert("User location is not available.");
+            notify({ message: 'User location is not available', type: 'error' });
             setTrackingEnabled(false);
         }
 
@@ -198,7 +201,12 @@ export default function MapPage() {
 
     // B2: open pin form with reverse geocoding to auto-fill address
     async function handleMapClickForPin({ lat, lng }) {
-        if (!user) { alert('Please log in first to create personal pins.'); return; }
+        if (!user) {
+            notifyAction(NOTIFICATION_ACTIONS.PIN_CREATE, 'error', {
+                message: 'Please log in first to create personal pins',
+            });
+            return;
+        }
 
         // Reset the pin sheet transform position so it doesn't stay hidden when reopened
         if (pinSheetRef.current) {
@@ -249,8 +257,41 @@ export default function MapPage() {
             });
             await queryClient.invalidateQueries({ queryKey: ['user-locations', user.id] });
             handleClosePinForm();
+            notifyAction(NOTIFICATION_ACTIONS.PIN_CREATE, 'success');
         } catch (e) {
-            alert(e.message);
+            notifyAction(NOTIFICATION_ACTIONS.PIN_CREATE, 'error');
+        }
+    }
+
+    async function handleSubmitMapRating() {
+        if (!user || !selectedService?.id) {
+            notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
+            return;
+        }
+
+        if (!rating) {
+            notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error', {
+                message: 'Please select a rating first',
+            });
+            return;
+        }
+
+        setSubmittingMapRating(true);
+        try {
+            await submitLocationReview({
+                locationId: Number(selectedService.id),
+                userId: user.id,
+                userName: user.user_metadata?.display_name ?? user.email,
+                rating,
+                comment: '',
+            });
+            notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'success');
+            setRating(0);
+            setRatingAction(false);
+        } catch (e) {
+            notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
+        } finally {
+            setSubmittingMapRating(false);
         }
     }
 
@@ -434,7 +475,10 @@ export default function MapPage() {
                     </div>
                     <div className='flex justify-end items-center'>
                         <div className='flex px-medium' onClick={() => setRatingAction(false)}><strong>Cancel</strong></div>
-                        <Button><Icon name='darkstar' />Rate</Button>
+                        <Button disabled={isSubmittingMapRating} onClick={handleSubmitMapRating}>
+                            <Icon name='darkstar' />
+                            {isSubmittingMapRating ? 'Submitting...' : 'Rate'}
+                        </Button>
                     </div>
                 </section>
             }
