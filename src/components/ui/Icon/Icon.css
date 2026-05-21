@@ -16,4 +16,9 @@
         width: 24px;
         height: 24px;
     }
+
+    &.xlarge{
+        width: 48px;
+        height: 48px;
+    }
 }

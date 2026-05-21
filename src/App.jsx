@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { Footer } from './components/ui';
+import { Footer, ToastViewport } from './components/ui';
 import { getCurrentUser, onAuthStateChangedListener } from './services/supabase';
 
 // B1 pages (base)
@@ -86,6 +86,7 @@ export default function App() {
                         <Route path='*' element={<Navigate to='/service/' />} />
                     </Routes>
                     <Footer />
+                    <ToastViewport />
                 </BrowserRouter>
             </div>
         </QueryClientProvider>

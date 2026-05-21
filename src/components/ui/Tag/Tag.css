@@ -1,10 +1,15 @@
 .tag {
+    display: inline-flex;
+    align-items: center;
     width: fit-content;
-    height: fit-content;
-    padding:  var(--space-xsmall) var(--space-medium);
+    min-height: 24px;
+    padding: var(--space-xsmall) var(--space-small);
     border-radius: var(--border-roundify);
-    background-color: var(--color-component-bg);
-    color: var(--color-text-main);
-    font-weight: var(--fw-bold);
+    border: 1px solid var(--tag-border, var(--color-accent-secondary));
+    background-color: var(--tag-bg, var(--color-accent-tertiary));
+    color: var(--tag-text, var(--color-text-main));
     font-size: var(--fs-caption);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+    white-space: nowrap;
 }

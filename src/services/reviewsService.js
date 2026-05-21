@@ -48,6 +48,17 @@ export async function submitLocationReview(review) {
   }
 }
 
+export async function deleteLocationReview(locationId, userId) {
+    const { data, error } = await supabase
+        .from('location_reviews')
+        .delete()
+        .eq('location_id', locationId) // Double check if your column is named locationId or location_id
+        .eq('user_id', userId);        // Double check if your column is named userId or user_id
+
+    if (error) throw error;
+    return data;
+}
+
 /**
  * Loads the review for a public OSM-backed location for a userID.
  *
@@ -67,5 +78,5 @@ export async function getLocationReviewOfUser(locationId, userId) {
     throw new Error(error.message);
   }
 
-  return ((data && data[0].rating) || 0);
+  return ((data && data[0]) || 0);
 }

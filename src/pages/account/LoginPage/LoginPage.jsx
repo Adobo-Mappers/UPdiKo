@@ -1,5 +1,5 @@
 import './LoginPage.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, InputField, PasswordField } from '../../../components/form';
 import { Icon, Carousel, Tag } from './../../../components/ui';
@@ -14,6 +14,19 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    
+    useEffect(() => {
+        if (errorMessage === "") { 
+            return;
+        }
+        
+        const timer = setTimeout(() => {
+            setErrorMessage("");
+        }, 15000);
+        
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
+    
 
     async function handleLogin() {
         try {
@@ -26,18 +39,14 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="login-page"> 
-            <main className='flex flex-col justify-center px-large py-medium'>
-                <Title>User <em className='text-accent'>Login</em></Title>
-                <Heading>Access personalized features like <em className='fw-bold'>bookmarking pins</em> and <em className='fw-bold'>creating custom pins. </em></Heading>
+        <div className="login-page px-xlarge"> 
+            <main className='flex flex-col justify-center p-xlarge bg-white border-roundify'>
+                <div>
+                    <Heading className='fw-extra-bold py-xsmall'>User</Heading>
+                    <Title className='fw-extra-bold lh-large'>Login</Title>
+                </div>
 
-                {errorMessage && (
-                    <div className='my-medium p-medium border-roundify bg-accent-softer'>
-                        <Text>{errorMessage}</Text>
-                    </div>
-                )}
-
-                <form>
+                <form className='pt-small px-small'>
                     <div className='my-medium'>
                         <InputField 
                             className='border-roundify py-medium email' 
@@ -58,21 +67,28 @@ export default function LoginPage() {
                     />
                     </div>
                     
-                    <div className='flex justify-end'>
+                    <div className='flex justify-end px-small'>
                         <Link to="/account/forgot-password" className='text-decoration-none'>
-                            <Text><u>Forgot Password</u></Text>
+                            <Text className='fw-extra-bold'><u>Forgot Password</u></Text>
                         </Link>
                     </div>
                     
                     <div className='flex justify-center my-large'>
-                        <Button type="button" className='py-medium' width='200px' onClick = {() => handleLogin()}>Login</Button>
+                        <Button type="button" className='py-medium bg-color-none border-solid fs-heading' width='250px' onClick = {() => handleLogin()}>Login</Button>
                     </div>
                     
                     <div className='flex justify-center my-large'>
-                        <Text>Don't have an account? <Link to="/account/register" className='text-decoration-none'><u>Sign up here</u></Link></Text>
+                        <Text>Don't have an account? <Link to="/account/register" className='text-decoration-none fw-extra-bold'><u>Sign up here</u></Link></Text>
                     </div>
                 </form>
             </main>
+                            
+            {errorMessage && (
+                <div id="error-message-toast" className='toast flex justify-between items-center bg-danger  py-medium px-large m-xlarge border-roundify'>
+                    <Text className='mr-xlarge text-danger'>{errorMessage}</Text>
+                    <Icon name='close' size='small' className='cursor-pointer' onClick={() => setErrorMessage("")}/>
+                </div>
+            )}
         </div>
     );
 }   

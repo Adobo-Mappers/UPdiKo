@@ -6,12 +6,9 @@
     border: none;   
     border-radius: var(--border-roundify); 
     padding: var(--space-small) var(--space-large);
-    background-color: var(--color-accent-secondary);
-    font-weight: var(--fw-bold);
+    background-color: transparent;
+    font-weight: var(--fw-extra-bold);
     color: var(--color-text-main);
     cursor: pointer;
 
-    &.toggled {
-        background-color: var(--color-component-bg); 
-    }
 }

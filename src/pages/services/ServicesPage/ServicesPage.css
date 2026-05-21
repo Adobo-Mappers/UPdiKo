@@ -1,58 +1,42 @@
 .services-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    display: grid;
-    grid-template-columns: 100%;
-    grid-template-rows: 150px 1fr var(--footer-height);
-    width: inherit;     
-    height: inherit;
-    overflow: hidden;
-    background-size: cover;
-    background-color: white;
+    
+    width: 100%;
+    min-height: 100vh; 
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: var(--color-accent-secondary);
 
     main {
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
+        height: 100dvh;
+        width: 100%; 
+        padding-bottom: 100px !important;
+        overflow: auto;
     }
-
-    #category-tab {
-        > * { 
-            font-size: var(--fs-text);
-            margin-right: var(--space-xlarge); 
-            white-space: nowrap;
-            cursor: pointer;
-        }
-
-        .active {
-            font-weight: var(--fw-bold);
-        }
-
-    }
-
-    #service-list {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-    }
-
 }
 
 .services-page::before {
     content: "";
-    position: absolute;
+    
+    position: absolute; 
+    object-fit: contain;
     top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    
     z-index: 1;
-    width: inherit;
-    height: inherit;
     background-image: url("./../../../assets/images/bg/upv-bg.jpg");
     background-position: center;
     background-size: cover;
-    opacity: 0.05;
+    background-repeat: repeat;
+    opacity: 0.1;
 }
-
 
 .services-page * {
     position: relative;
     z-index: 2;
 }
-

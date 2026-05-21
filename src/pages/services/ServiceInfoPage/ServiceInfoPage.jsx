@@ -1,15 +1,16 @@
-import './ServiceInfoPage.css'
+import './ServiceInfoPage.css';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag } from './../../../components/ui';
-import { Text, Caption, Heading } from './../../../components/typography';
+import { Icon, Carousel, Tag, shouldShowTag } from './../../../components/ui';
+import { Text, Caption, Heading, Title } from './../../../components/typography';
 import { getCurrentUser, onAuthStateChangedListener } from './../../../services/supabase.js';
 import { getServiceFromCache, fetchServicesFromServer, hasServiceCache } from './../../../services/service-handler.js';
-import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from '../../../services/reviewsService.js';
+import { getLocationReviews, submitLocationReview, getLocationReviewOfUser, deleteLocationReview } from '../../../services/reviewsService.js';
+import { NOTIFICATION_ACTIONS, notifyAction } from '../../../services/notificationCenter.js';
 
 export default function ServiceInfoPage() {
-    // user auth
+    // User Auth
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true); 
     useEffect(() => {
@@ -20,11 +21,10 @@ export default function ServiceInfoPage() {
         return () => unsubscribe(); 
     }, []);
 
-
-    // get service id
+    // Get URL Parameters
     const { category, id } = useParams();
     
-    // fetch service from cache
+    // Service Cache Loading
     const [service, setService] = useState(null);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
@@ -38,14 +38,18 @@ export default function ServiceInfoPage() {
         }
         loadService();
     }, [id]);
-    // B2: reviews
+    
+    // Reviews Management State
     const [reviews, setReviews] = useState([]);
     const [savedRating, setSavedRating] = useState(0);
     const [reviewRating, setReviewRating] = useState(0);
+    const [savedComment, setSavedComment] = useState('');
     const [reviewComment, setReviewComment] = useState('');
-    const [reviewTab, setReviewTab] = useState('info'); // 'info' | 'reviews'
+    const [reviewTab, setReviewTab] = useState('info'); // 'info' | 'photo' | 'reviews'
     const [submittingReview, setSubmittingReview] = useState(false);
+    const [reviewModal, setReviewModal] = useState(false);
 
+    // Fetch Global Location Reviews
     useEffect(() => {
         if (!id) return;
         getLocationReviews(Number(id))
@@ -53,27 +57,37 @@ export default function ServiceInfoPage() {
             .catch(() => setReviews([]));
     }, [id]);
 
+    // FIX 1: Tied dependency array to user.id and location id to prevent infinite loops
     useEffect(() => {
-        if (!user) return;
+        if (authLoading || !user || !id) return;
+        
         getLocationReviewOfUser(id, user.id)
             .then(data => { 
-                setReviewRating(data); 
-                setSavedRating(data); 
+                if (data) {
+                    setReviewComment(data.comment || ''); 
+                    setSavedComment(data.comment || ''); 
+                    setReviewRating(data.rating || 0); 
+                    setSavedRating(data.rating || 0);
+                }
             })
             .catch(() => {
+                setReviewComment(''); 
+                setSavedComment(''); 
                 setReviewRating(0);
                 setSavedRating(0);
             });
-    }, [authLoading])
+    }, [authLoading, user?.id, id]);
 
-    useEffect(() => {
-        if (reviewTab != 'reviews') {
-            setReviewRating(savedRating);
-        }
-    }, [reviewTab])
 
     async function handleSubmitReview() {
-        if (!user || reviewRating === 0) return;
+        if (!user || !id) return;
+        if (!reviewRating) {
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'error', {
+                message: 'Please select a rating first',
+            });
+            return;
+        }
+
         setSubmittingReview(true);
         try {
             await submitLocationReview({
@@ -86,12 +100,46 @@ export default function ServiceInfoPage() {
             const updated = await getLocationReviews(Number(id));
             setReviews(updated);
             setSavedRating(reviewRating);
-            setReviewComment('');
+            setSavedComment(reviewComment);
+            setReviewModal(false);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'success');
         } catch (e) {
             console.error('Review submit failed:', e);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'error');
         } finally {
             setSubmittingReview(false);
         }
+    }
+
+    async function handleClearReview() {
+        if (!user || !id) return;
+        setSubmittingReview(true);
+        try {
+            // 1. Delete review row directly from Database
+            await deleteLocationReview(Number(id), user.id);
+            
+            // 2. Wipe the local component values completely clean
+            setSavedComment("");
+            setReviewComment("");
+            setSavedRating(0);
+            setReviewRating(0);
+            
+            // 3. Fetch a fresh copy of the global array list to update the screen count
+            const updated = await getLocationReviews(Number(id));
+            setReviews(updated);
+            
+            // 4. Shut the modal view container 
+            setReviewModal(false);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'success', {
+                message: 'Service rating cleared',
+            });
+        } catch (e) {
+            console.error('Failed to remove review:', e);
+            notifyAction(NOTIFICATION_ACTIONS.SERVICE_RATING, 'error');
+        } finally {
+            setSubmittingReview(false);
+        }
+    
     }
 
     function parseContactInfo(infoArray) {
@@ -137,77 +185,73 @@ export default function ServiceInfoPage() {
     }
 
     const { email, phone } = parseContactInfo(service.contact_info);
+    const visibleTags = Array.isArray(service.tags)
+        ? service.tags.filter(shouldShowTag)
+        : [];
 
     return (
-        <div className="service-info-page">
-            <header className='px-large py-medium flex'>
-                <Link to={`/service/${category}`} className='flex items-center gap-small'>
-                    <Icon name="back" size='small' />
-                    <Text>Back</Text>
-                </Link>
-            </header>
+        <div className="service-info-page px-xlarge">
+            <main className='py-xlarge'>
+                <div className='flex flex-col justify-center p-xlarge bg-white border-roundify rotate-left'>
+                    <Link to={`/service/${category}`} className='flex items-center gap-small'>
+                        <Icon name="back" size='small' />
+                        <Text>Back</Text>
+                    </Link>    
+                    <Title className='pt-xlarge pb-medium fw-extra-bold'>{service.name}</Title>
+                    <div className='flex gap-small'>
+                        <Button href={`/map/${id}`} className="items-center border-solid">
+                            <Icon name='map' /><Text>View in Map</Text>
+                        </Button>
+                        {user && !authLoading &&
+                            <Button className="items-center" onClick={() => setReviewModal(true)}>
+                                <Icon name='darkstar' /><Text>{savedRating ? "Edit Rating" : "Rate"}</Text>
+                            </Button>
+                        }   
+                    </div>
+                </div>      
 
-            <main className='px-large py-medium'>
-                {service.images?.length > 0 && <Carousel imageUrls={service.images} />}
-
-                <div className='flex justify-end my-medium'>
-                    <Tag>{service.tags?.[0]}</Tag>
-                </div>
-
-                <div className='py-small flex justify-between'>
-                    <Heading><em className='fw-bold'>{service.name}</em></Heading>
-                    <div className='flex items-center gap-small'>
-                        <Icon name='star' size='small' />
-                        <Text>
-                            {avgRating ?? '—'}
-                            <em className="text-muted"> ({reviews.length} reviews)</em>
+                <div className='flex flex-col my-xlarge p-xlarge pt-medium bg-white border-roundify rotate-right' style={{"minHeight": "300px"}}>
+                    <div className='flex gap-large my-medium'>
+                        <Text
+                            className={`cursor-pointer ${reviewTab === 'info' ? 'fw-bold text-accent' : 'text-muted'}`}
+                            onClick={() => setReviewTab('info')}
+                        >
+                            Information
+                        </Text>
+                        <Text
+                            className={`cursor-pointer ${reviewTab === 'photo' ? 'fw-bold text-accent' : 'text-muted'}`}
+                            onClick={() => setReviewTab('photo')}
+                        >
+                            Photos
+                        </Text>
+                        <Text
+                            className={`cursor-pointer ${reviewTab === 'reviews' ? 'fw-bold text-accent' : 'text-muted'}`}
+                            onClick={() => setReviewTab('reviews')}
+                        >
+                            Reviews ({reviews.length})
                         </Text>
                     </div>
-                </div>
 
-                <div className='flex-col'>
-                    <div className='flex items-center gap-small my-xsmall'>
-                        <Icon name='address' /><Text>{service.address}</Text>
-                    </div>
-                    {(service.opening_hours[0]) &&
-                    <div className='flex items-center gap-small my-xsmall'>
-                        <Icon name='clock' /><Text>{service.opening_hours?.[0]}</Text>
-                    </div>
-                    }
-                </div>
-
-                <div className='flex gap-small my-medium'>
-                    <Button href={`/map/${id}`} className="items-center gap-small">
-                        <Icon name='map' /><Caption>View in Map</Caption>
-                    </Button>
-                </div>
-
-                {/* B2: Tab switcher */}
-                <div className='flex gap-large my-medium'>
-                    <Text
-                        className={`cursor-pointer ${reviewTab === 'info' ? 'fw-bold text-accent' : 'text-muted'}`}
-                        onClick={() => setReviewTab('info')}
-                    >
-                        Information
-                    </Text>
-                    <Text
-                        className={`cursor-pointer ${reviewTab === 'reviews' ? 'fw-bold text-accent' : 'text-muted'}`}
-                        onClick={() => setReviewTab('reviews')}
-                    >
-                        Reviews ({reviews.length})
-                    </Text>
-                </div>
-
-                {reviewTab === 'info' && (
+                    {reviewTab === 'info' && (
                     <div>
-                        {(service.additional_info?.text_based?.length > 0 || email || phone) ? (
-                            <>
-                                <Heading><em className='fw-bold'>Additional Information</em></Heading>
-                                {service.additional_info.text_based.map((info, i) => (
-                                    <Text key={i} className='text-muted my-xsmall'>{info}</Text>
-                                ))}
-                            
-                                <div className='py-medium'>
+                        <Heading className='flex gap-small py-medium fw-extra-bold'>
+                            <Icon name='map' size='large'/>
+                            Information
+                        </Heading>
+
+                        <div className='flex-col mx-small'>
+                            <div className='flex items-center gap-small my-xsmall'>
+                                <Icon name='star' /><Text>{avgRating ?? "None"} <em className='text-muted'>({reviews.length === 1 ? "1 review" : `${reviews.length} reviews`})</em></Text>
+                            </div>
+                            <div className='flex items-center gap-small my-xsmall'>
+                                <Icon name='address' /><Text>{service.address}</Text>
+                            </div>
+                            {service.opening_hours?.[0] &&
+                                <div className='flex items-center gap-small my-xsmall'>
+                                    <Icon name='clock' /><Text>{service.opening_hours[0]}</Text>
+                                </div>
+                            }
+                            <div className='py-small'>
                                 {email && (
                                     <div className='flex items-center gap-small my-xsmall'>
                                         <Icon name='mail' size='small' />
@@ -220,70 +264,97 @@ export default function ServiceInfoPage() {
                                         <Text><em className='text-muted'>{phone}</em></Text>
                                     </div>
                                 )}
-                            </div>
-                            </>
-                        ) : 
-                        (<Text>No additional information found.</Text>)
-                        }
-                    </div>
-                )}
-
-                {/* B2: Reviews tab */}
-                {reviewTab === 'reviews' && (
-                    <div className='my-medium'>
-                        {authLoading && <div>Loading Reviews...</div>}
-                        {(user) && (
-                            <div className='flex flex-col gap-small p-medium bg-component border-rounded my-medium'>
-                                <Text><em className='fw-bold'>Leave a Review</em></Text>
-                 
-                                <div className='flex gap-small'>
-                                    {[1,2,3,4,5].map(n => (
-                                        <Icon
-                                            key={n}
-                                            name={reviewRating >= n ? 'star' : 'darkstar'}
-                                            size='medium'
-                                            className='cursor-pointer'
-                                            onClick={() => setReviewRating(n)}
-                                        />
-                                    ))}
-                                </div>
-                                <textarea
-                                    className='p-small border-rounded'
-                                    style={{ width: '100%', border: 'none', background: 'white', fontFamily: 'inherit', fontSize: 'var(--fs-text)', resize: 'none', minHeight: '60px' }}
-                                    placeholder='Write your comment...'
-                                    value={reviewComment}
-                                    onChange={(e) => setReviewComment(e.target.value)}
-                                />
-                                <Button
-                                    onClick={handleSubmitReview}
-                                    disabled={reviewRating === 0 || submittingReview}
-                                >
-                                    {submittingReview ? 'Submitting...' : 'Submit'}
-                                </Button>
-                            </div>
-                        )}
-
-                        {reviews.length === 0 ? (
-                            <Text className='text-muted'>No reviews yet. Be the first!</Text>
-                        ) : (
-                            reviews.map((review) => (
-                                <div key={review.id} className='flex flex-col gap-xsmall p-medium my-small bg-component border-rounded'>
-                                    <div className='flex justify-between items-center'>
-                                        <Text><em className='fw-bold'>{review.userName}</em></Text>
-                                        <div className='flex gap-xsmall'>
-                                            {[1,2,3,4,5].map(n => (
-                                                <Icon key={n} name={review.rating >= n ? 'star' : 'darkstar'} size='small' />
-                                            ))}
-                                        </div>
+                                
+                                {visibleTags.length > 0 &&
+                                    <div className='flex gap-small flex-wrap'>
+                                        {visibleTags.map((tag, idx) => (
+                                            <div key={`${tag}-${idx}`} className='flex items-center gap-small my-xsmall'>
+                                                <Tag name={tag}/>
+                                            </div>
+                                        ))}
                                     </div>
-                                    {review.comment && <Text className='text-muted'>{review.comment}</Text>}
-                                    <Caption className='text-muted'>{new Date(review.created_at).toLocaleDateString()}</Caption>
-                                </div>
-                            ))
-                        )}
+                                }
+                                
+                                {(service.additional_info?.text_based?.length > 0 || email || phone) ? (
+                                    <div className='px-small'>
+                                        {service.additional_info?.text_based?.map((info, i) => (
+                                            <Text key={i} className='text-muted my-xsmall'>{info}</Text>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <Text>No additional information found.</Text>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                )}
+                    )}
+
+                    {reviewTab === 'photo' && (
+                        <div className='my-medium'>
+                            <Heading className='flex gap-small pb-medium fw-extra-bold'>
+                                <Icon name='eye' size='large'/>
+                                Photos
+                            </Heading>
+                            {service.images?.length > 0 ? 
+                                <Carousel imageUrls={service.images}/> :
+                                <Text className='px-small'>No images found.</Text>
+                            }
+                        </div>
+                    )} 
+
+                    {reviewTab === 'reviews' && (
+                        <div className='my-medium'>
+                            <Heading className='flex gap-small pb-medium fw-extra-bold'>
+                                <Icon name='darkstar' size='large'/>
+                                Reviews
+                            </Heading> 
+
+                            {reviews.length === 0 ? (
+                                <Text className='px-small'>No reviews yet. Be the first!</Text>
+                            ) : (
+                                reviews.map((review) => (
+                                    <div key={review.id} className='flex flex-col gap-xsmall px-small mb-small border-rounded'>
+                                        <div className='flex justify-between items-center'>
+                                            <Text className='fw-bold'>{review.userName}</Text>
+                                            <div className='flex gap-xsmall'>
+                                                {[1, 2, 3, 4, 5].map(n => (
+                                                    <Icon key={n} name={review.rating >= n ? 'star' : 'darkstar'} size='small' />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {review.comment && <Text className='text-muted'>{review.comment}</Text>}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>        
             </main>
-        </div>
+
+            {reviewModal && (
+                <div className='modal-container flex justify-center items-center px-xlarge'>
+                    <div className='w-100 flex flex-col justify-center mx-medium p-large bg-white border-roundify'>
+                        <div className='flex justify-between items-center'>
+                            <Heading className='fw-extra-bold py-xsmall'>Rate the service</Heading>
+                            <Icon className='flex items-center cursor-pointer' name='close' size='small' onClick={() => { setReviewModal(false); setReviewRating(savedRating); setReviewComment(savedComment); }}/>
+                        </div>
+                        <div className='flex justify-center my-medium gap-large'>
+                            {[1, 2, 3, 4, 5].map((number) => (
+                                <Icon key={number} name={number <= reviewRating ? "star" : "lightstar"} onClick={() => setReviewRating(number)} size='large' className='cursor-pointer'/>
+                            ))}
+                        </div>
+                        <div className='px-small'>
+                            <textarea disabled={submittingReview} value={reviewComment} className='w-100 bg-component border-none border-roundify p-medium' placeholder='Comment (Optional)' onChange={(e) => setReviewComment(e.target.value)} />
+                        </div>
+                        <div className='py-small flex justify-end gap-small'>
+                            <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
+                            <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
+                                {submittingReview ? "Submitting..." : "Submit"}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div> 
     );
 }
