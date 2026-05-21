@@ -430,6 +430,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
+  const isFixedLocation = Array.isArray(selectedMarkerInfo?.tags) && selectedMarkerInfo.tags.some(t => String(t).toLowerCase() === 'fixed services');
+
   const mapZoom = userLocation?.zoom || 16;
 
   // Bottom-sheet drag state for the marker info panel
@@ -916,7 +918,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                 <Text>{isLoadingRoute ? "Loading..." : isSelectedRouteActive ? "Clear Direction" : "Get Direction"}</Text>
               </Button>
             </div>
-            {user && (
+            {user && !isFixedLocation && (
               <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
                 <Icon name="darkstar" size="small" />
                 <Text>Rate</Text>
@@ -926,7 +928,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* Tabs */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-            {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos"].map(tab => (
+            {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos", ...(!isFixedLocation ? ["Reviews"] : [])].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
@@ -949,13 +951,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           {/* ABOUT */}
           {selectedPanelTab === "About" && (
             <div className="panel-scroll px-large">
-              <div className="flex items-center gap-small my-xsmall">
-                <Icon name="star" size="small" />
-                <Text>
-                  {avgRating ? avgRating : "No ratings yet"}
-                  {avgRating && <em className="text-muted"> ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</em>}
-                </Text>
-              </div>
+              {!isFixedLocation && (
+                <div className="flex items-center gap-small my-xsmall">
+                  <Icon name="star" size="small" />
+                  <Text>
+                    {avgRating ? avgRating : "No ratings yet"}
+                    {avgRating && <em className="text-muted"> ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</em>}
+                  </Text>
+                </div>
+              )}
               <div className="flex items-center gap-small my-xsmall">
                 <Icon name="address" size="small" /><Text>{selectedMarkerInfo.address || "—"}</Text>
               </div>

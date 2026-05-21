@@ -188,6 +188,7 @@ export default function ServiceInfoPage() {
     const visibleTags = Array.isArray(service.tags)
         ? service.tags.filter(shouldShowTag)
         : [];
+    const isFixedLocation = Array.isArray(service.tags) && service.tags.some(t => String(t).toLowerCase() === 'fixed services');
 
     return (
         <div className="service-info-page px-xlarge">
@@ -202,7 +203,7 @@ export default function ServiceInfoPage() {
                         <Button href={`/map/${id}`} className="items-center border-solid">
                             <Icon name='map' /><Text>View in Map</Text>
                         </Button>
-                        {user && !authLoading &&
+                        {user && !authLoading && !isFixedLocation &&
                             <Button className="items-center" onClick={() => setReviewModal(true)}>
                                 <Icon name='darkstar' /><Text>{savedRating ? "Edit Rating" : "Rate"}</Text>
                             </Button>
@@ -224,12 +225,14 @@ export default function ServiceInfoPage() {
                         >
                             Photos
                         </Text>
-                        <Text
-                            className={`cursor-pointer ${reviewTab === 'reviews' ? 'fw-bold text-accent' : 'text-muted'}`}
-                            onClick={() => setReviewTab('reviews')}
-                        >
-                            Reviews ({reviews.length})
-                        </Text>
+                        {!isFixedLocation && (
+                            <Text
+                                className={`cursor-pointer ${reviewTab === 'reviews' ? 'fw-bold text-accent' : 'text-muted'}`}
+                                onClick={() => setReviewTab('reviews')}
+                            >
+                                Reviews ({reviews.length})
+                            </Text>
+                        )}
                     </div>
 
                     {reviewTab === 'info' && (
@@ -240,9 +243,11 @@ export default function ServiceInfoPage() {
                         </Heading>
 
                         <div className='flex-col mx-small'>
-                            <div className='flex items-center gap-small my-xsmall'>
-                                <Icon name='star' /><Text>{avgRating ?? "None"} <em className='text-muted'>({reviews.length === 1 ? "1 review" : `${reviews.length} reviews`})</em></Text>
-                            </div>
+                            {!isFixedLocation && (
+                                <div className='flex items-center gap-small my-xsmall'>
+                                    <Icon name='star' /><Text>{avgRating ?? "None"} <em className='text-muted'>({reviews.length === 1 ? "1 review" : `${reviews.length} reviews`})</em></Text>
+                                </div>
+                            )}
                             <div className='flex items-center gap-small my-xsmall'>
                                 <Icon name='address' /><Text>{service.address}</Text>
                             </div>
