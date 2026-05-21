@@ -77,7 +77,7 @@ const GROUPS = {
     icon: "tourism"
   },
 
-  "Government & Safety": {
+  "Government": {
     tags: [
       "police", "fire_station", "parking", "fuel", "toilets"
     ],
@@ -85,7 +85,7 @@ const GROUPS = {
     icon: "safety"
   },
 
-  "Worship & Community": {
+  "Community": {
     tags: [
       "place_of_worship", "social_facility", "townhall"
     ],

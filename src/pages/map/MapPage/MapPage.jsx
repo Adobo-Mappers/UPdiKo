@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { TAG_GROUPS } from './../../../utils/servicecoding.js'
+import { TAG_GROUPS } from './../../../utils/servicecoding.js';
 import { Button, CircularButton, InputField } from './../../../components/form/';
-import { Heading, Text } from './../../../components/typography/';
+import { Heading, Text, Subtitle } from './../../../components/typography/';
 import { Icon, MapView } from './../../../components/ui/';
 import { getCurrentUser, addPinnedLocationToDB } from './../../../services/supabase.js';
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
@@ -13,10 +13,7 @@ import { reverseGeocode } from '../../../services/geocoding.js';
 import { uploadPinImage } from '../../../services/storageService.js';
 import CassieWidget from '../../../components/casie/CassieWidget.jsx';
 
-
 export default function MapPage() {
-    // TODO: Map recenterings (the compass) requires two presses to recenter (the first tap will recenter, but succeding recenters need two taps :<)
-
     // check user auth
     const [user, setUser] = useState(null);
     useEffect(() => {
@@ -94,14 +91,28 @@ export default function MapPage() {
         navigate('/map');
     };
 
-    const [selectedService, setSelectedService] = useState(getServiceFromCache(id));
+    const [selectedService, setSelectedService] = useState(null);
+
+    // Keep selectedService in sync when URL 'id' or cached services alter
+    useEffect(() => {
+        if (id) {
+            const service = getServiceFromCache(id);
+            if (service) {
+                setSelectedService(service);
+                // Automatically center map onto selected deep-linked pin
+                setMapCenter({ lat: Number(service.latitude), lng: Number(service.longitude), zoom: 17 });
+            }
+        } else {
+            setSelectedService(null);
+        }
+    }, [id, services]);
 
     // map tracking logic
-    const defaultCenter = { lat: 10.641944, lng: 122.235556 };                  // default coords
+    const defaultCenter = { lat: 10.641944, lng: 122.235556 };
     const [mapCenter, setMapCenter] = useState(defaultCenter);
-    const [userCurrentLocation, setUserCurrentLocation] = useState(null);       // user's latest GPS coordinate
-    const watchIdRef = useRef(null);                                             // ref to hold the watchPosition ID so we can clear it later
-    const [trackingEnabled, setTrackingEnabled] = useState(false);              // controls whether the map should automatically pan to the user's location
+    const [userCurrentLocation, setUserCurrentLocation] = useState(null);
+    const watchIdRef = useRef(null);
+    const [trackingEnabled, setTrackingEnabled] = useState(false);
 
     // modal logic
     const [rating, setRating] = useState(0);
@@ -179,6 +190,11 @@ export default function MapPage() {
     async function handleMapClickForPin({ lat, lng }) {
         if (!user) { alert('Please log in first to create personal pins.'); return; }
 
+        // Reset the pin sheet transform position so it doesn't stay hidden when reopened
+        if (pinSheetRef.current) {
+            pinSheetRef.current.style.transform = 'translateY(0)';
+        }
+
         setPinFormCoords({ lat, lng });
         setPinAddress('Loading address...');
         setIsPinFormOpen(true);
@@ -231,7 +247,7 @@ export default function MapPage() {
     function startRotating(direction) {
         rotateIntervalRef.current = setInterval(() => {
             setMapBearing(prev => prev + (direction === "left" ? -2 : 2));
-        }, 16); // ~60fps
+        }, 16);
     }
 
     function stopRotating() {
@@ -243,28 +259,73 @@ export default function MapPage() {
 
     function smoothResetBearing() {
         const animationRef = { current: null };
-
         const animate = () => {
             setMapBearing(prev => {
-                // Normalize bearing to -180 to 180 range for shortest path
                 let current = prev % 360;
                 if (current > 180) current -= 360;
                 if (current < -180) current += 360;
 
-                // If close enough to 0, snap to 0 and stop
                 if (Math.abs(current) < 0.5) {
                     cancelAnimationFrame(animationRef.current);
                     return 0;
                 }
-
-                // Ease towards 0 — multiply by 0.85 each frame for smooth deceleration
                 return current * 0.85;
             });
-
             animationRef.current = requestAnimationFrame(animate);
         };
-
         animationRef.current = requestAnimationFrame(animate);
+    }
+
+    // --- REFACTORED DRAG & BOTTOM SHEET SYSTEM ---
+    const startY = useRef(null);
+    const dragY = useRef(0);
+    const isDragging = useRef(false);
+    
+    // Dedicated hooks for separate dom element control
+    const markerPanelRef = useRef(null);
+    const pinSheetRef = useRef(null);
+
+    function onDragStart(e, targetRef) {
+        startY.current = e.clientY;
+        isDragging.current = true;
+        dragY.current = 0;
+        e.currentTarget.setPointerCapture?.(e.pointerId);
+
+        if (targetRef.current) {
+            targetRef.current.style.transition = 'none';
+        }
+    }
+
+    function onDragMove(e, targetRef) {
+        if (!isDragging.current || startY.current === null || !targetRef.current) return;
+
+        const delta = Math.max(0, e.clientY - startY.current);
+        dragY.current = delta;
+        targetRef.current.style.transform = `translateY(${delta}px)`;
+    }
+
+    function onDragEnd(e, targetRef, closeActionType) {
+        if (!isDragging.current || !targetRef.current) return;
+
+        e.currentTarget.releasePointerCapture?.(e.pointerId);
+        targetRef.current.style.transition = 'transform 0.25s ease';
+
+        if (dragY.current > 140) {
+            targetRef.current.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                if (closeActionType === 'PIN_FORM') {
+                    handleClosePinForm();
+                } else {
+                    handleClosePanel();
+                }
+            }, 200);
+        } else {
+            targetRef.current.style.transform = 'translateY(0)';
+        }
+
+        dragY.current = 0;
+        startY.current = null;
+        isDragging.current = false;
     }
 
     return (
@@ -275,9 +336,9 @@ export default function MapPage() {
                 trackingEnabled={trackingEnabled}
                 selectedService={selectedService}
                 handleMarkerClick={handleMarkerClick}
-                onMapClickForPin={handleMapClickForPin}   // FIX: was passing handleCenterToPin (wrong fn)
-                onMarkerClick={handleCenterToPin}         // FIX: was missing — centers map when a pin is clicked
-                onClosePinForm={handleClosePinForm}       // FIX: was missing — lets MapView close the pin form
+                onMapClickForPin={handleMapClickForPin}
+                onMarkerClick={handleCenterToPin}
+                onClosePinForm={handleClosePinForm}
                 bearing={mapBearing}
                 onBearingChange={setMapBearing}
                 setRatingSession={setRatingAction}
@@ -290,9 +351,8 @@ export default function MapPage() {
                 <section className='search-overlay'>
                     <div></div>
                     <div className='px-large py-small search-list'>
-                        {/* Show recent searches when no query typed */}
                         {!searchQuery && searchHistory.length > 0 && (
-                            <div className='my-small mx-small bg-white border-roundify px-large py-xlarge'>
+                            <div className='mb-large mx-small bg-white border-roundify px-large py-xlarge'>
                                 <div className='flex items-center gap-small mb-small'>
                                     <Icon name='map'/>
                                     <Heading className='fw-extra-bold'>Recent</Heading>
@@ -306,7 +366,6 @@ export default function MapPage() {
                                             const found = services.find(s => s.id === item.id);
                                             if (found) {
                                                 handleMarkerClick(found.id);
-                                                setSelectedService(found);
                                                 setSearching(false);
                                                 handleCenterToPin(found.latitude, found.longitude);
                                             }
@@ -315,7 +374,7 @@ export default function MapPage() {
                                         <div><Icon name='clock' size='medium' /></div>
                                         <div>
                                             <Heading>{item.name}</Heading>
-                                            <Text><em className='text-muted'>{item.address}</em></Text>
+                                            <Text>{item.address}</Text>
                                         </div>
                                         <div><Icon name='front' size="small" /></div>
                                     </div>
@@ -335,7 +394,6 @@ export default function MapPage() {
                                         className='items-center gap-small py-medium mx-small'
                                         onClick={() => {
                                             handleMarkerClick(service.id);
-                                            setSelectedService(service);
                                             setSearching(false);
                                             addToHistory(service);
                                             handleCenterToPin(service.latitude, service.longitude);
@@ -371,50 +429,111 @@ export default function MapPage() {
                 </section>
             }
 
-            {/* B2: Create personal pin sheet — appears when user long-presses the map */}
+            {/* B2: Create personal pin sheet — appears when user clicks/long-presses the map */}
             {isPinFormOpen &&
-                <section className='pin-form-sheet'>
-                    <div className='flex justify-between items-center py-small'>
-                        <Heading><em className='fw-bold'>New Pin</em></Heading>
-                        <Icon name='close' size='small' className='cursor-pointer' onClick={handleClosePinForm} />
+                <section className='pin-form-sheet py-large px-xlarge' ref={pinSheetRef}>
+                    <div className="drag-region">
+                        <div
+                            className="drag-handle"
+                            style={{ cursor: 'grab' }}
+                            onPointerDown={(e) => onDragStart(e, pinSheetRef)}
+                            onPointerMove={(e) => onDragMove(e, pinSheetRef)}
+                            onPointerUp={(e) => onDragEnd(e, pinSheetRef, 'PIN_FORM')}
+                            onPointerCancel={(e) => onDragEnd(e, pinSheetRef, 'PIN_FORM')}
+                        />
                     </div>
-                    <div className='flex flex-col gap-small'>
-                        <InputField
-                            className='border-roundify py-medium'
+                    <div className='flex justify-between items-center py-small gap-xlarge'>
+                         <InputField
+                            icon='edit'
+                            className='bg-none fs-subtitle p-none pl-large'
                             placeholder='Pin name'
                             value={pinName}
                             onChange={setPinName}
                         />
+                        <Icon name='close' size='small' className='cursor-pointer' onClick={handleClosePinForm} />
+                    </div>
+                    <div className='flex flex-col  gap-small py-medium px-large'>
                         <InputField
+                            icon='address'
                             className='border-roundify py-medium'
                             placeholder='Address'
                             value={pinAddress}
                             onChange={setPinAddress}
                         />
                         <InputField
+                            icon='address'
                             className='border-roundify py-medium'
                             placeholder='Tags (comma separated)'
                             value={pinTags}
                             onChange={setPinTags}
                         />
-                        <InputField
-                            className='border-roundify py-medium'
+                        <textarea 
+                            className='w-100 bg-component border-none border-roundify p-medium'
                             placeholder='Description'
                             value={pinDescription}
-                            onChange={setPinDescription}
-                        />
-                        <input
-                            type='file'
-                            accept='image/*'
-                            className='py-small'
-                            onChange={(e) => setPinImageFile(e.target.files?.[0] || null)}
-                        />
+                            onChange={(e) => setPinDescription(e.target.value)}
+                        ></textarea>
+
+                        <div className="file-upload-wrapper border-solid border-roundify px-small py-xsmall cursor-pointer" style={{"width": "50%"}}>
+                            <label htmlFor="pin-image-upload" className="custom-file-button items-center flex gap-small">
+                                <Icon name="photo" size="small" /> 
+                                <Text>{pinImageFile ? pinImageFile.name : 'Choose Pin Image'}</Text>
+                            </label>
+                            <input
+                                id="pin-image-upload"
+                                type="file"
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                                onChange={(e) => setPinImageFile(e.target.files?.[0] || null)}
+                            />
+                        </div>
+                        <div className='flex justify-end'>
+                            <Button className='border-solid' onClick={handleAddPin}>Save Pin</Button>
+                        </div>
                     </div>
                 </section>
             }
 
+            {/* Selected Marker Info Panel / Bottom Sheet */}
+            {selectedService && !isPinFormOpen && (
+                <section className='marker-info-sheet py-large px-xlarge' ref={markerPanelRef}>
+                    <div className="drag-region">
+                        <div
+                            className="drag-handle"
+                            style={{ cursor: 'grab' }}
+                            onPointerDown={(e) => onDragStart(e, markerPanelRef)}
+                            onPointerMove={(e) => onDragMove(e, markerPanelRef)}
+                            onPointerUp={(e) => onDragEnd(e, markerPanelRef, 'MARKER_PANEL')}
+                            onPointerCancel={(e) => onDragEnd(e, markerPanelRef, 'MARKER_PANEL')}
+                        />
+                    </div>
+                    <div className='flex justify-between items-start py-small'>
+                        <div>
+                            <Heading className="fw-extra-bold">{selectedService.name}</Heading>
+                            <Subtitle className="text-muted">{selectedService.address}</Subtitle>
+                        </div>
+                        <Icon name='close' size='small' className='cursor-pointer' onClick={handleClosePanel} />
+                    </div>
+                    <div className='py-medium'>
+                        <Text>{selectedService.description || "No description provided."}</Text>
+                        {selectedService.tags && (
+                            <div className='flex gap-xsmall flex-wrap mt-small'>
+                                {selectedService.tags.map(tag => (
+                                    <span key={tag} className='tag-badge'>{tag}</span>
+                                ))}
+                            </div>
+                        )}
+                        <div className='flex gap-small mt-medium'>
+                            <Button onClick={() => setRatingAction(true)}>
+                                <Icon name="star" size="small" /> Rate Service
+                            </Button>
+                        </div>
+                    </div>
+                </section>
+            )}
+
             <header className='px-xlarge py-small bg-accent-soft'>
-                <div className='flex items-center gap-medium py-small search-div'>
+                <div className='flex items-center gap-medium search-div'>
                     {isSearching &&
                         <div
                             className='flex items-center gap-xsmall cursor-pointer border-circlify bg-white p-xsmall'
@@ -427,7 +546,7 @@ export default function MapPage() {
                         className='py-medium border-roundify bg-white'
                         icon="search"
                         placeholder="Search for services..."
-                        onFocus={() => { setSearching(true); setSelectedService(""); }}
+                        onFocus={() => { setSearching(true); }}
                         value={searchQuery}
                         onChange={setSearchQuery}
                     />
@@ -443,6 +562,7 @@ export default function MapPage() {
                             <span className="filter-dropdown-label">
                                 <span>{activeTag}</span>
                             </span>
+                            <Icon name='down'/>
                         </button>
 
                         {isFilterOpen && (
@@ -467,40 +587,16 @@ export default function MapPage() {
             </header>
 
             <main className='map-utils'>
-                {/* <div className="rotation-controls">
-                    <CircularButton
-                        className="rotate-btn bg-component-dark"
-                        onMouseDown={() => startRotating("left")}
-                        onMouseUp={stopRotating}
-                        onMouseLeave={stopRotating}
-                        onTouchStart={() => startRotating("left")}
-                        onTouchEnd={stopRotating}
-                    ><strong className='text-white'>↺</strong></CircularButton>
-                    <CircularButton
-                        className="rotate-btn bg-component-dark"
-                        onClick={smoothResetBearing}
-                    ><strong className='text-white'>⊙</strong></CircularButton>
-                    <CircularButton
-                        className="rotate-btn bg-component-dark"
-                        onMouseDown={() => startRotating("right")}
-                        onMouseUp={stopRotating}
-                        onMouseLeave={stopRotating}
-                        onTouchStart={() => startRotating("right")}
-                        onTouchEnd={stopRotating}
-                    ><strong className='text-white'>↻</strong></CircularButton>
-                </div> */}
                 <div className='main-controls flex flex-col gap-small'>
                     <CircularButton width='55px' className='bg-component-dark' onClick={handleRecenter}>
                         <Icon name='compass' size='large' />
                     </CircularButton>
-                    {/* B2: Casie AI floating widget */}
                     <CassieWidget
                         currentSection='MAP'
                         selectedService={selectedService}
                         userLocation={userCurrentLocation}
                         onNavigateToLocation={(location) => {
-                            setSelectedService(location);
-                            handleCenterToPin(Number(location.latitude), Number(location.longitude));
+                            handleMarkerClick(location.id);
                         }}
                     />
                 </div>

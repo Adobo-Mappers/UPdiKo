@@ -101,7 +101,6 @@ export default function ServiceInfoPage() {
         }
     }
 
-    // FIX 3: Pass explicit reset values directly into submission processor
     async function handleClearReview() {
         if (!user || !id) return;
         setSubmittingReview(true);

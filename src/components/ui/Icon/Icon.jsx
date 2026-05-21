@@ -18,6 +18,7 @@ import compassIcon         from "../../../assets/images/icon/compass-icon.png";
 import darkstarIcon        from "../../../assets/images/icon/darkstar-icon.png";
 import deleteIcon          from "../../../assets/images/icon/delete-icon.png";
 import directionsIcon      from "../../../assets/images/icon/directions-icon.png";
+import downIcon            from "../../../assets/images/icon/down-icon.png";
 import editIcon            from "../../../assets/images/icon/edit-icon.png";
 import hidePasswordIcon    from "../../../assets/images/icon/hide-password-icon.png";
 import lightstarIcon       from "../../../assets/images/icon/lightstar-icon.png";
@@ -28,12 +29,14 @@ import mapNavlinkIcon      from "../../../assets/images/icon/map-navlink-icon.pn
 import openHoursIcon       from "../../../assets/images/icon/open-hours-icon.png";
 import passwordIcon        from "../../../assets/images/icon/password-icon.png";
 import phoneIcon           from "../../../assets/images/icon/phone-icon.png";
+import photoIcon           from "../../../assets/images/icon/photo-camera.png";
 import saveIcon            from "../../../assets/images/icon/save-icon.png";
 import savePng             from "../../../assets/images/icon/save.png";
 import searchIcon          from "../../../assets/images/icon/search-icon.png";
 import servicesNavlinkIcon from "../../../assets/images/icon/services-navlink-icon.png";
 import showPasswordIcon    from "../../../assets/images/icon/peeping-tom-icon.png";
 import starIcon            from "../../../assets/images/icon/star-icon.png";
+import upIcon              from "../../../assets/images/icon/up-icon.png";
 import userIcon            from "../../../assets/images/icon/user-icon.png";
 import userImage           from "../../../assets/images/icon/user.png";
 import frontIcon           from "../../../assets/images/icon/front-icon.png";
@@ -77,6 +80,7 @@ export const iconMap = {
   compass:   compassIcon,
   darkstar:  darkstarIcon,
   delete:    deleteIcon,
+  down:      downIcon,
   direction: directionsIcon,
   edit:      editIcon,
   eye:       showPasswordIcon,
@@ -88,11 +92,14 @@ export const iconMap = {
   map:       mapIcon,
   password:  passwordIcon,
   phone:     phoneIcon,
+  photo:     photoIcon,
   save:      saveIcon,
   search:    searchIcon,
   star:      starIcon,
   sunflower: userImage,
+  up:        upIcon,
   user:      userIcon,
+  
 
   // ── Map pin categories (original) ───────────────────────────
   accommodation: accommodationIcon,
