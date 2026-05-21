@@ -45,8 +45,8 @@ export default function AccountPage() {
                     <Title className='mt-xlarge'>Dashboard</Title>
                     <Heading>Good day! What do you want to do today?</Heading>
                 </div>
-                <div className='flex flex-col gap-medium my-large'>
-                    <Link to='/account/update'  style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}} className='gap-large p-xlarge border-roundify bg-white cursor-pointer'>
+                <div className='flex flex-col gap-small my-large px-small'>
+                    <Link to='/account/update'  style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}} className='gap-large px-xlarge py-large border-roundify bg-white cursor-pointer rotate-left'>
                         <Icon name='edit' size='large'/>
                         <div>
                             <Heading className='fw-extra-bold'>Update Account</Heading>
@@ -56,7 +56,7 @@ export default function AccountPage() {
                             <Icon name='front'/>
                         </div>
                     </Link>
-                    <Link to='/account/pins' style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}} className='gap-large p-xlarge border-roundify bg-white cursor-pointer'>
+                    <Link to='/account/pins' style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}} className='gap-large p-xlarge my-small py-large border-roundify bg-white cursor-pointer rotate-right'>
                         <Icon name='map' size='large' />
                         <div>
                             <Heading className='fw-extra-bold'>Your Personal Pins</Heading>

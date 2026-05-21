@@ -86,9 +86,9 @@ export default function AccountUpdatePage() {
 
                 <div>
                     <Heading className='fw-extra-bold py-xsmall'>User</Heading>
-                    <Title className='fw-extra-bold lh-large'>Update Account</Title>
+                    <Title className='fw-extra-bold lh-large mb-small'>Update Account</Title>
                     <Heading className='mx-small my-medium'>
-                        Logged in as <em className='fw-bold'>{user.email}</em>
+                        Edit your username or password.
                     </Heading>
                 </div>
 
