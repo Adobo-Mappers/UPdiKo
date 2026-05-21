@@ -5,6 +5,27 @@
   left: 0;
   width: 100%;
   height: 100dvh;
+
+  
+  .modal-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: inherit;
+      height: 100dvh;
+      z-index: 100;
+      background-color: rgba(225, 210, 113, 0.67);
+  }
+
+    textarea {
+        height: 100px;
+        resize: none;
+    }
+
+    .marker-desaturated {
+      filter: saturate(0.7) opacity(0.6);
+      transition: filter 0.2s ease;
+    }
 }
 
 /* MAIN GROUP: LOADING SCREEN */
@@ -37,11 +58,17 @@
   }
 
   .drag-handle {
-    width: 100px;
+    width: 80px;
     height: 6px;
     background-color: var(--color-component-bg);
     border-radius: var(--border-roundify);
   }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+  
 }
   /* padding: var(--pad-32);
   background: var(--color-primary);
@@ -56,18 +83,21 @@
   color: white;
   
 }
-.marker-info-panel::before{
+*/
+.marker-info::before{
   content: "";
   position: absolute;
   top: 0; 
   left: 0;
   width: 100%; 
   height: 100%;  
-  opacity: 20%; 
-  z-index: -1;
-  background-image: url('./../assets/images/bg/pin-info-ng.png');
+  opacity: 0.05; 
+  z-index: 1;
+  background-image: url("./../../../assets/images/bg/upv-bg.jpg");
   background-size: cover;
-} */
+} 
+
+
 
 .review-modal {
   position: absolute;

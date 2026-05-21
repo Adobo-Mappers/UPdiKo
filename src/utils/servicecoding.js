@@ -2,7 +2,7 @@ const GROUPS = {
   "All": {
     tags: ["All"],
     description: "Browse all available locations and services in Miagao.",
-    icon: "grid"
+    icon: "sunflower"
   },
 
   "Food & Drinks": {
@@ -50,7 +50,7 @@ const GROUPS = {
     icon: "education"
   },
 
-  "Services": {
+  "Utility Services": {
     tags: [
       "laundry", "car_repair", "car_wash", "beauty",
       "funeral_directors", "recycling", "post_office",
@@ -77,7 +77,7 @@ const GROUPS = {
     icon: "tourism"
   },
 
-  "Government & Safety": {
+  "Government": {
     tags: [
       "police", "fire_station", "parking", "fuel", "toilets"
     ],
@@ -85,19 +85,13 @@ const GROUPS = {
     icon: "safety"
   },
 
-  "Worship & Community": {
+  "Community": {
     tags: [
       "place_of_worship", "social_facility", "townhall"
     ],
     description: "Churches, mosques, community centers, and places for social gatherings.",
     icon: "community"
-  },
-
-  "Other": {
-    tags: ["yes"],
-    description: "Miscellaneous locations and services that don't fit other categories.",
-    icon: "other"
-  },
+  }
 };
 
 export function getGroupForTag(tag) {

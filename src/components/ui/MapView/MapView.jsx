@@ -1,8 +1,9 @@
 // Important Dependencies
-import React, { useEffect, useState, useRef, act} from "react";
+import React, { useEffect, useState, useRef} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
 import { useParams, useNavigate } from "react-router-dom";
 import { TAG_GROUPS } from './../../../utils/servicecoding.js'
+
 import "leaflet/dist/leaflet.css";
 import L, { map, marker } from "leaflet";
 import "./MapView.css";
@@ -11,7 +12,7 @@ import "leaflet-rotate";
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/form';
 import { Icon, Carousel, Tag } from './../../../components/ui';
-import { Text, Caption, Heading } from './../../../components/typography'
+import { Text, Caption, Heading, Subtitle } from './../../../components/typography'
 
 // Placeholder Icons from Leaflet
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -59,7 +60,7 @@ import customPinIcon from '../../../assets/images/icon/save.png';
 import { getStaticLocations, getRoute } from "../../../services/locations.js";
 // Getting Pinned Locations and supabase connection
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
-import { getLocationReviews, submitLocationReview, getLocationReviewOfUser } from "../../../services/reviewsService.js";
+import { getLocationReviews, submitLocationReview, getLocationReviewOfUser, deleteLocationReview} from "../../../services/reviewsService.js";
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
 
 
@@ -382,21 +383,16 @@ function LocationMarker({ tempLocation, setTempLocation, setSelectedMarkerInfo, 
   return null;
 }
 
-// // responds to location change
-// function ChangeView({ center }) {
-//   const map = useMap();
-//   const prevCenter = useRef(center);
-  
-//   useEffect(() => {
-//     // Only update if center coordinates actually changed
-//     if (center && (prevCenter.current[0] !== center[0] || prevCenter.current[1] !== center[1])) {
-//       map.setView(center);
-//       prevCenter.current = center;
-//     }
-//   }, [center, map]);
-
-//   return null;
-// }
+function getScaledIcon (baseIcon, scale = 1, desaturated = false) {
+  const size = 30 * scale;
+  const anchor = size / 2;
+  return new L.Icon({
+    iconUrl: baseIcon.options.iconUrl,
+    iconSize: [size, size],
+    iconAnchor: [anchor, anchor],
+    className: `user-location-marker${(desaturated) ? ' marker-desaturated' : ''}`
+  });
+};
 
 // 1. REVISED: responds to location change, now accepts 'zoom'
 function ChangeView({ center, zoom }) {
@@ -490,8 +486,6 @@ function RotationController({ bearing, setBearing }) {
   return null;
 }
 
-
-
 // // main map element
 export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded, setRatingSession, isRating, setRating, activeTag}) {
   const navigate = useNavigate();
@@ -543,6 +537,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [reviews, setReviews] = useState([]);
   const [savedRating, setSavedRating] = useState(0);
   const [reviewRating, setReviewRating] = useState(0);
+  const [savedComment, setSavedComment] = useState('');
   const [reviewComment, setReviewComment] = useState('');
   const [reviewModal, setReviewModal] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -594,6 +589,33 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         setReviewModal(false);
         setSubmittingReview(false); 
       }
+  }
+
+  async function handleClearReview() {
+    if (!user || !id) return;
+    setSubmittingReview(true);
+    try {
+        // 1. Delete review row directly from Database
+        await deleteLocationReview(Number(id), user.id);
+        
+        // 2. Wipe the local component values completely clean
+        setSavedComment("");
+        setReviewComment("");
+        setSavedRating(0);
+        setReviewRating(0);
+        
+        // 3. Fetch a fresh copy of the global array list to update the screen count
+        const updated = await getLocationReviews(Number(id));
+        setReviews(updated);
+        
+        // 4. Shut the modal view container 
+        setReviewModal(false);
+    } catch (e) {
+        console.error('Failed to remove review:', e);
+    } finally {
+        setSubmittingReview(false);
+    }
+
   }
 
   const avgRating = reviews.length
@@ -931,7 +953,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         />
         {tempLocation && (
           <Marker 
-            icon={customIcon} 
+            icon={getScaledIcon(customIcon, 1.75)} 
             position={[tempLocation.latitude, tempLocation.longitude]} 
             eventHandlers={{ click: () => {handleMarkerClick(tempLocation, tempLocation.latitude, tempLocation.longitude)} }}
           >
@@ -946,11 +968,14 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         {/* <Marker position={center}>
           <Popup>You are here</Popup>
         </Marker> */}
-        {pinnedLocations.filter(isLocationVisibleForActiveTag).map((pin) => (
-          <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={customIcon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
+        {pinnedLocations.filter(isLocationVisibleForActiveTag).map((pin) => {
+          const isSelected = selectedMarkerInfo?.id === pin.id;
+          const icon = getScaledIcon(customIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
+  
+          <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={icon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
             {/* <Popup>{pin.name}</Popup> */}
           </Marker>
-        ))}
+        })}
         {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
        {staticLocations
           .filter(isLocationVisibleForActiveTag)
@@ -963,11 +988,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             }
             return true;
           })
-          .map((facility) => (
-          <Marker
+          .map((facility) => {
+          const isSelected = selectedMarkerInfo?.id === facility.id;
+          const baseIcon = getFacilityIcon(facility.tags);
+          const icon = getScaledIcon(baseIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
+
+          return <Marker
             key={facility.id}
             position={[parseFloat(facility.latitude), parseFloat(facility.longitude)]}
-            icon={getFacilityIcon(facility.tags)}
+            icon={icon}
             eventHandlers={{ click: () => {
               handleMarkerClick(
                 { ...facility, type: facility.location_type },
@@ -978,47 +1007,38 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           >
             {/* <Popup>{facility.name}</Popup> */}
           </Marker>
-        ))} 
+        })} 
       </MapContainer>
       
-      {reviewModal && 
-        <div className="review-modal">
-          <div className="review-modal-container">
-            <Heading className="py-small"><em className='fw-bold'>Leave a Review</em></Heading>      
-            <div className='flex gap-small justify-around py-medium px-xlarge'>
-                {[1,2,3,4,5].map(n => (
-                    <Icon
-                        key={n}
-                        name={reviewRating >= n ? 'star' : 'darkstar'}
-                        size='large'
-                        className='cursor-pointer'
-                        onClick={() => setReviewRating(n)}
-                    />
-                ))}
+      {reviewModal && (
+            <div className='modal-container flex justify-center items-center px-xlarge'>
+                <div className='w-100 flex flex-col justify-center mx-medium p-large bg-white border-roundify'>
+                    <div className='flex justify-between items-center'>
+                        <Heading className='fw-extra-bold py-xsmall'>Leave a Review</Heading>
+                        <Icon className='flex items-center cursor-pointer' name='close' size='small' onClick={() => { setReviewModal(false); setReviewRating(savedRating); setReviewComment(savedComment); }}/>
+                    </div>
+                    <div className='flex justify-center my-medium gap-large'>
+                        {[1, 2, 3, 4, 5].map((number) => (
+                            <Icon key={number} name={number <= reviewRating ? "star" : "lightstar"} onClick={() => setReviewRating(number)} size='large' className='cursor-pointer'/>
+                        ))}
+                    </div>
+                    <div className='px-small'>
+                        <textarea disabled={submittingReview} value={reviewComment} className='w-100 bg-component border-none border-roundify p-medium' placeholder='Comment (Optional)' onChange={(e) => setReviewComment(e.target.value)} />
+                    </div>
+                    <div className='py-small flex justify-end gap-small'>
+                        <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
+                        <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
+                            {submittingReview ? "Submitting..." : "Submit"}
+                        </Button>
+                    </div>
+                </div>
             </div>
-          <textarea
-              className='p-small border-rounded bg-component '
-              style={{ width: '100%', border: 'none', background: 'white', fontFamily: 'inherit', fontSize: 'var(--fs-text)', resize: 'none', minHeight: '60px' }}
-              placeholder='Write your comment...'
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-          />
-          <div className="flex justify-end my-small gap-medium">
-            <Text className="flex items-center cursor-pointer" onClick={() => setReviewModal(false)}><em className="fw-bold">Cancel</em></Text>
-            <Button
-                onClick={handleSubmitReview}
-                disabled={reviewRating === 0 || submittingReview}
-            >
-                {submittingReview ? 'Submitting...' : 'Submit'}
-            </Button>
-          </div>
-        </div>
-      </div>
-      }
+        )} 
+      
 
 
       {selectedMarkerInfo && (
-        <div className="marker-info p-large" ref={panelRef}>
+        <div className="marker-info py-large px-xlarge" ref={panelRef}>
 
           {/* Drag handle */}
           <div className="drag-region">
@@ -1033,28 +1053,29 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* Name + close */}
           
-          <div className="flex justify-between gap-xlarge my-small">
-            <Heading><strong>{selectedMarkerInfo.name}</strong></Heading>
+          <div className="flex justify-between gap-xlarge my-small px-medium">
+            <Subtitle className="fw-extra-bold">{selectedMarkerInfo.name}</Subtitle>
             <Icon name="close" size="small" className="cursor-pointer" onClick={() => { setSelectedMarkerInfo(null); navigate("/map")}} />
           </div>
 
           <div className="flex gap-small">
             {/* Get Directions */}
-            <div className="my-small">
-              <Button onClick={() => handleGetDirections(selectedMarkerInfo)}>
+            <div className="m-small">
+              <Button onClick={() => handleGetDirections(selectedMarkerInfo)} className="border-solid">
                 <Icon name="direction" size="small" />
-                <Caption>{isLoadingRoute ? "Loading..." : "Get Directions"}</Caption>
+                <Text>{isLoadingRoute ? "Loading..." : "Get Directions"}</Text>
               </Button>
             </div>
             {user && (
                 <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
                     <Icon name="darkstar" size="small" />
-                    <Caption>Rate</Caption>
+                    <Text>Rate</Text>
                 </div>
             )}
           </div>
+          
           {routeInfo && (
-            <div className="flex items-center gap-medium my-xsmall">
+            <div className="flex items-center gap-medium m-small">
               <Caption className="text-muted">🚗 {routeInfo.distance}</Caption>
               <Caption className="text-muted">⏱ {routeInfo.duration}</Caption>
               <Caption className="text-accent cursor-pointer" onClick={handleClearRoute}>Clear</Caption>
@@ -1062,8 +1083,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           )}
 
           {/* Tabs — use <button> not <Text/<p> so onClick always fires */}
-          <div className="flex gap-large my-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-            {["About", "Photos", "Reviews"].map(tab => (
+          <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
+            {["About", "Photos"].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
@@ -1085,7 +1106,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* ABOUT */}
           {selectedPanelTab === "About" && (
-            <div className="panel-scroll">
+            <div className="panel-scroll px-large">
               <div className="flex items-center gap-small my-xsmall">
                 <Icon name="star" size="small" />
                 <Text>
@@ -1122,7 +1143,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* PHOTOS */}
           {selectedPanelTab === "Photos" && (
-            <div className="panel-scroll">
+            <div className="panel-scroll px-large">
               {selectedMarkerInfo.images?.length > 0 ? (
                 <div className="flex gap-medium overflow-x py-small">
                   {selectedMarkerInfo.images.map((img, i) => (
@@ -1134,31 +1155,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               )}
             </div>
           )}
-
-          {/* REVIEWS */}
-          {selectedPanelTab === "Reviews" && (
-            <div className="panel-scroll">
-              {reviews.length === 0 ? (
-                <Text className="text-muted my-small">No reviews yet.</Text>
-              ) : (
-                reviews.map(r => (
-                  <div key={r.id} className="review-item my-small p-medium border-rounded bg-component">
-                    <div className="flex justify-between items-center">
-                      <Text><em className="fw-bold">{r.userName}</em></Text>
-                      <div className="flex gap-xsmall">
-                        {[1,2,3,4,5].map(n => (
-                          <Icon key={n} name={r.rating >= n ? "star" : "darkstar"} size="small" />
-                        ))}
-                      </div>
-                    </div>
-                    {r.comment && <Text className="text-muted">{r.comment}</Text>}
-                    <Caption className="text-muted">{new Date(r.created_at).toLocaleDateString()}</Caption>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-
         </div>
       )}
     </div>
