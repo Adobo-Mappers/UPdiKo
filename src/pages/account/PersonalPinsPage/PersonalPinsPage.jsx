@@ -35,7 +35,6 @@ export default function PersonalPinsPage() {
                 if (mounted) setLoading(false);
             }
         }
-
         loadPins();
 
         return () => {
@@ -53,11 +52,11 @@ export default function PersonalPinsPage() {
     }
 
     if (loading) return null;
-
+    console.log(pins);
     return (
         <div className="personal-pins-page px-xlarge">
             <main className='py-xlarge'>
-                {/* Main Header Container Styled Like ServiceCategoryPage */}
+                {/* Main Header Container */}
                 <div className="flex flex-col bg-white p-xlarge border-roundify">
                     <Link to="/account" className='flex items-center gap-small text-inherit'>
                         <Icon name="back" size='small' />
@@ -73,7 +72,7 @@ export default function PersonalPinsPage() {
                     </div>
                 </div>
 
-                {/* Pin Grid Wrapper matching the layout from #service-list */}
+                {/* Pin Grid Wrapper */}
                 <div id="pins-list" className='flex flex-col gap-medium mt-medium mx-large' style={{ paddingBottom: '80px' }}>
                     {pins.length === 0 ? (
                         <div className="px-large py-large text-center border-roundify bg-white">
@@ -93,41 +92,68 @@ export default function PersonalPinsPage() {
                                         handleOpenPin(pin.id);
                                     }
                                 }}
-                                /* Alternates cards side-to-side (start vs end) just like Service Category cards */
                                 style={{"width": "300px", "alignSelf": `${(index % 2 === 0) ? "start" : "end"}`}} 
                             >   
-                                {/* Alternating card rotation effects (rotate-left vs rotate-right) */}
                                 <div className={`w-100 bg-white my-small border-roundify p-medium ${(index % 2 === 0) ? "rotate-left" : "rotate-right"}`}>
                                     
-                                    {/* Map Preview Placeholder Block mimicking the Service Image layer */}
+                                    {/* Map Preview Placeholder Block */}
                                     <div
-                                        style={{"width": "100%", "height": "170px", "display": "flex", "alignItems": "center", "justifyContent": "center", "backgroundColor": "#212121"}}
-                                        className='border-roundify text-white'
-                                    >
-                                        <Icon name='map' size='large' />
-                                    </div>
+                                        style={{
+                                        "width": "100%", 
+                                        "height": "170px", 
+                                        "display": "flex", 
+                                        "alignItems": "center", 
+                                        "justifyContent": "center", 
+                                        "backgroundColor": "#212121",
+                                        "overflow": "hidden" // Prevents images from bleeding past rounded corners
+                                    }}
+                                    className='border-roundify text-white'
+                                >   
+                                    {(pin.img) && (
+                                        <img 
+                                            src={pin.imageUrl} 
+                                            alt={pin.locationName} 
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                objectFit: "cover" // Ensures the image crops nicely instead of stretching
+                                            }}
+                                        />
+                                    )}
+                                </div>
                                     
-                                    {/* Context Details Wrapper */}
-                                    <div className='py-small px-medium'>
-                                        <Heading className='fw-bold'>{pin.locationName}</Heading>
-                                        
-                                        <div className='flex items-center gap-xsmall p-xsmall'>
-                                            <Icon name='address' size='small' />
-                                            <Text className='fw-regular text-muted'>{pin.address}</Text>
+                                    {/* Name and Description Content Details Wrapper */}
+                                    <div className='py-small px-medium flex flex-col gap-xsmall'>
+                                        {/* Name container limited to max 2 lines before ellipsis */}
+                                        <div style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            maxHeight: '48px', /* Adjust based on typography standard line height */
+                                        }}>
+                                            <Heading className='fw-bold'>{pin.locationName}</Heading>
                                         </div>
-                                        
-                                        {pin.description && (
-                                            <div className='p-xsmall'>
-                                                <Text className='text-muted' style={{ fontStyle: 'italic' }}>{pin.description}</Text>
-                                            </div>
-                                        )}
+
+                                        {/* Description container limited to exactly 40px height with clean multiline ellipsis */}
+                                        <div style={{
+                                            height: '40px',
+                                            overflow: 'hidden',
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2,
+                                            WebkitBoxOrient: 'vertical'
+                                        }}>
+                                            <Text className='text-muted' style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                                                {pin.description || "No description provided."}
+                                            </Text>
+                                        </div>
                                     </div>    
 
-                                    {/* Action row container with Delete capability added */}
-                                    <div className='flex justify-between items-center gap-xsmall pt-small'>
+                                    {/* Action row container */}
+                                    <div className='flex justify-between items-center gap-xsmall pt-small' style={{ borderTop: '1px solid var(--color-component-bg, #f4f4f4)' }}>
                                         <Icon
                                             name='delete'
-                                            size='small'
+                                            size='medium'
                                             className='cursor-pointer text-danger'
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -135,7 +161,7 @@ export default function PersonalPinsPage() {
                                             }}
                                         />
                                         <div className='flex items-center gap-xsmall'>
-                                            <Text>View Pin</Text>    
+                                            <Text className='fw-extra-bold'>View Pin</Text>    
                                             <Icon name='front' size='small' />    
                                         </div>
                                     </div>                                    

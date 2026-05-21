@@ -842,7 +842,17 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* Name + close */}
           <div className="flex justify-between gap-xlarge my-small px-medium">
-            <Subtitle className="fw-extra-bold">{selectedMarkerInfo.name}</Subtitle>
+            <Subtitle 
+            className="fw-extra-bold"  
+              style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  maxHeight: '48px', /* Adjust based on typography standard line height */
+              }}>
+                {selectedMarkerInfo.name}
+                </Subtitle>
             <Icon name="close" size="small" className="cursor-pointer" onClick={() => { setSelectedMarkerInfo(null); navigate("/map"); }} />
           </div>
 
@@ -871,7 +881,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* Tabs */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-            {["About", "Photos"].map(tab => (
+            {["About", "Photos", "Reviews"].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
@@ -944,6 +954,29 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               )}
             </div>
           )}
+
+          {selectedPanelTab === "Reviews" && (
+            <div className="panel-scroll">
+              {reviews.length === 0 ? (
+                <Text className="text-muted my-small">No reviews yet.</Text>
+              ) : (
+                reviews.map(r => (
+                  <div key={r.id} className="review-item p-medium border-rounded">
+                    <div className="flex justify-between items-center">
+                      <Text className="fw-bold">{r.userName}</Text>
+                      <div className="flex gap-xsmall">
+                        {[1,2,3,4,5].map(n => (
+                          <Icon key={n} name={r.rating >= n ? "star" : "lightstar"} size="small" />
+                        ))}
+                      </div>
+                    </div>
+                    {r.comment && <Text className="text-muted">{r.comment}</Text>}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
         </div>
       )}
     </div>
