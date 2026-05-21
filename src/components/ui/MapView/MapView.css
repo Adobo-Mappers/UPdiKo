@@ -23,7 +23,7 @@
     }
 
     .marker-desaturated {
-      filter: saturate(0.7) opacity(0.6);
+      filter: saturate(0.5) opacity(0.6);
       transition: filter 0.2s ease;
     }
 }

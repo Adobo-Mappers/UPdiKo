@@ -1,5 +1,5 @@
 // Important Dependencies
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents, Polyline} from "react-leaflet";
 import { useParams, useNavigate } from "react-router-dom";
 import { TAG_GROUPS } from './../../../utils/servicecoding.js'
@@ -72,216 +72,43 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Custom icon for the user's location (assuming a simple blue dot or custom image)
+// Custom icon for the user's location
 const userIcon = new L.Icon({
     iconUrl: userPinIcon,
     iconSize: [60, 60],
-    iconAnchor: [30, 30], // tip of pin sits on coordinate
+    iconAnchor: [30, 30],
     className: 'user-location-marker' 
 });
 
-const restaurantIcon = new L.Icon({
-    iconUrl: restaurantPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const cafeIcon = new L.Icon({
-    iconUrl: cafePinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const bakeryIcon = new L.Icon({
-    iconUrl: bakeryPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const groceryIcon = new L.Icon({
-    iconUrl: groceryPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const giftIcon = new L.Icon({
-    iconUrl: giftPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const hardwareIcon = new L.Icon({
-    iconUrl: hardwarePinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const printingIcon = new L.Icon({
-    iconUrl: printingPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const beautyIcon = new L.Icon({
-    iconUrl: beautyPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const medicalIcon = new L.Icon({
-    iconUrl: medicalPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const pharmacyIcon = new L.Icon({
-    iconUrl: pharmacyPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const financialIcon = new L.Icon({
-    iconUrl: financialPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const universityIcon = new L.Icon({
-    iconUrl: universityPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const schoolsIcon = new L.Icon({
-    iconUrl: schoolsPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const accommodationIcon = new L.Icon({
-    iconUrl: accommodationPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const automotiveIcon = new L.Icon({
-    iconUrl: automotivePinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const laundryIcon = new L.Icon({
-    iconUrl: laundryPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const tourismIcon = new L.Icon({
-    iconUrl: tourismPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const religiousIcon = new L.Icon({
-    iconUrl: religiousPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const entertainmentIcon = new L.Icon({
-    iconUrl: entertainmentPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const governmentIcon = new L.Icon({
-    iconUrl: governmentPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const informationIcon = new L.Icon({
-    iconUrl: informationPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const recyclingIcon = new L.Icon({
-    iconUrl: recyclingPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const funeralIcon = new L.Icon({
-    iconUrl: funeralPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const shelterIcon = new L.Icon({
-    iconUrl: shelterPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const toiletIcon = new L.Icon({
-    iconUrl: toiletPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const lotteryIcon = new L.Icon({
-    iconUrl: lotteryPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const computerIcon = new L.Icon({
-    iconUrl: computerPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    className: 'user-location-marker' 
-});
-
-const communityIcon = new L.Icon({
-    iconUrl: communityPinIcon,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15], // tip of pin sits on coordinate
-    className: 'user-location-marker' 
-});
-
-const customIcon = new L.Icon({
-    iconUrl: customPinIcon,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20], // tip of pin sits on coordinate
-    className: 'user-location-marker' 
-});
+const restaurantIcon = new L.Icon({ iconUrl: restaurantPinIcon, iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const cafeIcon       = new L.Icon({ iconUrl: cafePinIcon,        iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const bakeryIcon     = new L.Icon({ iconUrl: bakeryPinIcon,      iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const groceryIcon    = new L.Icon({ iconUrl: groceryPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const giftIcon       = new L.Icon({ iconUrl: giftPinIcon,        iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const hardwareIcon   = new L.Icon({ iconUrl: hardwarePinIcon,    iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const printingIcon   = new L.Icon({ iconUrl: printingPinIcon,    iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const beautyIcon     = new L.Icon({ iconUrl: beautyPinIcon,      iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const medicalIcon    = new L.Icon({ iconUrl: medicalPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const pharmacyIcon   = new L.Icon({ iconUrl: pharmacyPinIcon,    iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const financialIcon  = new L.Icon({ iconUrl: financialPinIcon,   iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const universityIcon = new L.Icon({ iconUrl: universityPinIcon,  iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const schoolsIcon    = new L.Icon({ iconUrl: schoolsPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const accommodationIcon = new L.Icon({ iconUrl: accommodationPinIcon, iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const automotiveIcon = new L.Icon({ iconUrl: automotivePinIcon,  iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const laundryIcon    = new L.Icon({ iconUrl: laundryPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const tourismIcon    = new L.Icon({ iconUrl: tourismPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const religiousIcon  = new L.Icon({ iconUrl: religiousPinIcon,   iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const entertainmentIcon = new L.Icon({ iconUrl: entertainmentPinIcon, iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const governmentIcon = new L.Icon({ iconUrl: governmentPinIcon,  iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const informationIcon = new L.Icon({ iconUrl: informationPinIcon, iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const recyclingIcon  = new L.Icon({ iconUrl: recyclingPinIcon,   iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const funeralIcon    = new L.Icon({ iconUrl: funeralPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const shelterIcon    = new L.Icon({ iconUrl: shelterPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const toiletIcon     = new L.Icon({ iconUrl: toiletPinIcon,      iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const lotteryIcon    = new L.Icon({ iconUrl: lotteryPinIcon,     iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const computerIcon   = new L.Icon({ iconUrl: computerPinIcon,    iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const communityIcon  = new L.Icon({ iconUrl: communityPinIcon,   iconSize: [30, 30], iconAnchor: [15, 15], className: 'user-location-marker' });
+const customIcon     = new L.Icon({ iconUrl: customPinIcon,      iconSize: [40, 40], iconAnchor: [20, 20], className: 'user-location-marker' });
 
 const iconMapping = {
   restaurant: restaurantIcon,
@@ -311,54 +138,23 @@ const iconMapping = {
   toilet: toiletIcon,
   lottery: lotteryIcon,
   computer: computerIcon,
-  community: communityIcon // Default fallback
+  community: communityIcon
 };
-
-// function LocationMarker({ tempLocation, selectedMarkerInfo, setTempLocation, setSelectedMarkerInfo }) {
-//   // listen for a click event on the map
-//   useMapEvents({
-//     click(e) {
-//       if (tempLocation && !(tempLocation && !selectedMarkerInfo)) {
-//         // when there is an existing pin, remove it
-//         setTempLocation(null);
-//         setSelectedMarkerInfo(null);
-//       } else {
-//         // when there is no pin, show a pin for that location.
-//         const newPin = {
-//           latitude: e.latlng.lat,
-//           longitude: e.latlng.lng,
-//           name: "Temporary Pin",
-//           type: "Temporary Pin",
-//           tags: ["Temporary Pin"],
-//           address: `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`, 
-//         };
-//         setTempLocation(newPin);
-//         setSelectedMarkerInfo(newPin);
-//       }
-//     },
-//   });
-
-//   return null;
-// }
 
 // REVISED: Component to handle map clicks and open the pin form
 function LocationMarker({ tempLocation, setTempLocation, setSelectedMarkerInfo, onMapClickForPin, onClosePinForm, handleMarkerClick }) {
-  // Use useMapEvents to listen for a click event on the map
   useMapEvents({
     click(e) {
       const lat = e.latlng.lat;
       const lng = e.latlng.lng;
         
-      // 1. Always remove any existing temporary pin first, according to previous rule
       if (tempLocation) {
         // RULE 1: If a temporary pin exists, remove it and close the form.
         setTempLocation(null);
         setSelectedMarkerInfo(null);
         onClosePinForm();
-       } else {
+      } else {
         // RULE 2: If no temporary pin exists, create one and open the form.
-        
-        // 1. Create the temporary pin data object
         const newPin = {
             latitude: lat,
             longitude: lng,
@@ -367,14 +163,9 @@ function LocationMarker({ tempLocation, setTempLocation, setSelectedMarkerInfo, 
             tags: ["Temporary Pin"],
             address: `${lat}, ${lng}`,
         };
-
-        // 2. Set the temporary pin to be rendered on the map
-        handleMarkerClick(newPin, newPin.latitude, newPin.longitude)
+        handleMarkerClick(newPin, newPin.latitude, newPin.longitude);
         setTempLocation(newPin); 
         setSelectedMarkerInfo(null);
-        
-
-        // 3. Trigger the pin creation form in the parent component
         onMapClickForPin({ lat, lng });
       }
     },
@@ -383,22 +174,22 @@ function LocationMarker({ tempLocation, setTempLocation, setSelectedMarkerInfo, 
   return null;
 }
 
-function getScaledIcon (baseIcon, scale = 1, desaturated = false) {
+function getScaledIcon(baseIcon, scale = 1, desaturated = false) {
   const size = 30 * scale;
   const anchor = size / 2;
   return new L.Icon({
     iconUrl: baseIcon.options.iconUrl,
     iconSize: [size, size],
     iconAnchor: [anchor, anchor],
-    className: `user-location-marker${(desaturated) ? ' marker-desaturated' : ''}`
+    className: `user-location-marker${desaturated ? ' marker-desaturated' : ''}`
   });
-};
+}
 
-// 1. REVISED: responds to location change, now accepts 'zoom'
+// FIX 2: Responds to location change, preserves zoom when not explicitly changed
 function ChangeView({ center, zoom }) {
   const map = useMap();
   const prevCenter = useRef(center);
-  const prevZoom = useRef(zoom); // Track previous zoom
+  const prevZoom = useRef(zoom);
 
   useEffect(() => {
     const tolerance = 0.000001; 
@@ -410,12 +201,7 @@ function ChangeView({ center, zoom }) {
     
     if (center && (isDifferentCenter || isDifferentZoom)) {
       const targetZoom = zoom || map.getZoom();
-
-      // Use targetZoom for the projection so the pixel offset is correct
-      // at the zoom level we're animating to.
-      // offsetPx shifts the view down so the pin appears in the upper portion
-      // of the screen above the info panel (panel is ~55dvh tall).
-      const offsetPx = window.innerHeight * 0.275; // ~half of 55dvh
+      const offsetPx = window.innerHeight * 0.275;
       const targetPoint = map.project(center, targetZoom);
       const offsetPoint = targetPoint.add([0, offsetPx]);
       const offsetLatLng = map.unproject(offsetPoint, targetZoom);
@@ -434,16 +220,13 @@ function ChangeView({ center, zoom }) {
   return null;
 }
 
-// NEW COMPONENT: Displays the user's marker and handles the view tracking
+// Displays the user's marker and handles the view tracking
 function UserLocationMarker({ coords, trackingEnabled }) {
     const map = useMap();
     const markerRef = useRef(null);
 
-    // useEffect to handle the continuous view update when tracking is ON
     useEffect(() => {
         if (trackingEnabled && coords) {
-            // This is handled by the parent's state and ChangeView component now,
-            // but we can ensure the view is centered whenever coords update *if* tracking is on
             map.setView([coords.lat, coords.lng], map.getZoom(), {
                 animate: true,
                 duration: 0.5
@@ -451,11 +234,8 @@ function UserLocationMarker({ coords, trackingEnabled }) {
         }
     }, [coords, trackingEnabled, map]);
 
-    if (!coords) {
-        return null;
-    }
+    if (!coords) return null;
 
-    // Coordinates are {lat, lng} objects
     const position = [coords.lat, coords.lng];
 
     return (
@@ -473,8 +253,8 @@ function UserLocationMarker({ coords, trackingEnabled }) {
     );
 }
 
-// NEW COMPONENT: Controls the Map rotation
-function RotationController({ bearing, setBearing }) {
+// Controls the Map rotation
+function RotationController({ bearing }) {
   const map = useMap();
 
   useEffect(() => {
@@ -486,7 +266,16 @@ function RotationController({ bearing, setBearing }) {
   return null;
 }
 
-// // main map element
+// Captures the live Leaflet map instance so we can read its current zoom
+function MapInstanceCapture({ mapRef }) {
+  const map = useMap();
+  useEffect(() => {
+    mapRef.current = map;
+  }, [map, mapRef]);
+  return null;
+}
+
+// main map element
 export function MapView({ userLocation, currentCoords, trackingEnabled, selectedService, onMapClickForPin, onClosePinForm, onMarkerClick, bearing, onBearingChange, onRouteNeeded, setRatingSession, isRating, setRating, activeTag}) {
   const navigate = useNavigate();
 
@@ -494,44 +283,48 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const [center, setCenter] = useState(defaultCenter);
   const [loading, setLoading] = useState(true);
   const [pinnedLocations, setPinnedLocations] = useState([]);
-  const [staticLocations, setStaticLocations] = useState([]); // replaces Miagao/Campus JSON imports
+  const [staticLocations, setStaticLocations] = useState([]);
   const [selectedMarkerInfo, setSelectedMarkerInfo] = useState(selectedService);
   const [selectedPanelTab, setSelectedPanelTab] = useState("About");
   const [tempLocation, setTempLocation] = useState(null);
 
+  // FIX 2: ref to read live map zoom without forcing re-renders
+  const mapRef = useRef(null);
 
   // States for PostGIS directions using Leaflet
   const [routeCoords, setRouteCoords] = useState([]);
   const [isLoadingRoute, setIsLoadingRoute] = useState(false);
   const [routeDestination, setRouteDestination] = useState(null);
   const [routeInfo, setRouteInfo] = useState(null);
-  // user auth
-    const [user, setUser] = useState(null);
-    const [authLoading, setAuthLoading] = useState(true); 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChangedListener((user) => {
-            setUser(user);
-            setAuthLoading(false); 
-        });
-        return () => unsubscribe(); 
-    }, []);
 
-    // get service id
-    const { id } = useParams();
-    console.log(id);
-    // fetch service from cache
-    const [service, setService] = useState(null);
-    useEffect(() => {
-        async function loadService() {
-            if (!id) return;
-            if (!hasServiceCache()) {
-                await fetchServicesFromServer();
-            }
-            setService(getServiceFromCache(id));
-            setLoading(false);
-        }
-        loadService();
-    }, [id]);
+  // user auth
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true); 
+  useEffect(() => {
+      const unsubscribe = onAuthStateChangedListener((user) => {
+          setUser(user);
+          setAuthLoading(false); 
+      });
+      return () => unsubscribe(); 
+  }, []);
+
+  // get service id
+  const { id } = useParams();
+  console.log(id);
+
+  // fetch service from cache
+  const [service, setService] = useState(null);
+  useEffect(() => {
+      async function loadService() {
+          if (!id) return;
+          if (!hasServiceCache()) {
+              await fetchServicesFromServer();
+          }
+          setService(getServiceFromCache(id));
+          setLoading(false);
+      }
+      loadService();
+  }, [id]);
 
   // Reviews state
   const [reviews, setReviews] = useState([]);
@@ -560,13 +353,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               setReviewRating(0);
               setSavedRating(0);
           });
-  }, [authLoading])
+  }, [authLoading, id, user]);
 
   useEffect(() => {
       if (reviewModal === false) {
           setReviewRating(savedRating);
       }
-  }, [reviewModal])
+  }, [reviewModal, savedRating]);
 
   async function handleSubmitReview() {
       if (!user || reviewRating === 0) return;
@@ -595,38 +388,28 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     if (!user || !id) return;
     setSubmittingReview(true);
     try {
-        // 1. Delete review row directly from Database
         await deleteLocationReview(Number(id), user.id);
-        
-        // 2. Wipe the local component values completely clean
         setSavedComment("");
         setReviewComment("");
         setSavedRating(0);
         setReviewRating(0);
-        
-        // 3. Fetch a fresh copy of the global array list to update the screen count
         const updated = await getLocationReviews(Number(id));
         setReviews(updated);
-        
-        // 4. Shut the modal view container 
         setReviewModal(false);
     } catch (e) {
         console.error('Failed to remove review:', e);
     } finally {
         setSubmittingReview(false);
     }
-
   }
 
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
-
-  // Extract the zoom level if available (assuming MapSection passed it via userLocation)
   const mapZoom = userLocation?.zoom || 16;
 
-  // Bottom-sheet drag state for the marker info panel.
+  // Bottom-sheet drag state for the marker info panel
   const dragY = useRef(0);
   const startY = useRef(null);
   const isDraggingPanel = useRef(false);
@@ -637,7 +420,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       isDraggingPanel.current = true;
       dragY.current = 0;
       e.currentTarget.setPointerCapture?.(e.pointerId);
-
       if (panelRef.current) {
           panelRef.current.style.transition = 'none';
       }
@@ -645,7 +427,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
   function onDragMove(e) {
       if (!isDraggingPanel.current || startY.current === null || !panelRef.current) return;
-
       const delta = Math.max(0, e.clientY - startY.current);
       dragY.current = delta;
       panelRef.current.style.transform = `translateY(${delta}px)`;
@@ -653,10 +434,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
   function onDragEnd(e) {
       if (!isDraggingPanel.current || !panelRef.current) return;
-
       e.currentTarget.releasePointerCapture?.(e.pointerId);
       panelRef.current.style.transition = 'transform 0.25s ease';
-
       if (dragY.current > 140) {
           panelRef.current.style.transform = 'translateY(100%)';
           setTimeout(() => {
@@ -666,28 +445,25 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       } else {
           panelRef.current.style.transform = 'translateY(0)';
       }
-
       dragY.current = 0;
       startY.current = null;
       isDraggingPanel.current = false;
-
   }
 
-  // Function to handle the marker click logic
+  // FIX 2: Read live zoom from mapRef instead of hardcoding 17
   const handleMarkerClick = (data, lat, lng, shouldRoute = false) => {
-      // 1. Set the selected marker info panel
       setSelectedMarkerInfo(data);
       setTempLocation(null);
       onClosePinForm();
 
-      // 2. Center the map on the clicked marker.
-      //    The rightward shift was caused by wrong iconAnchor values, not the pan itself.
       if (onMarkerClick) {
-          onMarkerClick(lat, lng, 17);
+          // Use the map's current zoom level — don't force a jump to 17
+          const currentZoom = mapRef.current ? mapRef.current.getZoom() : mapZoom;
+          console.log(currentZoom)
+          onMarkerClick(lat, lng, currentZoom);
           navigate(`/map/${data.id ? data.id : ""}`);
       }
       
-      // 3. Calculate route if requested (e.g., from Cassie navigation)
       if (shouldRoute) {
         handleGetDirections(data);
       }
@@ -700,7 +476,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       parseFloat(selectedService.latitude),
       parseFloat(selectedService.longitude)
     );
-  }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -726,8 +502,9 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   }, [id, pinnedLocations, staticLocations]);
 
   useEffect(() => {
-      handleServiceClick(selectedService)
-  }, [selectedService])
+      handleServiceClick(selectedService);
+  }, [selectedService]);
+
   useEffect(() => {
     if (userLocation) {
       setCenter([userLocation.lat, userLocation.lng]);
@@ -754,40 +531,36 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             opening_hours: pin.opening_hours || [],
           }))
         );
-
       } else {
         setPinnedLocations([]);
       }
     });
     return () => unsubscribe();
   }, [activeTag]);
-  // Replaces static JSON imports — fetch all locations from Supabase static_locations table
+
+  // FIX 1: Cache static locations in sessionStorage to avoid re-fetching on every refresh
   useEffect(() => {
     const fetchStaticLocations = async () => {
+      const CACHE_KEY = 'static_locations_cache';
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        setStaticLocations(JSON.parse(cached));
+        setLoading(false);
+        return;
+      }
       const data = await getStaticLocations(supabase);
       const valid = data.filter(r => !isNaN(parseFloat(r.latitude)) && !isNaN(parseFloat(r.longitude)));
       console.log(`🗺 Total loaded: ${data.length} | Valid coords: ${valid.length} | Skipped: ${data.length - valid.length}`);
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
       setStaticLocations(data);
     };
     fetchStaticLocations();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="map-loading">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
-
   const shouldShowMarker = (facility) => {
     return true;
-    
-    // Check if facility has a tags array and if it includes the selected service
-    return facility.name && facility.name.includes(selectedService.name);
   };
 
-  // NEW COMPONENT: Gets the direction to the location selected from user's current location
   const handleGetDirections = async (destination) => {
     if (!currentCoords) {
       alert("Your location is not available yet.");
@@ -803,8 +576,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       const endLat = parseFloat(destination.latitude);
       const endLng = parseFloat(destination.longitude);
 
-      // Single OSRM call — getRoute returns [lat,lng] pairs for the polyline
-      // and we also extract distance/duration from the same response
       const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
       const response = await fetch(url);
       const data = await response.json();
@@ -815,8 +586,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       }
 
       const route = data.routes[0];
-
-      // Polyline coords: GeoJSON is [lng, lat], Leaflet needs [lat, lng]
       const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
       setRouteCoords(coords);
 
@@ -832,7 +601,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     }
   };
 
-  // NEW COMPONENT: removes the routing given
   const handleClearRoute = () => {
     setRouteCoords([]);
     setRouteDestination(null);
@@ -840,7 +608,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   };
 
   const getFacilityIcon = (tags) => {
-    // Safe parsing fallback if tags are null/undefined
     if (!tags) return communityIcon;
     
     let parsedTags = [];
@@ -851,13 +618,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       return communityIcon;
     }
 
-    // Ensure parsedTags is an array before checking
     if (!Array.isArray(parsedTags)) return communityIcon;
 
-    // Normalize array to lowercase to avoid case-sensitivity bugs
     const activeTags = parsedTags.map(t => String(t).toLowerCase());
 
-    // Match active tags against your specific subcategory lists
     if (activeTags.some(t => ["restaurant", "fast_food", "seafood"].includes(t))) return iconMapping.restaurant;
     if (activeTags.some(t => ["cafe", "beverages"].includes(t))) return iconMapping.cafe;
     if (activeTags.some(t => ["bakery", "pastry"].includes(t))) return iconMapping.bakery;
@@ -886,18 +650,36 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     if (activeTags.some(t => ["lottery"].includes(t))) return iconMapping.lottery;
     if (activeTags.some(t => ["internet_cafe"].includes(t))) return iconMapping.computer;
 
-    // Default fallback if no match is found
     return communityIcon;
   };
 
-  const isLocationVisibleForActiveTag = (location) => {
-    if (activeTag === 'All') return true;
-    const allowedTags = TAG_GROUPS[activeTag]?.tags || [];
-    const tags = Array.isArray(location.tags)
-      ? location.tags.map((tag) => String(tag).toLowerCase())
-      : [];
-    return tags.some((tag) => allowedTags.includes(tag));
-  };
+  // FIX 3: Memoize allowed tag set — O(1) Set lookup instead of O(n) Array.includes
+  const allowedTagSet = useMemo(() => {
+    if (activeTag === 'All') return null; // null = show all, skip tag checks entirely
+    const tags = TAG_GROUPS[activeTag]?.tags || [];
+    return new Set(tags);
+  }, [activeTag]);
+
+  // FIX 3: Pre-filter both location lists once per activeTag change, not on every render
+  const visibleStaticLocations = useMemo(() => {
+    return staticLocations.filter(location => {
+      if (allowedTagSet === null) return true;
+      const tags = Array.isArray(location.tags)
+        ? location.tags.map(t => String(t).toLowerCase())
+        : [];
+      return tags.some(t => allowedTagSet.has(t));
+    });
+  }, [staticLocations, allowedTagSet]);
+
+  const visiblePinnedLocations = useMemo(() => {
+    return pinnedLocations.filter(location => {
+      if (allowedTagSet === null) return true;
+      const tags = Array.isArray(location.tags)
+        ? location.tags.map(t => String(t).toLowerCase())
+        : [];
+      return tags.some(t => allowedTagSet.has(t));
+    });
+  }, [pinnedLocations, allowedTagSet]);
 
   return (
     <div className="MapView">
@@ -906,8 +688,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         zoom={mapZoom} 
         style={{ width: "100%", height: "100%", zIndex: 0}} 
         zoomControl={false}
-
-        // NEW COMPONENT: Clamps the user only to Miagao
         minZoom={13}
         maxZoom={20}
         maxBounds={[
@@ -915,27 +695,21 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           [10.78, 122.35],
         ]}
         maxBoundsViscosity={1.0}
-
-        // NEW COMPONENT: Makes the Map rotatable
         rotate={true}          
         rotateControl={false}   
-
-        // NEW COMPONENT: Add mobile rotation and zoom
-        touchRotate={true}    // NEW
+        touchRotate={true}
         touchZoom={true} 
-        >
+      >
+        {/* FIX 2: Capture the live map instance so handleMarkerClick can read current zoom */}
+        <MapInstanceCapture mapRef={mapRef} />
         <ChangeView center={center} zoom={mapZoom} />
         <RotationController bearing={bearing} />
-        {/* Stadia Maps — alidade_smooth_dark theme */}
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-          // url={`https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
           url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
-          // NEW COMPONENT: Clamps the user only to Miagao
           minZoom={13}
           maxZoom={20}
         />
-        {/* Render the user's current location marker and tracking logic */}
         <UserLocationMarker coords={currentCoords} trackingEnabled={trackingEnabled} />
         {routeCoords.length > 0 && (
           <Polyline
@@ -955,87 +729,102 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           <Marker 
             icon={getScaledIcon(customIcon, 1.75)} 
             position={[tempLocation.latitude, tempLocation.longitude]} 
-            eventHandlers={{ click: () => {handleMarkerClick(tempLocation, tempLocation.latitude, tempLocation.longitude)} }}
+            eventHandlers={{ click: () => handleMarkerClick(tempLocation, tempLocation.latitude, tempLocation.longitude) }}
           >
-             <Popup autoPan={false}>
-               Clicked Location: <br />
-               Lat: {tempLocation.latitude}, <br />
-               Lng: {tempLocation.longitude}
-             </Popup>
+            <Popup autoPan={false}>
+              Clicked Location: <br />
+              Lat: {tempLocation.latitude}, <br />
+              Lng: {tempLocation.longitude}
+            </Popup>
           </Marker>
         )}
 
-        {/* <Marker position={center}>
-          <Popup>You are here</Popup>
-        </Marker> */}
-        {pinnedLocations.filter(isLocationVisibleForActiveTag).map((pin) => {
+        {/* FIX: Added missing return statement so pinned markers actually render */}
+        {visiblePinnedLocations.map((pin) => {
           const isSelected = selectedMarkerInfo?.id === pin.id;
           const icon = getScaledIcon(customIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
-  
-          <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={icon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
-            {/* <Popup>{pin.name}</Popup> */}
-          </Marker>
+          return (
+            <Marker
+              key={pin.id}
+              position={[pin.latitude, pin.longitude]}
+              icon={icon}
+              eventHandlers={{ click: () => handleMarkerClick(pin, pin.latitude, pin.longitude) }}
+            />
+          );
         })}
-        {/* Replaces Miagao.map() and Campus.map() — now sourced from Supabase static_locations */}
-       {staticLocations
-          .filter(isLocationVisibleForActiveTag)
+
+        {/* FIX 3: Use pre-filtered visibleStaticLocations instead of filtering inline */}
+        {visibleStaticLocations
           .filter(shouldShowMarker)
           .filter(facility => {
             const lat = parseFloat(facility.latitude);
             const lng = parseFloat(facility.longitude);
-            if (isNaN(lat) || isNaN(lng)) {
-              return false;
-            }
-            return true;
+            return !isNaN(lat) && !isNaN(lng);
           })
           .map((facility) => {
-          const isSelected = selectedMarkerInfo?.id === facility.id;
-          const baseIcon = getFacilityIcon(facility.tags);
-          const icon = getScaledIcon(baseIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
+            const isSelected = selectedMarkerInfo?.id === facility.id;
+            const baseIcon = getFacilityIcon(facility.tags);
+            const icon = getScaledIcon(baseIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
 
-          return <Marker
-            key={facility.id}
-            position={[parseFloat(facility.latitude), parseFloat(facility.longitude)]}
-            icon={icon}
-            eventHandlers={{ click: () => {
-              handleMarkerClick(
-                { ...facility, type: facility.location_type },
-                parseFloat(facility.latitude),
-                parseFloat(facility.longitude)
-              );
-            }}}
-          >
-            {/* <Popup>{facility.name}</Popup> */}
-          </Marker>
-        })} 
+            return (
+              <Marker
+                key={facility.id}
+                position={[parseFloat(facility.latitude), parseFloat(facility.longitude)]}
+                icon={icon}
+                eventHandlers={{ click: () => {
+                  handleMarkerClick(
+                    { ...facility, type: facility.location_type },
+                    parseFloat(facility.latitude),
+                    parseFloat(facility.longitude)
+                  );
+                }}}
+              />
+            );
+          })
+        } 
       </MapContainer>
       
       {reviewModal && (
-            <div className='modal-container flex justify-center items-center px-xlarge'>
-                <div className='w-100 flex flex-col justify-center mx-medium p-large bg-white border-roundify'>
-                    <div className='flex justify-between items-center'>
-                        <Heading className='fw-extra-bold py-xsmall'>Leave a Review</Heading>
-                        <Icon className='flex items-center cursor-pointer' name='close' size='small' onClick={() => { setReviewModal(false); setReviewRating(savedRating); setReviewComment(savedComment); }}/>
-                    </div>
-                    <div className='flex justify-center my-medium gap-large'>
-                        {[1, 2, 3, 4, 5].map((number) => (
-                            <Icon key={number} name={number <= reviewRating ? "star" : "lightstar"} onClick={() => setReviewRating(number)} size='large' className='cursor-pointer'/>
-                        ))}
-                    </div>
-                    <div className='px-small'>
-                        <textarea disabled={submittingReview} value={reviewComment} className='w-100 bg-component border-none border-roundify p-medium' placeholder='Comment (Optional)' onChange={(e) => setReviewComment(e.target.value)} />
-                    </div>
-                    <div className='py-small flex justify-end gap-small'>
-                        <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
-                        <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
-                            {submittingReview ? "Submitting..." : "Submit"}
-                        </Button>
-                    </div>
-                </div>
+        <div className='modal-container flex justify-center items-center px-xlarge'>
+          <div className='w-100 flex flex-col justify-center mx-medium p-large bg-white border-roundify'>
+            <div className='flex justify-between items-center'>
+              <Heading className='fw-extra-bold py-xsmall'>Leave a Review</Heading>
+              <Icon
+                className='flex items-center cursor-pointer'
+                name='close'
+                size='small'
+                onClick={() => { setReviewModal(false); setReviewRating(savedRating); setReviewComment(savedComment); }}
+              />
             </div>
-        )} 
-      
-
+            <div className='flex justify-center my-medium gap-large'>
+              {[1, 2, 3, 4, 5].map((number) => (
+                <Icon
+                  key={number}
+                  name={number <= reviewRating ? "star" : "lightstar"}
+                  onClick={() => setReviewRating(number)}
+                  size='large'
+                  className='cursor-pointer'
+                />
+              ))}
+            </div>
+            <div className='px-small'>
+              <textarea
+                disabled={submittingReview}
+                value={reviewComment}
+                className='w-100 bg-component border-none border-roundify p-medium'
+                placeholder='Comment (Optional)'
+                onChange={(e) => setReviewComment(e.target.value)}
+              />
+            </div>
+            <div className='py-small flex justify-end gap-small'>
+              <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
+              <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
+                {submittingReview ? "Submitting..." : "Submit"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )} 
 
       {selectedMarkerInfo && (
         <div className="marker-info py-large px-xlarge" ref={panelRef}>
@@ -1052,14 +841,12 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           </div>
 
           {/* Name + close */}
-          
           <div className="flex justify-between gap-xlarge my-small px-medium">
             <Subtitle className="fw-extra-bold">{selectedMarkerInfo.name}</Subtitle>
-            <Icon name="close" size="small" className="cursor-pointer" onClick={() => { setSelectedMarkerInfo(null); navigate("/map")}} />
+            <Icon name="close" size="small" className="cursor-pointer" onClick={() => { setSelectedMarkerInfo(null); navigate("/map"); }} />
           </div>
 
           <div className="flex gap-small">
-            {/* Get Directions */}
             <div className="m-small">
               <Button onClick={() => handleGetDirections(selectedMarkerInfo)} className="border-solid">
                 <Icon name="direction" size="small" />
@@ -1067,10 +854,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               </Button>
             </div>
             {user && (
-                <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
-                    <Icon name="darkstar" size="small" />
-                    <Text>Rate</Text>
-                </div>
+              <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
+                <Icon name="darkstar" size="small" />
+                <Text>Rate</Text>
+              </div>
             )}
           </div>
           
@@ -1082,7 +869,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             </div>
           )}
 
-          {/* Tabs — use <button> not <Text/<p> so onClick always fires */}
+          {/* Tabs */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
             {["About", "Photos"].map(tab => (
               <button
@@ -1158,7 +945,5 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         </div>
       )}
     </div>
-  )
-};
-
-  
+  );
+}

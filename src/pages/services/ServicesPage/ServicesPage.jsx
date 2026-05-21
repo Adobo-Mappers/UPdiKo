@@ -6,7 +6,6 @@ import { InputField, Dropdown } from './../../../components/form/';
 import { Heading, Text, Title } from './../../../components/typography/';
 import { Icon, Card } from './../../../components/ui/';
 import { getCurrentUser } from './../../../services/supabase.js';
-import { hasServiceCache, fetchServicesFromServer, getAllServicesFromCache } from './../../../services/service-handler.js';
 import { usePublicLocations } from '../../../hooks/useUnifiedLocations.js';
 import { TAG_GROUPS } from '../../../utils/servicecoding.js';
 import EventDisplay from '../../../components/events/EventDisplay.jsx';

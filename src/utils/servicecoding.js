@@ -1,10 +1,4 @@
 const GROUPS = {
-  "All": {
-    tags: ["All"],
-    description: "Browse all available locations and services in Miagao.",
-    icon: "sunflower"
-  },
-
   "Food & Drinks": {
     tags: [
       "restaurant", "fast_food", "cafe", "bakery", "seafood",

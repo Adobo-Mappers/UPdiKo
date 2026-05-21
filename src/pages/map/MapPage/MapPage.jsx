@@ -99,8 +99,12 @@ export default function MapPage() {
             const service = getServiceFromCache(id);
             if (service) {
                 setSelectedService(service);
-                // Automatically center map onto selected deep-linked pin
-                setMapCenter({ lat: Number(service.latitude), lng: Number(service.longitude), zoom: 17 });
+                // FIXED: Uses functional state updates to pull and maintain the user's current zoom level
+                setMapCenter(prev => ({ 
+                    lat: Number(service.latitude), 
+                    lng: Number(service.longitude), 
+                    zoom: prev.zoom // Maintain existing zoom level
+                }));
             }
         } else {
             setSelectedService(null);
@@ -168,9 +172,13 @@ export default function MapPage() {
     }, [trackingEnabled]);
 
     // map centering logic — also passed to MapView as onMarkerClick
-    function handleCenterToPin(lat, lng, zoomLevel = 17) {
+    function handleCenterToPin(lat, lng, zoomLevel) {
         setTrackingEnabled(false);
-        setMapCenter({ lat, lng, zoom: zoomLevel });
+        setMapCenter(prev => ({
+            lat,
+            lng,
+            zoom: zoomLevel !== undefined ? zoomLevel : prev.zoom
+        }));
     }
 
     // map recenter to user logic
