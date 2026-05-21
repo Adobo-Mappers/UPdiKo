@@ -25,35 +25,45 @@ export default function AccountPage() {
     if (!user) return null;
 
     return (
-        <div className='account-page'>
-            <main className='px-large py-mediums flex flex-col justify-center '>
-                <div className='flex items-center justify-between my-small'>
-                    <div className='flex items-center gap-medium'>
-                        <Icon name='sunflower' size='large' className='account-profile-icon' />
-                        <div>
-                            <Text><em className='fw-bold'>{user.user_metadata?.display_name ?? 'User'}</em></Text>
-                            <Text className='text-muted'>{user.email}</Text>
+        <div className='account-page px-xlarge'>
+            <main className='py-xlarge flex flex-col justify-center '>
+                <div className='flex flex-col p-xlarge border-roundify bg-white'>
+                    <div className='flex justify-between my-smal'>
+                        <div className='flex items-center gap-medium'>
+                            <Icon name='sunflower' size='xlarge' className='account-profile-icon' />
+                            <div>
+                                <Heading className='fw-extra-bold'>{user.user_metadata?.display_name ?? 'User'}</Heading>
+                                <Text>{user.email}</Text>
+                            </div>
+                        </div>
+                        <div className='flex items-center gap-xsmall'>
+                            <Icon name='logout' size='medium' className='cursor-pointer' onClick={handleLogOut} />
+                            <Text className='cursor-pointer fw-bold' onClick={handleLogOut}>Log Out</Text>
                         </div>
                     </div>
-                    <Icon name='logout' size='medium' className='cursor-pointer' onClick={handleLogOut} />
+                    
+                    <Title className='mt-xlarge'>Dashboard</Title>
+                    <Heading>Good day! What do you want to do today?</Heading>
                 </div>
-                
-                <Title>Dashboard</Title>
-                <Heading className='my-small'>Good day! What do you want to do today?</Heading>
-
                 <div className='flex flex-col gap-medium my-large'>
-                    <Link to='/account/update' className='option-card flex items-center gap-medium p-large border-rounded bg-component'>
-                        <Icon name='edit' size='large' />
+                    <Link to='/account/update'  style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}} className='gap-large p-xlarge border-roundify bg-white cursor-pointer'>
+                        <Icon name='edit' size='large'/>
                         <div>
-                            <Text><em className='fw-bold'>Update Account</em></Text>
-                            <Text className='text-muted'>Change your display name or password</Text>
+                            <Heading className='fw-extra-bold'>Update Account</Heading>
+                            <Text className='fw-regular'>Change your display name or password</Text>
+                        </div>
+                        <div className=' flex items-center'>
+                            <Icon name='front'/>
                         </div>
                     </Link>
-                    <Link to='/account/pins' className='option-card flex items-center gap-medium p-large border-rounded bg-component'>
+                    <Link to='/account/pins' style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}} className='gap-large p-xlarge border-roundify bg-white cursor-pointer'>
                         <Icon name='map' size='large' />
                         <div>
-                            <Text><em className='fw-bold'>Your Personal Pins</em></Text>
-                            <Text className='text-muted'>Manage your created map pins</Text>
+                            <Heading className='fw-extra-bold'>Your Personal Pins</Heading>
+                            <Text className='fw-regular'>Manage your created map pins</Text>
+                        </div>
+                        <div className=' flex items-center'>
+                            <Icon name='front'/>
                         </div>
                     </Link>
                 </div>
