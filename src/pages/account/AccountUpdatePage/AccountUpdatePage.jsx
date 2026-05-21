@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, InputField, PasswordField } from '../../../components/form';
 import { Icon } from '../../../components/ui';
-import { Caption, Text, Heading, Title } from '../../../components/typography';
+import { Text, Heading, Title } from '../../../components/typography';
+import { NOTIFICATION_ACTIONS, notifyAction } from '../../../services/notificationCenter';
 import {
     getCurrentUser,
     updateUserProfile,
     updateUserPassword,
     saveUserDataToDB,
-    logOut,
 } from '../../../services/supabase';
 
 export default function AccountUpdatePage() {
@@ -26,36 +26,35 @@ export default function AccountUpdatePage() {
     const [newPassword, setNewPassword] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [showConfirm, setShowConfirm] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    useEffect(() => {
-        if (errorMessage === "") { 
-            return;
-        }
-        
-        const timer = setTimeout(() => {
-            setErrorMessage("");
-        }, 15000);
-        
-        return () => clearTimeout(timer);
-    }, [errorMessage]);
 
     function mapError(error) {
         const msg = error.message?.toLowerCase() ?? '';
         if (msg.includes('password should be at least') || msg.includes('weak password'))
             return 'Password must be at least 6 characters.';
-        return 'Password is incorrect.';
+        if (msg.includes('invalid login credentials') || msg.includes('password'))
+            return 'Password is incorrect.';
+        return 'Unable to update account';
     }
 
     async function handleUpdate() {
-        setErrorMessage('');
-        
-        if (!displayName) { setErrorMessage('Display name is required.'); return; }
+        if (!displayName) {
+            notifyAction(NOTIFICATION_ACTIONS.ACCOUNT_UPDATE, 'error', {
+                message: 'Please complete all required fields',
+            });
+            return;
+        }
+
         try {
             await updateUserProfile({ displayName });
             if (newPassword.trim()) { setShowConfirm(true); return; }
             await saveUserDataToDB(user.id, { name: displayName });
+            notifyAction(NOTIFICATION_ACTIONS.ACCOUNT_UPDATE, 'success');
             navigate('/account');
-        } catch (e) { setErrorMessage(mapError(e)); }
+        } catch (e) {
+            notifyAction(NOTIFICATION_ACTIONS.ACCOUNT_UPDATE, 'error', {
+                message: mapError(e),
+            });
+        }
     }
 
     async function handlePasswordConfirm() {
@@ -63,8 +62,13 @@ export default function AccountUpdatePage() {
             setShowConfirm(false);
             await updateUserPassword(newPassword.trim(), currentPassword);
             await saveUserDataToDB(user.id, { name: displayName });
+            notifyAction(NOTIFICATION_ACTIONS.ACCOUNT_UPDATE, 'success');
             navigate('/account');
-        } catch (e) { setErrorMessage(mapError(e)); }
+        } catch (e) {
+            notifyAction(NOTIFICATION_ACTIONS.ACCOUNT_UPDATE, 'error', {
+                message: mapError(e),
+            });
+        }
     }
 
     if (!user) return null;
@@ -122,14 +126,6 @@ export default function AccountUpdatePage() {
                     </div>
                 </form>
             </main>
-
-            {/* Error Message formatting changed to look exactly like RegisterPage toast alert setup */}
-            {errorMessage && (
-                <div id="error-message-toast" className='toast flex justify-between items-center bg-danger py-medium px-large m-xlarge border-roundify'>
-                    <Text className='mr-xlarge text-danger'>{errorMessage}</Text>
-                    <Icon name='close' size='small' className='cursor-pointer' onClick={() => setErrorMessage("")}/>
-                </div>
-            )}
 
             {showConfirm && (
                 <div className='modal-container flex justify-center items-center px-xlarge'>

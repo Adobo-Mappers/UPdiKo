@@ -62,6 +62,7 @@ import { getStaticLocations, getRoute } from "../../../services/locations.js";
 import { onAuthStateChangedListener, getPinnedLocationsFromDB, supabase, getCurrentUser } from "../../../services/supabase.js";
 import { getLocationReviews, submitLocationReview, getLocationReviewOfUser, deleteLocationReview} from "../../../services/reviewsService.js";
 import { hasServiceCache, getAllServicesFromCache, fetchServicesFromServer, getServiceFromCache } from '../../../services/service-handler.js';
+import { NOTIFICATION_ACTIONS, notify, notifyAction } from '../../../services/notificationCenter.js';
 
 
 // fixes icon
@@ -550,26 +551,42 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   }, [id]);
 
   useEffect(() => {
-      if (!user) return;
+      if (authLoading || !user || !id) return;
       getLocationReviewOfUser(id, user.id)
           .then(data => { 
-              setReviewRating(data); 
-              setSavedRating(data); 
+              setReviewComment(data?.comment || '');
+              setSavedComment(data?.comment || '');
+              setReviewRating(data?.rating || 0);
+              setSavedRating(data?.rating || 0);
           })
           .catch(() => {
+              setReviewComment('');
+              setSavedComment('');
               setReviewRating(0);
               setSavedRating(0);
           });
-  }, [authLoading])
+  }, [authLoading, user?.id, id])
 
   useEffect(() => {
       if (reviewModal === false) {
           setReviewRating(savedRating);
+          setReviewComment(savedComment);
       }
-  }, [reviewModal])
+  }, [reviewModal, savedRating, savedComment])
 
   async function handleSubmitReview() {
-      if (!user || reviewRating === 0) return;
+      if (!user || !id) {
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
+          return;
+      }
+
+      if (!reviewRating) {
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error', {
+              message: 'Please select a rating first',
+          });
+          return;
+      }
+
       setSubmittingReview(true);
       try {
           await submitLocationReview({
@@ -582,11 +599,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           const updated = await getLocationReviews(Number(id));
           setReviews(updated);
           setSavedRating(reviewRating);
-          setReviewComment('');
+          setSavedComment(reviewComment);
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'success');
+          setReviewModal(false);
       } catch (e) {
           console.error('Review submit failed:', e);
+          notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
       } finally {
-        setReviewModal(false);
         setSubmittingReview(false); 
       }
   }
@@ -610,8 +629,12 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         
         // 4. Shut the modal view container 
         setReviewModal(false);
+        notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'success', {
+            message: 'Map rating cleared',
+        });
     } catch (e) {
         console.error('Failed to remove review:', e);
+        notifyAction(NOTIFICATION_ACTIONS.MAP_RATING, 'error');
     } finally {
         setSubmittingReview(false);
     }
@@ -790,12 +813,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   // NEW COMPONENT: Gets the direction to the location selected from user's current location
   const handleGetDirections = async (destination) => {
     if (!currentCoords) {
-      alert("Your location is not available yet.");
+      notify({ message: 'Your location is not available yet', type: 'error' });
       return;
     }
 
     setIsLoadingRoute(true);
+    setRouteCoords([]);
+    setRouteInfo(null);
     setRouteDestination(destination);
+    setSelectedPanelTab("Directions");
 
     try {
       const startLat = currentCoords.lat;
@@ -811,6 +837,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
       if (data.code !== "Ok") {
         console.warn("OSRM routing failed:", data.message);
+        setRouteCoords([]);
+        setRouteInfo(null);
+        setRouteDestination(null);
+        setSelectedPanelTab("About");
         return;
       }
 
@@ -827,6 +857,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
     } catch (error) {
       console.error("Directions error:", error);
+      setRouteCoords([]);
+      setRouteInfo(null);
+      setRouteDestination(null);
+      setSelectedPanelTab("About");
     } finally {
       setIsLoadingRoute(false);
     }
@@ -837,7 +871,22 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     setRouteCoords([]);
     setRouteDestination(null);
     setRouteInfo(null);
+    setSelectedPanelTab("About");
   };
+
+  const isRouteForSelectedMarker = Boolean(
+    selectedMarkerInfo &&
+    routeDestination &&
+    (
+      (selectedMarkerInfo.id && routeDestination.id && String(selectedMarkerInfo.id) === String(routeDestination.id)) ||
+      (
+        parseFloat(selectedMarkerInfo.latitude) === parseFloat(routeDestination.latitude) &&
+        parseFloat(selectedMarkerInfo.longitude) === parseFloat(routeDestination.longitude)
+      )
+    )
+  );
+  const showDirectionsTab = Boolean((routeInfo || routeDestination || isLoadingRoute) && isRouteForSelectedMarker);
+  const isSelectedRouteActive = Boolean(routeInfo && isRouteForSelectedMarker);
 
   const getFacilityIcon = (tags, fallbackIcon = communityIcon) => {
     // Safe parsing fallback if tags are null/undefined
@@ -1062,9 +1111,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           <div className="flex gap-small">
             {/* Get Directions */}
             <div className="m-small">
-              <Button onClick={() => handleGetDirections(selectedMarkerInfo)} className="border-solid">
+              <Button
+                onClick={() => isSelectedRouteActive ? handleClearRoute() : handleGetDirections(selectedMarkerInfo)}
+                className="border-solid"
+                disabled={isLoadingRoute}
+              >
                 <Icon name="direction" size="small" />
-                <Text>{isLoadingRoute ? "Loading..." : "Get Directions"}</Text>
+                <Text>{isLoadingRoute ? "Loading..." : isSelectedRouteActive ? "Clear Direction" : "Get Direction"}</Text>
               </Button>
             </div>
             {user && (
@@ -1074,18 +1127,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                 </div>
             )}
           </div>
-          
-          {routeInfo && (
-            <div className="flex items-center gap-medium m-small">
-              <Caption className="text-muted">🚗 {routeInfo.distance}</Caption>
-              <Caption className="text-muted">⏱ {routeInfo.duration}</Caption>
-              <Caption className="text-accent cursor-pointer" onClick={handleClearRoute}>Clear</Caption>
-            </div>
-          )}
 
           {/* Tabs — use <button> not <Text/<p> so onClick always fires */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-            {["About", "Photos"].map(tab => (
+            {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos"].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
@@ -1141,6 +1186,34 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                   return <div key={i} className="flex items-center gap-small my-xsmall"><Icon name="phone" size="small"/><Text><em className="text-muted">{info.replace("phone:", "").replace("Phone:", "").trim()}</em></Text></div>;
                 return null;
               })}
+            </div>
+          )}
+
+          {/* DIRECTIONS */}
+          {selectedPanelTab === "Directions" && showDirectionsTab && (
+            <div className="panel-scroll px-large">
+              <div className="flex flex-col gap-small my-small">
+                <Text className="fw-bold">Directions to {routeDestination?.name || selectedMarkerInfo.name}</Text>
+                {isLoadingRoute ? (
+                  <Text className="text-muted">Loading route details...</Text>
+                ) : routeInfo ? (
+                  <>
+                    <div className="flex items-center gap-small my-xsmall">
+                      <Icon name="direction" size="small" />
+                      <Text>{routeInfo.distance}</Text>
+                    </div>
+                    <div className="flex items-center gap-small my-xsmall">
+                      <Icon name="clock" size="small" />
+                      <Text>{routeInfo.duration}</Text>
+                    </div>
+                    <Text className="text-muted my-xsmall">
+                      Route starts from your current location and ends at this selected place.
+                    </Text>
+                  </>
+                ) : (
+                  <Text className="text-muted">No route details available.</Text>
+                )}
+              </div>
             </div>
           )}
 
