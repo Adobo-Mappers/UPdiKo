@@ -2,7 +2,7 @@ import './ServiceInfoPage.css';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag } from './../../../components/ui';
+import { Icon, Carousel, Tag, shouldShowTag } from './../../../components/ui';
 import { Text, Caption, Heading, Title } from './../../../components/typography';
 import { getCurrentUser, onAuthStateChangedListener } from './../../../services/supabase.js';
 import { getServiceFromCache, fetchServicesFromServer, hasServiceCache } from './../../../services/service-handler.js';
@@ -171,6 +171,9 @@ export default function ServiceInfoPage() {
     }
 
     const { email, phone } = parseContactInfo(service.contact_info);
+    const visibleTags = Array.isArray(service.tags)
+        ? service.tags.filter(shouldShowTag)
+        : [];
 
     return (
         <div className="service-info-page px-xlarge">
@@ -248,14 +251,12 @@ export default function ServiceInfoPage() {
                                     </div>
                                 )}
                                 
-                                {service.tags?.length > 0 &&
+                                {visibleTags.length > 0 &&
                                     <div className='flex gap-small flex-wrap'>
-                                        {service.tags.map((tag, idx) => (
-                                            tag !== "Fixed Services" && tag !== "Miagao Services" && (
-                                                <div key={idx} className='flex items-center gap-small my-xsmall'>
-                                                    <Tag name={tag}/>
-                                                </div>
-                                            )
+                                        {visibleTags.map((tag, idx) => (
+                                            <div key={`${tag}-${idx}`} className='flex items-center gap-small my-xsmall'>
+                                                <Tag name={tag}/>
+                                            </div>
                                         ))}
                                     </div>
                                 }
