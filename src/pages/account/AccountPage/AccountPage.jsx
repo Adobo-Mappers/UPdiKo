@@ -6,7 +6,7 @@ import { Icon } from '../../../components/ui';
 import { Text, Heading, Title } from '../../../components/typography';
 import { getCurrentUser, logOut } from '../../../services/supabase';
 
-export default function AccountPage() {
+export default function AccountPage() { 
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
 

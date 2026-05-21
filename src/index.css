@@ -20,6 +20,7 @@
     --fs-caption: 11px;
     --fs-text: 13px;
     --fs-heading: 16px;
+    --fs-subtitle: 20px;
     --fs-title: 32px;
 
     /* font-weight */
@@ -65,12 +66,12 @@ body {
     overflow: auto;
 }
 
-em {
-    font-style: italic;
-}
-
 strong {
     font-weight: var(--fw-bold); 
+}
+
+textarea {
+    resize: none;
 }
 
 a {
@@ -94,6 +95,12 @@ p, h1, h2, h3, h4, h5, h6 {
 
 em {
     font-style: none;
+}
+
+input#file-upload-button {
+    display: flex;
+    padding: 100px;
+    background-color: transparent;    
 }
 
 /** Util Classes **/
@@ -133,6 +140,7 @@ em {
 
 /* --- PADDING UTILITIES --- */
 /* Global Padding */
+.p-none   { padding: 0 !important}
 .p-xsmall { padding: var(--space-xsmall) !important}
 .p-small  { padding: var(--space-small) !important}
 .p-medium { padding: var(--space-medium) !important}
@@ -184,6 +192,7 @@ em {
 
 /* --- MARGIN UTILITIES --- */
 /* Global Margin */
+.m-auto   { margin: auto !important }
 .m-xsmall { margin: var(--space-xsmall) !important}
 .m-small  { margin: var(--space-small) !important}
 .m-medium { margin: var(--space-medium) !important}
@@ -323,6 +332,7 @@ em {
 }
 
 /* background color */
+.bg-none           { background-color: transparent !important} 
 .bg-white          { background-color: white !important}
 .bg-component      { background-color: var(--color-component-bg) !important}
 .bg-component-dark { background-color: var(--color-text-main) !important;}
@@ -356,6 +366,13 @@ em {
 .fw-semibold   { font-weight: var(--fw-semi-bold) !important; }
 .fw-bold       { font-weight: var(--fw-bold) !important; }
 .fw-extra-bold { font-weight: var(--fw-extra-bold) !important; }
+
+/* font style */
+.fs-caption    { font-size: var(--fs-caption) !important; }
+.fs-text       { font-size: var(--fs-text) !important; }     
+.fs-heading    { font-size: var(--fs-heading) !important; } 
+.fs-subtitle   { font-size: var(--fs-subtitle) !important; } 
+.fs-title      { font-size: var(--fs-title) !important; }
 
 /* border styling */
 .border-solid       { border: solid 2px var(--color-text-muted) !important;}
