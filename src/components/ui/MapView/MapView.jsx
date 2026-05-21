@@ -795,7 +795,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     }
 
     setIsLoadingRoute(true);
+    setRouteCoords([]);
+    setRouteInfo(null);
     setRouteDestination(destination);
+    setSelectedPanelTab("Directions");
 
     try {
       const startLat = currentCoords.lat;
@@ -811,6 +814,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
       if (data.code !== "Ok") {
         console.warn("OSRM routing failed:", data.message);
+        setRouteCoords([]);
+        setRouteInfo(null);
+        setRouteDestination(null);
+        setSelectedPanelTab("About");
         return;
       }
 
@@ -827,6 +834,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
     } catch (error) {
       console.error("Directions error:", error);
+      setRouteCoords([]);
+      setRouteInfo(null);
+      setRouteDestination(null);
+      setSelectedPanelTab("About");
     } finally {
       setIsLoadingRoute(false);
     }
@@ -837,7 +848,22 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     setRouteCoords([]);
     setRouteDestination(null);
     setRouteInfo(null);
+    setSelectedPanelTab("About");
   };
+
+  const isRouteForSelectedMarker = Boolean(
+    selectedMarkerInfo &&
+    routeDestination &&
+    (
+      (selectedMarkerInfo.id && routeDestination.id && String(selectedMarkerInfo.id) === String(routeDestination.id)) ||
+      (
+        parseFloat(selectedMarkerInfo.latitude) === parseFloat(routeDestination.latitude) &&
+        parseFloat(selectedMarkerInfo.longitude) === parseFloat(routeDestination.longitude)
+      )
+    )
+  );
+  const showDirectionsTab = Boolean((routeInfo || routeDestination || isLoadingRoute) && isRouteForSelectedMarker);
+  const isSelectedRouteActive = Boolean(routeInfo && isRouteForSelectedMarker);
 
   const getFacilityIcon = (tags, fallbackIcon = communityIcon) => {
     // Safe parsing fallback if tags are null/undefined
@@ -1062,9 +1088,13 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           <div className="flex gap-small">
             {/* Get Directions */}
             <div className="m-small">
-              <Button onClick={() => handleGetDirections(selectedMarkerInfo)} className="border-solid">
+              <Button
+                onClick={() => isSelectedRouteActive ? handleClearRoute() : handleGetDirections(selectedMarkerInfo)}
+                className="border-solid"
+                disabled={isLoadingRoute}
+              >
                 <Icon name="direction" size="small" />
-                <Text>{isLoadingRoute ? "Loading..." : "Get Directions"}</Text>
+                <Text>{isLoadingRoute ? "Loading..." : isSelectedRouteActive ? "Clear Direction" : "Get Direction"}</Text>
               </Button>
             </div>
             {user && (
@@ -1074,18 +1104,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                 </div>
             )}
           </div>
-          
-          {routeInfo && (
-            <div className="flex items-center gap-medium m-small">
-              <Caption className="text-muted">🚗 {routeInfo.distance}</Caption>
-              <Caption className="text-muted">⏱ {routeInfo.duration}</Caption>
-              <Caption className="text-accent cursor-pointer" onClick={handleClearRoute}>Clear</Caption>
-            </div>
-          )}
 
           {/* Tabs — use <button> not <Text/<p> so onClick always fires */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-            {["About", "Photos"].map(tab => (
+            {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos"].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
@@ -1141,6 +1163,34 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                   return <div key={i} className="flex items-center gap-small my-xsmall"><Icon name="phone" size="small"/><Text><em className="text-muted">{info.replace("phone:", "").replace("Phone:", "").trim()}</em></Text></div>;
                 return null;
               })}
+            </div>
+          )}
+
+          {/* DIRECTIONS */}
+          {selectedPanelTab === "Directions" && showDirectionsTab && (
+            <div className="panel-scroll px-large">
+              <div className="flex flex-col gap-small my-small">
+                <Text className="fw-bold">Directions to {routeDestination?.name || selectedMarkerInfo.name}</Text>
+                {isLoadingRoute ? (
+                  <Text className="text-muted">Loading route details...</Text>
+                ) : routeInfo ? (
+                  <>
+                    <div className="flex items-center gap-small my-xsmall">
+                      <Icon name="direction" size="small" />
+                      <Text>{routeInfo.distance}</Text>
+                    </div>
+                    <div className="flex items-center gap-small my-xsmall">
+                      <Icon name="clock" size="small" />
+                      <Text>{routeInfo.duration}</Text>
+                    </div>
+                    <Text className="text-muted my-xsmall">
+                      Route starts from your current location and ends at this selected place.
+                    </Text>
+                  </>
+                ) : (
+                  <Text className="text-muted">No route details available.</Text>
+                )}
+              </div>
             </div>
           )}
 
