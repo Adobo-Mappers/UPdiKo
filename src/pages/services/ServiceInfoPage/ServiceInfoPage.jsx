@@ -174,7 +174,7 @@ export default function ServiceInfoPage() {
     const { email, phone } = parseContactInfo(service.contact_info);
 
     return (
-        <div className="service-info-page px-xlarge ">
+        <div className="service-info-page px-xlarge">
             <main className='py-xlarge'>
                 <div className='flex flex-col justify-center p-xlarge bg-white border-roundify rotate-left'>
                     <Link to={`/service/${category}`} className='flex items-center gap-small'>
