@@ -11,7 +11,7 @@ import "leaflet-rotate";
 
 import { Link } from 'react-router-dom';
 import { Button } from '../../../components/form';
-import { Icon, Carousel, Tag } from './../../../components/ui';
+import { Icon, Carousel, Tag, shouldShowTag } from './../../../components/ui';
 import { Text, Caption, Heading, Subtitle } from './../../../components/typography'
 
 // Placeholder Icons from Leaflet
@@ -839,20 +839,20 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     setRouteInfo(null);
   };
 
-  const getFacilityIcon = (tags) => {
+  const getFacilityIcon = (tags, fallbackIcon = communityIcon) => {
     // Safe parsing fallback if tags are null/undefined
-    if (!tags) return communityIcon;
+    if (!tags) return fallbackIcon;
     
     let parsedTags = [];
     try {
       parsedTags = typeof tags === 'string' ? JSON.parse(tags) : tags;
     } catch (e) {
       console.error("Failed to parse facility tags JSON array", e);
-      return communityIcon;
+      return fallbackIcon;
     }
 
     // Ensure parsedTags is an array before checking
-    if (!Array.isArray(parsedTags)) return communityIcon;
+    if (!Array.isArray(parsedTags)) return fallbackIcon;
 
     // Normalize array to lowercase to avoid case-sensitivity bugs
     const activeTags = parsedTags.map(t => String(t).toLowerCase());
@@ -887,7 +887,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     if (activeTags.some(t => ["internet_cafe"].includes(t))) return iconMapping.computer;
 
     // Default fallback if no match is found
-    return communityIcon;
+    return fallbackIcon;
   };
 
   const isLocationVisibleForActiveTag = (location) => {
@@ -970,9 +970,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         </Marker> */}
         {pinnedLocations.filter(isLocationVisibleForActiveTag).map((pin) => {
           const isSelected = selectedMarkerInfo?.id === pin.id;
-          const icon = getScaledIcon(customIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
+          const baseIcon = getFacilityIcon(pin.tags, customIcon);
+          const icon = getScaledIcon(baseIcon, isSelected ? 1.5 : 1, !isSelected && !!selectedMarkerInfo);
   
-          <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={icon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
+          return <Marker key={pin.id} position={[pin.latitude, pin.longitude]} icon={icon} eventHandlers={{ click: () => {handleMarkerClick(pin, pin.latitude, pin.longitude)} }}>
             {/* <Popup>{pin.name}</Popup> */}
           </Marker>
         })}
@@ -1122,9 +1123,11 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                   <Icon name="clock" size="small" /><Text>{selectedMarkerInfo.opening_hours[0]}</Text>
                 </div>
               )}
-              {selectedMarkerInfo.tags?.length > 0 && (
+              {selectedMarkerInfo.tags?.some(shouldShowTag) && (
                 <div className="flex gap-small my-small" style={{flexWrap:"wrap"}}>
-                  {selectedMarkerInfo.tags.map((tag, i) => <Tag key={i}>{tag}</Tag>)}
+                  {selectedMarkerInfo.tags
+                    .filter(shouldShowTag)
+                    .map((tag, i) => <Tag key={`${tag}-${i}`} name={tag} />)}
                 </div>
               )}
               {selectedMarkerInfo.additional_info?.text_based?.map((info, i) => (
