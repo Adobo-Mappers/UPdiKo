@@ -1,6 +1,6 @@
 import "./Tag.css";
 
-const HIDDEN_TAGS = new Set(["all", "fixed services", "miagao services"]);
+const HIDDEN_TAGS = new Set(["all", "fixed services", "miagao services", "save"]);
 
 const MARKER_COLORS = {
     restaurant: "#E04000",

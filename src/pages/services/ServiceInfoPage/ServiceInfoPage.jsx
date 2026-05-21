@@ -188,7 +188,10 @@ export default function ServiceInfoPage() {
     const visibleTags = Array.isArray(service.tags)
         ? service.tags.filter(shouldShowTag)
         : [];
-    const isFixedLocation = Array.isArray(service.tags) && service.tags.some(t => String(t).toLowerCase() === 'fixed services');
+        
+    const UNRATEABLE_TAGS = ['fixed services', 'save', 'pinned', 'created pins'];
+    const isFixedLocation = Array.isArray(service.tags) &&
+        service.tags.some(t => UNRATEABLE_TAGS.includes(String(t).toLowerCase()));
 
     return (
         <div className="service-info-page px-xlarge">

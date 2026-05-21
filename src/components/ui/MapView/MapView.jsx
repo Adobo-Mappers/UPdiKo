@@ -15,9 +15,9 @@ import { Icon, Carousel, Tag, shouldShowTag } from './../../../components/ui';
 import { Text, Caption, Heading, Subtitle } from './../../../components/typography'
 
 // Placeholder Icons from Leaflet
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+// import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+// import markerIcon from "leaflet/dist/images/marker-icon.png";
+// import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Information Icons
 import closeIcon from '../../../assets/images/icon/close-icon.png';
@@ -66,12 +66,12 @@ import { NOTIFICATION_ACTIONS, notify, notifyAction } from '../../../services/no
 
 
 // fixes icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// delete L.Icon.Default.prototype._getIconUrl;
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: markerIcon2x,
+//   iconUrl: markerIcon,
+//   shadowUrl: markerShadow,
+// });
 
 // Custom icon for the user's location
 const userIcon = new L.Icon({
@@ -430,7 +430,9 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
-  const isFixedLocation = Array.isArray(selectedMarkerInfo?.tags) && selectedMarkerInfo.tags.some(t => String(t).toLowerCase() === 'fixed services');
+  const UNRATEABLE_TAGS = ['fixed services', 'save'];
+  const isFixedLocation = Array.isArray(selectedMarkerInfo?.tags) &&
+    selectedMarkerInfo.tags.some(t => UNRATEABLE_TAGS.includes(String(t).toLowerCase()));
 
   const mapZoom = userLocation?.zoom || 16;
 
