@@ -17,14 +17,15 @@
 
     .search-overlay {
         display: grid;
-        grid-template-rows: var(--header-height) 1fr;
+        grid-template-rows: 90px 1fr;
         width: 100%;
         height: inherit;
         position: absolute;
         top: 0px;
         z-index: 500;
-        background-color: white;
+        background-color: var(--color-accent-secondary);
     }
+
     .search-list {
         overflow-y: auto;
     }

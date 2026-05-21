@@ -289,15 +289,19 @@ export default function MapPage() {
             {isSearching &&
                 <section className='search-overlay'>
                     <div></div>
-                    <div className='px-large py-medium search-list'>
+                    <div className='px-large py-small search-list'>
                         {/* Show recent searches when no query typed */}
                         {!searchQuery && searchHistory.length > 0 && (
-                            <div className='my-small'>
-                                <Text className='text-muted'><em>Recent searches</em></Text>
+                            <div className='my-small mx-small bg-white border-roundify px-large py-xlarge'>
+                                <div className='flex items-center gap-small mb-small'>
+                                    <Icon name='map'/>
+                                    <Heading className='fw-extra-bold'>Recent</Heading>
+                                </div>
                                 {searchHistory.map((item) => (
                                     <div
                                         key={item.id}
-                                        className='flex gap-large py-medium'
+                                        style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}}
+                                        className=' items-center gap-small py-medium mx-small'
                                         onClick={() => {
                                             const found = services.find(s => s.id === item.id);
                                             if (found) {
@@ -308,35 +312,45 @@ export default function MapPage() {
                                             }
                                         }}
                                     >
-                                        <div><Icon name='clock' size='large' /></div>
+                                        <div><Icon name='clock' size='medium' /></div>
                                         <div>
                                             <Heading>{item.name}</Heading>
                                             <Text><em className='text-muted'>{item.address}</em></Text>
                                         </div>
+                                        <div><Icon name='front' size="small" /></div>
                                     </div>
                                 ))}
-                                <hr className='my-small' />
                             </div>
                         )}
-                        {filteredServices.map((service) =>
-                            <div
-                                key={service.id}
-                                className='flex gap-large py-medium'
-                                onClick={() => {
-                                    handleMarkerClick(service.id);
-                                    setSelectedService(service);
-                                    setSearching(false);
-                                    addToHistory(service);
-                                    handleCenterToPin(service.latitude, service.longitude);
-                                }}
-                            >
-                                <div><Icon name='map' size="large" /></div>
-                                <div>
-                                    <Heading>{service.name}</Heading>
-                                    <Text><em className="text-muted">{service.address}</em></Text>
-                                </div>
+                        <div className='my-small mx-small bg-white border-roundify px-large py-xlarge'>
+                            <div className='flex items-center gap-small mb-small'>
+                                <Icon name='map'/>
+                                <Heading className='fw-extra-bold'>Services</Heading>
                             </div>
-                        )}
+                            {(filteredServices.length) ? 
+                                filteredServices.map((service) =>
+                                    <div
+                                        key={service.id}
+                                        style={{'display':'grid', 'gridTemplateColumns': '24px 1fr 24px'}}
+                                        className='items-center gap-small py-medium mx-small'
+                                        onClick={() => {
+                                            handleMarkerClick(service.id);
+                                            setSelectedService(service);
+                                            setSearching(false);
+                                            addToHistory(service);
+                                            handleCenterToPin(service.latitude, service.longitude);
+                                        }}
+                                    >
+                                        <div><Icon name='address' size="medium" /></div>
+                                        <div>
+                                            <Heading>{service.name}</Heading>
+                                            <Text >{service.address}</Text>
+                                        </div>
+                                        <div><Icon name='front' size="small" /></div>
+                                    </div>
+                                ) : (<div className='items-center gap-small py-medium mx-small'><Text>There are no services with that search.</Text></div>)
+                            }
+                        </div>
                     </div>
                 </section>
             }
@@ -364,7 +378,6 @@ export default function MapPage() {
                         <Heading><em className='fw-bold'>New Pin</em></Heading>
                         <Icon name='close' size='small' className='cursor-pointer' onClick={handleClosePinForm} />
                     </div>
-                    <hr className='my-small' />
                     <div className='flex flex-col gap-small'>
                         <InputField
                             className='border-roundify py-medium'
@@ -400,18 +413,18 @@ export default function MapPage() {
                 </section>
             }
 
-            <header className='px-large'>
+            <header className='px-xlarge py-small bg-accent-soft'>
                 <div className='flex items-center gap-medium py-small search-div'>
                     {isSearching &&
                         <div
-                            className='flex items-center gap-xsmall cursor-pointer'
+                            className='flex items-center gap-xsmall cursor-pointer border-circlify bg-white p-xsmall'
                             onClick={() => setSearching(false)}
                         >
-                            <Icon name="back" size='small' /><Text><em className='fw-bold'>Back</em></Text>
+                            <Icon name="back"/>
                         </div>
                     }
                     <InputField
-                        className='py-medium border-roundify'
+                        className='py-medium border-roundify bg-white'
                         icon="search"
                         placeholder="Search for services..."
                         onFocus={() => { setSearching(true); setSelectedService(""); }}
