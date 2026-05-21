@@ -1,4 +1,4 @@
 import "./Caption.css"
-export function Caption({children, className=""}) {
-    return <p className={`caption ${className}`}>{children}</p>
+export function Caption({children, className="", ...props}) {
+    return <p className={`caption ${className}`} {...props}>{children}</p>
 }

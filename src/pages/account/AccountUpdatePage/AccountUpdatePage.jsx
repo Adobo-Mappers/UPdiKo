@@ -51,10 +51,6 @@ export default function AccountUpdatePage() {
         
         if (!displayName) { setErrorMessage('Display name is required.'); return; }
         try {
-            if (newPassword.length < 6)  {
-                setErrorMessage("Password should have at least 6 characters.")
-                return;
-            } 
             await updateUserProfile({ displayName });
             if (newPassword.trim()) { setShowConfirm(true); return; }
             await saveUserDataToDB(user.id, { name: displayName });
