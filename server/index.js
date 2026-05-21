@@ -11,7 +11,7 @@ const port = Number(process.env.PORT || 3000);
 const geminiApiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
 // const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 // const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
-const geminiModels = (process.env.GEMINI_MODELS || 'gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b')
+const geminiModels = (process.env.GEMINI_MODELS || 'gemini-2.0-flash')
   .split(',')
   .map(m => m.trim())
   .filter(Boolean);
