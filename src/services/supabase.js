@@ -137,7 +137,7 @@ export async function signUp(email, password, name = "") {
     console.error("Error signing up:", error);
     throw error;
   }
-  return data.user;
+  return data;
 }
 
 // Replaces: logIn(email, password) + signInWithEmailAndPassword
