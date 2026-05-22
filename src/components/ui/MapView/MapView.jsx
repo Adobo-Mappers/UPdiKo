@@ -762,7 +762,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         <RotationController bearing={bearing} />
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
-          url={`https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
+          url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
           minZoom={13}
           maxZoom={20}
         />
@@ -870,7 +870,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               />
             </div>
             <div className='py-small flex justify-end gap-small'>
-              <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
+              {(savedRating !== 0) && <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>}
               <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
                 {submittingReview ? "Submitting..." : "Submit"}
               </Button>
@@ -922,8 +922,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             </div>
             {user && !isFixedLocation && (
               <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
-                <Icon name="darkstar" size="small" />
-                <Text>Rate</Text>
+                <Icon name={(savedRating) ? `star`: 'darkstar'} size="small" />
+                <Text>{(savedRating) ? `Edit Rating`: 'Rate'} </Text>
               </div>
             )}
           </div>
