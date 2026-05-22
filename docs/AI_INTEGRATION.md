@@ -381,7 +381,7 @@ Prompt injection patterns filtered in `useCasie.js` before sending:
 | Variable | Where | Required | Description |
 |----------|-------|----------|-------------|
 | `GEMINI_API_KEY` | server `.env` | ✅ | Gemini API key (never expose client-side) |
-| `GEMINI_MODELS` | server `.env` | No | Comma-separated model fallback list; defaults to `gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b` |
+| `GEMINI_MODELS` | server `.env` | No | Comma-separated model fallback list; defaults to `gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.0-flash-lite,gemini-2.0-flash` |
 | `VITE_SUPABASE_URL` | `.env` | ✅ | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | `.env` | ✅ | Supabase anon key |
 | `VITE_API_BASE` | `.env` | No | Backend base URL (empty = use Vite proxy) |
@@ -393,7 +393,7 @@ Prompt injection patterns filtered in `useCasie.js` before sending:
 VITE_SUPABASE_URL=https://xyz.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 GEMINI_API_KEY=AIza...
-GEMINI_MODELS=gemini-2.0-flash,gemini-1.5-flash
+GEMINI_MODELS=gemini-2.5-flash-lite,gemini-2.5-flash
 PORT=3000
 ```
 
