@@ -1,17 +1,20 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import { rateLimit } from 'express-rate-limit';
+import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
+
 const port = Number(process.env.PORT || 3000);
-const geminiApiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+const geminiApiKey = process.env.GEMINI_API_KEY;
+const geminiRequestTimeoutMs = Number(process.env.GEMINI_REQUEST_TIMEOUT_MS || 7000);
 // const geminiModel = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 // const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent`;
-const geminiModels = (process.env.GEMINI_MODELS || 'gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b')
+const geminiModels = (process.env.GEMINI_MODELS || 'gemini-2.5-flash-lite,gemini-2.5-flash,gemini-2.0-flash-lite,gemini-2.0-flash')
   .split(',')
   .map(m => m.trim())
   .filter(Boolean);
@@ -23,6 +26,7 @@ let _supabase = null;
 function getSupabase() {
   if (!_supabase) {
     if (!supabaseUrl) throw new Error('Missing SUPABASE_URL env var');
+    if (!supabaseKey) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY env var');
     _supabase = createClient(supabaseUrl, supabaseKey);
   }
   return _supabase;
@@ -91,6 +95,7 @@ app.use(express.json({ limit: '1mb' }));
 const casieLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 40,
+  keyGenerator: (request) => ipKeyGenerator(request.ip),
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -196,6 +201,8 @@ async function callGemini(body) {
 
   for (const model of geminiModels) {
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), geminiRequestTimeoutMs);
 
     try {
       const response = await fetch(`${endpoint}?key=${encodeURIComponent(geminiApiKey)}`, {
@@ -203,6 +210,7 @@ async function callGemini(body) {
         headers: { 
           'Content-Type': 'application/json'
         },
+        signal: controller.signal,
         body: JSON.stringify(body),
       });
 
@@ -215,12 +223,64 @@ async function callGemini(body) {
       console.log(`Gemini responded using model: ${model}`);
       return payload;
     } catch (error) {
-      console.warn(`Gemini model "${model}" failed: ${error.message}`);
-      lastError = error;
+      const message =
+        error.name === 'AbortError'
+          ? `Gemini request timed out after ${geminiRequestTimeoutMs}ms`
+          : error.message;
+
+      console.warn(`Gemini model "${model}" failed: ${message}`);
+      lastError = new Error(message);
+
+      if (error.name === 'AbortError') {
+        break;
+      }
+    } finally {
+      clearTimeout(timeout);
     }
   }
 
   throw new Error(`All Gemini models failed. Last error: ${lastError?.message}`);
+}
+
+/**
+ * @param {Error} error
+ * @returns {number}
+ */
+function getCasieErrorStatus(error) {
+  const message = String(error?.message || '').toLowerCase();
+
+  if (message.includes('timed out')) {
+    return 504;
+  }
+
+  if (
+    message.includes('missing gemini_api_key') ||
+    message.includes('missing supabase') ||
+    message.includes('gemini request failed') ||
+    message.includes('all gemini models failed')
+  ) {
+    return 503;
+  }
+
+  return 500;
+}
+
+/**
+ * @param {Error} error
+ * @returns {string}
+ */
+function getCasieErrorMessage(error) {
+  const message = String(error?.message || '').toLowerCase();
+
+  if (message.includes('timed out')) {
+    return 'Casie took too long to respond. Please try a shorter question.';
+  }
+
+  if (message.includes('missing')) {
+    return 'Casie is not fully configured on the server yet.';
+  }
+
+  return 'Casie is temporarily unavailable. Please try again in a bit.';
 }
 
 function extractText(responsePayload) {
@@ -326,8 +386,9 @@ app.post('/api/cassie', casieLimiter, async (request, response) => {
       history: sessionHistory.slice(-20),
     });
   } catch (error) {
-    response.status(500).json({
-      error: error.message || 'Failed to process the Casie request.',
+    console.error('Casie request failed:', error);
+    response.status(getCasieErrorStatus(error)).json({
+      error: getCasieErrorMessage(error),
     });
   }
 });
@@ -378,3 +439,5 @@ if (process.env.NODE_ENV !== 'production') {
     console.log(`UPdiKo backend listening on http://localhost:${port}`);
   });
 }
+
+export default app;
