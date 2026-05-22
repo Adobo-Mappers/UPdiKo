@@ -10,17 +10,11 @@ import EventDisplay from '../../components/events/EventDisplay.jsx';
 import { usePublicLocations } from '../../hooks/useUnifiedLocations.js';
 import { getCurrentUser } from '../../services/supabase.js';
 
-<<<<<<< HEAD:src/frontend-old/pages/home/HomeSection.jsx
-console.log(supabase);
-
-function HomeSection({setAppSection, setAppService}) {
-=======
 function HomeSection({ setAppSection, setAppService }) {
   const [activeCategory, setCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState(null);
   const { data: allServices = [] } = usePublicLocations();
->>>>>>> feat/address-gaps:src/pages/home/HomeSection.jsx
 
   useEffect(() => {
     getCurrentUser().then(setUser);

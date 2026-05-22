@@ -10,8 +10,8 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
       .register('/sw.js')
-      .then(() => console.log('✅ Tile cache service worker active'))
-      .catch((err) => console.error('❌ SW failed:', err));
+      .then(() => console.log('Tile cache service worker active'))
+      .catch((err) => console.error('SW failed:', err));
   });
 }
 

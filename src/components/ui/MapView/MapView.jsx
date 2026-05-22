@@ -311,7 +311,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
   // get service id
   const { id } = useParams();
-  console.log(id);
 
   // fetch service from cache
   const [service, setService] = useState(null);
@@ -486,7 +485,6 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       if (onMarkerClick) {
           // Use the map's current zoom level — don't force a jump to 17
           const currentZoom = mapRef.current ? mapRef.current.getZoom() : mapZoom;
-          console.log(currentZoom)
           onMarkerClick(lat, lng, currentZoom);
           navigate(`/map/${data.id ? data.id : ""}`);
       }
@@ -577,7 +575,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       }
       const data = await getStaticLocations(supabase);
       const valid = data.filter(r => !isNaN(parseFloat(r.latitude)) && !isNaN(parseFloat(r.longitude)));
-      console.log(`🗺 Total loaded: ${data.length} | Valid coords: ${valid.length} | Skipped: ${data.length - valid.length}`);
+      console.log(`Total loaded: ${data.length} | Valid coords: ${valid.length} | Skipped: ${data.length - valid.length}`);
       sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
       setStaticLocations(data);
     };

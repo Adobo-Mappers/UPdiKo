@@ -52,7 +52,7 @@ export default function PersonalPinsPage() {
     }
 
     if (loading) return null;
-    console.log(pins);
+
     return (
         <div className="personal-pins-page px-xlarge">
             <main className='py-xlarge'>

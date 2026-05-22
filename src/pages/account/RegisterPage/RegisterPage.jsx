@@ -46,7 +46,6 @@ export default function RegisterPage() {
 
     async function handleRegister() {
         setErrorMessage('');
-        console.log("hello");
         if (!username || !email || !password) {
             setErrorMessage("Please fill in all the required fields.");
             return;
