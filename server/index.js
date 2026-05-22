@@ -21,7 +21,7 @@ const supabaseKey =
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const sCASIE_SYSTEM_PROMPT =`
+const CASIE_SYSTEM_PROMPT =`
   
   Follow this priority order:
   1) Scope
