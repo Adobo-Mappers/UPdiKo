@@ -15,9 +15,9 @@ import { Icon, Carousel, Tag, shouldShowTag } from './../../../components/ui';
 import { Text, Caption, Heading, Subtitle } from './../../../components/typography'
 
 // Placeholder Icons from Leaflet
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
+// import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+// import markerIcon from "leaflet/dist/images/marker-icon.png";
+// import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Information Icons
 import closeIcon from '../../../assets/images/icon/close-icon.png';
@@ -66,12 +66,12 @@ import { NOTIFICATION_ACTIONS, notify, notifyAction } from '../../../services/no
 
 
 // fixes icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// delete L.Icon.Default.prototype._getIconUrl;
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: markerIcon2x,
+//   iconUrl: markerIcon,
+//   shadowUrl: markerShadow,
+// });
 
 // Custom icon for the user's location
 const userIcon = new L.Icon({
@@ -244,7 +244,7 @@ function UserLocationMarker({ coords, trackingEnabled }) {
             position={position}
             icon={userIcon}
             ref={markerRef}
-            zIndexOffset={10} 
+            zIndexOffset={100} 
         >
             <Popup autoPan={false}>
                 You are here.
@@ -429,6 +429,10 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
   const avgRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
+
+  const UNRATEABLE_TAGS = ['fixed services', 'save'];
+  const isFixedLocation = Array.isArray(selectedMarkerInfo?.tags) &&
+    selectedMarkerInfo.tags.some(t => UNRATEABLE_TAGS.includes(String(t).toLowerCase()));
 
   const mapZoom = userLocation?.zoom || 16;
 
@@ -916,7 +920,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
                 <Text>{isLoadingRoute ? "Loading..." : isSelectedRouteActive ? "Clear Direction" : "Get Direction"}</Text>
               </Button>
             </div>
-            {user && (
+            {user && !isFixedLocation && (
               <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
                 <Icon name="darkstar" size="small" />
                 <Text>Rate</Text>
@@ -926,7 +930,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
 
           {/* Tabs */}
           <div className="flex gap-large m-small" style={{borderBottom:"1px solid var(--color-component-bg)", paddingBottom:"8px"}}>
-            {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos"].map(tab => (
+            {["About", ...(showDirectionsTab ? ["Directions"] : []), "Photos", ...(!isFixedLocation ? ["Reviews"] : [])].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedPanelTab(tab)}
@@ -949,13 +953,15 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
           {/* ABOUT */}
           {selectedPanelTab === "About" && (
             <div className="panel-scroll px-large">
-              <div className="flex items-center gap-small my-xsmall">
-                <Icon name="star" size="small" />
-                <Text>
-                  {avgRating ? avgRating : "No ratings yet"}
-                  {avgRating && <em className="text-muted"> ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</em>}
-                </Text>
-              </div>
+              {!isFixedLocation && (
+                <div className="flex items-center gap-small my-xsmall">
+                  <Icon name="star" size="small" />
+                  <Text>
+                    {avgRating ? avgRating : "No ratings yet"}
+                    {avgRating && <em className="text-muted"> ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</em>}
+                  </Text>
+                </div>
+              )}
               <div className="flex items-center gap-small my-xsmall">
                 <Icon name="address" size="small" /><Text>{selectedMarkerInfo.address || "—"}</Text>
               </div>

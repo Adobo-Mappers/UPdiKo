@@ -43,7 +43,7 @@ export async function addPinnedLocationToDB(uid, location) {
         latitude: location.latitude,
         longitude: location.longitude,
         description: location.description || null,
-        tags: Array.isArray(location.tags) ? location.tags : [],
+        tags: Array.isArray(location.tags) ? ['save', ...location.tags] : ['save'],
         image_url: location.imageUrl || null,
       },
     ])
