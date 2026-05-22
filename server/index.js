@@ -19,7 +19,14 @@ const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+let _supabase = null;
+function getSupabase() {
+  if (!_supabase) {
+    if (!supabaseUrl) throw new Error('Missing SUPABASE_URL env var');
+    _supabase = createClient(supabaseUrl, supabaseKey);
+  }
+  return _supabase;
+}
 
 const CASIE_SYSTEM_PROMPT =`
   
@@ -165,7 +172,7 @@ function queryLocations(locations, filters = {}) {
 }
 
 async function loadPublicLocations() {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from('openstreets_static_locations')
     .select('id, name, address, latitude, longitude, tags');
 
@@ -325,13 +332,8 @@ app.post('/api/cassie', casieLimiter, async (request, response) => {
   }
 });
 
-app.post('/api/cassie/clear', (request, response) => {
-  const sessionId = request.body?.sessionId;
-
-  if (sessionId) {
-    casieSessions.delete(sessionId);
-  }
-
+app.post('/api/cassie/clear', (_request, response) => {
+  // History is client-driven; client clears its own historyRef.
   response.json({ success: true });
 });
 
@@ -348,7 +350,7 @@ app.post('/api/directions', async (request, response) => {
     return;
   }
 
-  const { data, error } = await supabase.rpc('get_pedestrian_route', {
+  const { data, error } = await getSupabase().rpc('get_pedestrian_route', {
     start_lat: Number(startLat),
     start_lng: Number(startLng),
     end_lat: Number(endLat),
