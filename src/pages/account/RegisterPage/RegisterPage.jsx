@@ -2,8 +2,8 @@ import './RegisterPage.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Button, InputField, PasswordField } from '../../../components/form';
-import { Icon, Carousel, Tag } from '../../../components/ui';
-import { Text, Caption, Heading, Title } from '../../../components/typography'
+import { Icon } from '../../../components/ui';
+import { Text, Heading, Title } from '../../../components/typography'
 import { signUp, saveUserDataToDB } from "../../../services/supabase.js";
 
 export default function RegisterPage() {
@@ -15,6 +15,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     useEffect(() => {
         if (errorMessage === "") { 
             return;
@@ -26,6 +27,17 @@ export default function RegisterPage() {
         
         return () => clearTimeout(timer);
     }, [errorMessage]);
+    useEffect(() => {
+        if (successMessage === "") {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setSuccessMessage("");
+        }, 15000);
+
+        return () => clearTimeout(timer);
+    }, [successMessage]);
     
 
 
@@ -46,6 +58,7 @@ export default function RegisterPage() {
 
     async function handleRegister() {
         setErrorMessage('');
+        setSuccessMessage('');
         if (!username || !email || !password) {
             setErrorMessage("Please fill in all the required fields.");
             return;
@@ -53,14 +66,19 @@ export default function RegisterPage() {
 
         try {
             // signUp now accepts name and stores it in Supabase Auth user_metadata
-            const newUserCredential = await signUp(email, password, username);
+            const { user, session } = await signUp(email, password, username);
 
-            // Save to public.users table using user.id (Supabase uses .id not .uid)
-            await saveUserDataToDB(newUserCredential.id, {
-              name: username,
-              email
-            });
-            navigate('/service/');
+            if (session) {
+                // Save to public.users table using user.id (Supabase uses .id not .uid)
+                await saveUserDataToDB(user.id, {
+                  name: username,
+                  email
+                });
+                navigate('/service/');
+                return;
+            }
+
+            setSuccessMessage("Account created. Please check your email to confirm your account, then sign in.");
 
         } catch (error) {   
             console.error("Error creating account:", error);
@@ -123,6 +141,13 @@ export default function RegisterPage() {
                 </div>
             )}
 
+            {successMessage && (
+                <div id="success-message-toast" className=' toast flex justify-between items-center bg-success py-medium px-large m-xlarge border-roundify'>
+                    <Text className='mr-xlarge text-success'>{successMessage}</Text>
+                    <Icon name='close' size='small' className='cursor-pointer' onClick={() => setSuccessMessage("")}/>
+                </div>
+            )}
+
         </div>
     );
-}   
+}
