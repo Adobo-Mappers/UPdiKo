@@ -244,7 +244,7 @@ function UserLocationMarker({ coords, trackingEnabled }) {
             position={position}
             icon={userIcon}
             ref={markerRef}
-            zIndexOffset={10} 
+            zIndexOffset={100} 
         >
             <Popup autoPan={false}>
                 You are here.
