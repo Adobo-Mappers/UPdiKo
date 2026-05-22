@@ -1,8 +1,8 @@
 # UPdiKo API Documentation
 
 > **Last Updated:** May 2026  
-> **Version:** 2.0.0  
-> **Base URL:** `http://localhost:3000`
+> **Version:** 3.0.0  
+> **Base URL:** `http://localhost:3000` (dev) or same-origin `/api` (production on Vercel)
 
 ---
 
@@ -24,7 +24,7 @@
 
 ### 1.1 Prerequisites
 
-- Node.js v18 or higher
+- Node.js v20 or higher
 - npm
 - A Supabase project with the required tables
 - A Google Gemini API key
@@ -70,8 +70,10 @@ The Express backend (`server/index.js`) handles three concerns:
 server/index.js
 ├── POST /api/cassie          # Casie AI chat (Gemini + Supabase location search)
 ├── POST /api/cassie/clear    # Clear a chat session
-├── POST /api/directions      # Pedestrian routing via Supabase RPC
+├── POST /api/directions      # Pedestrian routing via Supabase RPC (PostGIS/pgRouting)
 └── GET  /api/health          # Health check
+
+In production (Vercel), `api/index.js` imports and exports the Express app as a serverless function. In development, `server/index.js` runs as a standalone process.
 ```
 
 Locations are stored and served from **Supabase** (PostgreSQL), not SQLite. The frontend fetches them directly via the Supabase client and caches them in **IndexedDB** (24-hour TTL).
@@ -87,7 +89,8 @@ Frontend (React + Vite)
 ├── Images            → storageService.js → Supabase Storage
 │
 ├── Casie AI          → cassieService.js → POST /api/cassie → Gemini API
-├── Directions        → locations.js (getRoute) → OSRM public API (no backend needed)
+├── Directions        → POST /api/directions → Supabase RPC (PostGIS/pgRouting, primary)
+│                     → locations.js (getRoute) → OSRM public API (client-side fallback)
 └── Geocoding         → geocoding.js → Nominatim (OpenStreetMap)
 ```
 
@@ -115,6 +118,7 @@ Send a message to the Casie AI assistant.
 {
   "message": "Find restaurants near campus",
   "sessionId": "optional-uuid",
+  "history": [],
   "context": {
     "currentPage": "MAP",
     "userLocation": { "lat": 10.6419, "lng": 122.2354 },
@@ -127,6 +131,7 @@ Send a message to the Casie AI assistant.
 |-------|------|----------|-------------|
 | `message` | string | ✅ | User's message (max 500 chars after sanitization) |
 | `sessionId` | string | No | UUID from previous response for continuity |
+| `history` | array | No | Conversation history from previous response (enables continuity across serverless cold starts) |
 | `context.currentPage` | string | No | Current page (HOME, MAP, etc.) |
 | `context.userLocation` | object | No | User GPS `{ lat, lng }` |
 | `context.selectedLocation` | object | No | Currently selected location `{ name }` |
@@ -145,7 +150,8 @@ Send a message to the Casie AI assistant.
       "tags": ["restaurant", "food"]
     }
   ],
-  "sessionId": "uuid-for-next-message"
+  "sessionId": "uuid-for-next-message",
+  "history": []
 }
 ```
 
@@ -240,7 +246,9 @@ These are frontend service functions that talk directly to Supabase (not via the
 | Function | Description |
 |----------|-------------|
 | `getLocationReviews(locationId)` | Fetch all reviews for a location |
+| `getLocationReviewOfUser(locationId, userId)` | Fetch a specific user's review for a location |
 | `submitLocationReview(review)` | Create or update a review (upsert on `location_id + user_id`) |
+| `deleteLocationReview(locationId, userId)` | Delete a user's review for a location |
 
 **Review shape:**
 ```javascript
@@ -502,14 +510,17 @@ controller.abort();
 import { sendToCasie, clearCasieHistory } from './services/cassieService';
 
 let sessionId = null;
+let history = [];
 
 const response = await sendToCasie({
   message: 'Find pharmacies',
   sessionId,
+  history,
   context: { currentPage: 'MAP', userLocation: { lat: 10.64, lng: 122.23 } },
 });
 
 sessionId = response.sessionId;
+history = response.history || [];
 console.log(response.message);   // Natural language reply
 console.log(response.places);    // Array of matching locations
 ```

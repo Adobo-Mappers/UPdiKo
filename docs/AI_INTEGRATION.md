@@ -1,7 +1,7 @@
 # Casie AI Integration Guide
 
 > **Last Updated:** May 2026  
-> **Version:** 2.0.0
+> **Version:** 3.0.0
 
 ---
 
@@ -37,7 +37,7 @@ Casie is an AI-powered chatbot that helps users discover locations in Miagao, Il
 | Natural language search | "Find restaurants near campus" |
 | Quick prompts | Pre-defined common queries shown on first open |
 | Location cards | Clickable results that navigate the map |
-| Session continuity | Remembers conversation context (server-side, 15 min TTL) |
+| Session continuity | Remembers conversation context via client-driven history (last 20 turns) |
 | Rate limiting | 40 requests per 15 min per IP; 2 sec client-side cooldown |
 | Input sanitization | Prompt injection patterns filtered before sending to Gemini |
 
@@ -76,7 +76,7 @@ Casie is an AI-powered chatbot that helps users discover locations in Miagao, Il
 │              Express Backend (server/index.js)       │
 │                                                     │
 │  1. Validate message                                │
-│  2. Look up or create session                       │
+│  2. Parse client-provided history array             │
 │  3. First Gemini call (with search_locations tool)  │
 │  4. If tool triggered → query Supabase DB           │
 │  5. Second Gemini call (synthesize with results)    │
@@ -189,7 +189,8 @@ Send a message to Casie.
       "tags": ["restaurant", "food"]
     }
   ],
-  "sessionId": "uuid-for-next-message"
+  "sessionId": "uuid-for-next-message",
+  "history": []
 }
 ```
 
@@ -318,18 +319,30 @@ const searchLocationsTool = {
 
 ## 7. Session Management
 
-- Sessions stored in a server-side `Map` keyed by UUID
-- History capped at last **20 messages** per session
-- Sessions persist for the lifetime of the server process
-- Cleared explicitly via `POST /api/cassie/clear` or on widget "clear" button
+### 7.1 Client-Driven History
 
-### Client-side limits (useCasie.js)
+Conversation context is managed client-side to survive serverless cold starts on Vercel:
+
+1. **Client** — The `useCasie` hook stores conversation history in a `useRef([])`. Each call to `sendToCasie()` includes the current `history` array.
+2. **Server** — Receives `history` from the request body, appends the new user message and assistant reply, trims to the last 20 turns, and returns the updated `history` in the response.
+3. **Client** — On response, updates `historyRef` with the returned `history` array.
+4. **Clear** — `clearSession()` resets `historyRef` to `[]` locally; the `/api/cassie/clear` endpoint is also called for housekeeping.
+
+### 7.2 Client-side limits (useCasie.js)
 
 | Limit | Value |
 |-------|-------|
 | Min time between messages | 2 seconds |
 | Daily message cap | 50 messages |
 | Max input length | 500 characters |
+| History cap | 20 turns (server-side trim) |
+
+### 7.3 Serverless Considerations
+
+- History is **not persisted** on the server — zero server-side state.
+- If the client does not send `history`, each message is treated as a new conversation.
+- The `history` array uses the Gemini API content format (`{ role, parts }`).
+- The `sessionId` is still generated and returned but is informational; history, not sessionId, drives continuity.
 
 ---
 
@@ -343,7 +356,7 @@ const searchLocationsTool = {
 
 ### 8.2 Rate Limiting
 
-Express rate limiter: **40 requests per 15 minutes per IP** (returns 429 on exceed).
+Express rate limiter: **40 requests per 15 minutes per IP** (returns 429 on exceed). Uses in-memory storage — limits reset on Vercel serverless cold starts. For persistent rate limiting, configure an external store (Vercel KV, Upstash).
 
 ### 8.3 Input Sanitization
 
@@ -368,7 +381,7 @@ Prompt injection patterns filtered in `useCasie.js` before sending:
 | Variable | Where | Required | Description |
 |----------|-------|----------|-------------|
 | `GEMINI_API_KEY` | server `.env` | ✅ | Gemini API key (never expose client-side) |
-| `GEMINI_MODEL` | server `.env` | No | Defaults to `gemini-2.0-flash` |
+| `GEMINI_MODELS` | server `.env` | No | Comma-separated model fallback list; defaults to `gemini-2.0-flash,gemini-1.5-flash,gemini-1.5-flash-8b` |
 | `VITE_SUPABASE_URL` | `.env` | ✅ | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | `.env` | ✅ | Supabase anon key |
 | `VITE_API_BASE` | `.env` | No | Backend base URL (empty = use Vite proxy) |
@@ -380,7 +393,7 @@ Prompt injection patterns filtered in `useCasie.js` before sending:
 VITE_SUPABASE_URL=https://xyz.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 GEMINI_API_KEY=AIza...
-GEMINI_MODEL=gemini-2.0-flash
+GEMINI_MODELS=gemini-2.0-flash,gemini-1.5-flash
 PORT=3000
 ```
 
@@ -390,12 +403,13 @@ PORT=3000
 
 | Issue | Cause | Fix |
 |-------|-------|-----|
-| `"Missing GEMINI_API_KEY"` | Env var not set on server | Add to server `.env` |
+| `"Missing GEMINI_API_KEY"` | Env var not set on server | Add to Vercel Environment Variables or server `.env` |
 | Empty `places` array | No DB matches | Verify `openstreets_static_locations` has data |
 | 429 Too Many Requests | Rate limit hit | Wait 15 min or increase `max` in `casieLimiter` |
-| Session lost between reloads | Server restarted | Normal — sessions are in-memory |
-| CORS error | Frontend origin not whitelisted | Update `cors` origin in `server/index.js` |
-| `"AI is not configured correctly"` | Client can't reach `/api/cassie` | Ensure `npm run dev:server` is running |
+| Conversation context lost between messages | Client not passing `history` back | Ensure `useCasie` hook is used (manages historyRef internally) |
+| CORS error | Frontend origin not whitelisted | Set `CORS_ORIGIN` env var to production URL |
+| `"AI is not configured correctly"` | Client can't reach `/api/cassie` | In dev, ensure `npm run dev:server` is running; in prod, check Vercel function logs |
+| Gemini timeout on Vercel | Cold start + two sequential Gemini calls exceed 10s (Hobby) | Upgrade to Vercel Pro (15s timeout) or reduce `GEMINI_MODELS` list |
 
 ---
 
