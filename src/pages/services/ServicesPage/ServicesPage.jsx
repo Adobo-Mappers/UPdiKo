@@ -22,7 +22,7 @@ export default function ServicesPage() {
         <div className='services-page px-xlarge'>
             <main className='py-xlarge'>
                 <div className='flex flex-col justify-center p-xlarge bg-white border-roundify'>
-                    <Title className='fw-extra-bold lh-large pt-medium'>Good Day {user ? (user.user_metadata?.display_name?.split(' ')[0]) : "" }!</Title>
+                    <Title className='fw-extra-bold lh-xlarge pt-medium'>Good Day {user ? (user.user_metadata?.display_name) : "" }!</Title>
                     <WeatherView />
                     <Heading className='pt-small px-small'>What services do you want to find?</Heading>
                 </div>

@@ -4,7 +4,7 @@
     left: 50%;
     z-index: 5000;
     display: flex;
-    width: min(calc(var(--screen-width) - 48px), calc(100vw - 32px));
+    width: 300px;
     transform: translateX(-50%);
     flex-direction: column;
     gap: var(--space-small);
@@ -24,18 +24,10 @@
     pointer-events: auto;
 }
 
-.app-toast-success {
-    border: 2px solid rgba(34, 97, 48, 0.18);
-}
-
-.app-toast-error {
-    border: 2px solid rgba(114, 28, 36, 0.18);
-}
-
 .app-toast-message {
     flex: 1;
     color: var(--color-text-main);
-    font-size: var(--fs-heading);
+    font-size: var(--fs-text);
 }
 
 .app-toast-close {
