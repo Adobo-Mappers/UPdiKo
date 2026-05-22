@@ -204,7 +204,7 @@ export default function ServiceInfoPage() {
                         </Button>
                         {user && !authLoading &&
                             <Button className="items-center" onClick={() => setReviewModal(true)}>
-                                <Icon name='darkstar' /><Text>{savedRating ? "Edit Rating" : "Rate"}</Text>
+                                <Icon name={savedRating ? 'star' : 'darkstar'}/><Text>{savedRating ? `Edit Rating` : "Rate"}</Text>
                             </Button>
                         }   
                     </div>
@@ -347,7 +347,7 @@ export default function ServiceInfoPage() {
                             <textarea disabled={submittingReview} value={reviewComment} className='w-100 bg-component border-none border-roundify p-medium' placeholder='Comment (Optional)' onChange={(e) => setReviewComment(e.target.value)} />
                         </div>
                         <div className='py-small flex justify-end gap-small'>
-                            <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
+                            {(savedRating !== 0) && <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>}
                             <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
                                 {submittingReview ? "Submitting..." : "Submit"}
                             </Button>

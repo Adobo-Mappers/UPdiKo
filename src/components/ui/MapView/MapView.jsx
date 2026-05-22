@@ -866,7 +866,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
               />
             </div>
             <div className='py-small flex justify-end gap-small'>
-              <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>
+              {(savedRating !== 0) && <Button disabled={submittingReview} onClick={handleClearReview}>Clear Rating</Button>}
               <Button disabled={submittingReview} className='border-solid' onClick={handleSubmitReview}>
                 {submittingReview ? "Submitting..." : "Submit"}
               </Button>
@@ -918,8 +918,8 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
             </div>
             {user && (
               <div className="flex items-center my-small fw-bold gap-small cursor-pointer" onClick={() => setReviewModal(true)}>
-                <Icon name="darkstar" size="small" />
-                <Text>Rate</Text>
+                <Icon name={(savedRating) ? `star`: 'darkstar'} size="small" />
+                <Text>{(savedRating) ? `Edit Rating`: 'Rate'} </Text>
               </div>
             )}
           </div>
