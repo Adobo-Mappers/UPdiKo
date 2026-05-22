@@ -40,8 +40,10 @@
 | Backend | Node.js + Express |
 | AI | Google Gemini API |
 | Database + Auth | Supabase (PostgreSQL) |
+| GIS / Routing | PostGIS + pgRouting (primary), OSRM (fallback) |
 | File Storage | Supabase Storage |
 | Geocoding | Nominatim (OpenStreetMap) |
+| Deployment | Vercel (SPA + serverless API) |
 
 ## Project Structure
 
@@ -49,9 +51,14 @@
 updi-ko/
 ├── server/
 │   └── index.js                      # Express backend: Casie AI, directions, rate limiting
+├── api/
+│   └── index.js                      # Vercel serverless entrypoint (exports Express app)
+├── vercel.json                       # Vercel build config, API rewrites, SPA fallback
 ├── docs/
 │   ├── API_DOCUMENTATION.md          # Full API and service function reference
-│   └── AI_INTEGRATION.md             # Casie AI architecture and integration guide
+│   ├── AI_INTEGRATION.md             # Casie AI architecture and integration guide
+│   ├── deploy-report.md              # Deployment readiness audit
+│   └── deploy-guide.md               # Step-by-step Vercel deployment setup
 ├── src/
 │   ├── App.jsx                        # Central router and QueryClientProvider wrapper
 │   ├── index.jsx                      # Entry point and service worker registration
@@ -121,10 +128,10 @@ updi-ko/
 |   +-- geocoding.js       reverse geocodes coordinates via Nominatim
 |   +-- api.js             shared fetch helper with base URL resolution
 |
-+-- [ Express Backend -- server/index.js ]
++-- [ Express Backend -- server/index.js + api/index.js ]
     +-- POST /api/cassie       proxies messages to Google Gemini, returns AI reply + places
     +-- POST /api/cassie/clear clears a chat session
-    +-- POST /api/directions   requests pedestrian routing via Supabase RPC
+    +-- POST /api/directions   requests pedestrian routing via Supabase RPC (PostGIS/pgRouting)
     +-- GET  /api/health       health check
 ```
 
@@ -167,7 +174,8 @@ Beyond individual pages, the application is divided into horizontal layers. The 
 +-- [ External Systems ]
       Supabase (database, auth, storage)
       Google Gemini via Express (AI assistant)
-      OSRM (routing)
+      PostGIS / pgRouting via Supabase RPC (pedestrian routing, primary)
+      OSRM (driving directions, client-side fallback)
       Nominatim (reverse geocoding)
       Open-Meteo (weather)
       Stadia Maps (map tiles)
@@ -176,14 +184,20 @@ Beyond individual pages, the application is divided into horizontal layers. The 
 ## High Level Structure
 
 ```
-src/
-├── assets/          # global static resources (images, icons)
-├── components/      # reusable view-layer components
-├── hooks/           # shared React hooks (Casie state, location queries)
-├── pages/           # page-level modules (logic + view combined)
-├── services/        # service layer (all external data access)
-├── utils/           # shared utility functions
-└── App.jsx          # central router and application entry
+updi-ko/
+├── src/
+│   ├── assets/          # global static resources (images, icons)
+│   ├── components/      # reusable view-layer components
+│   ├── hooks/           # shared React hooks (Casie state, location queries)
+│   ├── pages/           # page-level modules (logic + view combined)
+│   ├── services/        # service layer (all external data access)
+│   ├── utils/           # shared utility functions
+│   └── App.jsx          # central router and application entry
+├── server/
+│   └── index.js         # Express backend (Casie AI, directions, rate limiting)
+├── api/
+│   └── index.js         # Vercel serverless entrypoint (exports Express app)
+└── vercel.json          # Vercel build config and routing rules
 ```
 
 ## Pages Folder Structure
@@ -235,11 +249,19 @@ services/
 
 ## Known Issues
 
-- Casie AI and the directions endpoint require the Express backend to be running (`npm run dev:server`).
 - Pedestrian routing via `/api/directions` requires a campus path graph loaded into Supabase. Without it, the endpoint returns a 503 and the app falls back to OSRM driving directions.
 - The weather card is hidden if `VITE_OPENMETEO_API_URL` is not set in `.env`.
 - The service worker (`/sw.js`) must be manually provided in the `public/` folder for map tile caching to work.
 - The `location-images` Supabase Storage bucket must exist and be set to public for pin image uploads to work.
+- `express-rate-limit` uses in-memory storage — rate limits reset on Vercel serverless cold starts. For production, configure an external store (Vercel KV, Upstash, or Supabase).
+- Gemini API calls with tool use (two sequential model requests) may approach the Vercel Hobby plan timeout (10s) during cold starts.
+
+## Documentation
+
+- [API Documentation](docs/API_DOCUMENTATION.md) — Full API reference, service functions, database schema, and code examples
+- [AI Integration Guide](docs/AI_INTEGRATION.md) — Casie AI architecture, session management, function calling, and security
+
+---
 
 ## License and Credits
 
