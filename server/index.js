@@ -20,7 +20,6 @@ const supabaseKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 const supabase = createClient(supabaseUrl, supabaseKey);
-const casieSessions = new Map();
 
 const sCASIE_SYSTEM_PROMPT =`
   
@@ -66,9 +65,17 @@ const searchLocationsTool = {
   ],
 };
 
+const allowedOrigins = [
+  /localhost:\d+$/,
+];
+
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(process.env.CORS_ORIGIN);
+}
+
 app.use(
   cors({
-    origin: [/localhost:\d+$/],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
@@ -238,7 +245,11 @@ app.post('/api/cassie', casieLimiter, async (request, response) => {
     return;
   }
 
-  const sessionHistory = casieSessions.get(sessionId) || [];
+  // Client-driven history: receives previous turns from the client so
+  // conversation context survives across serverless cold starts.
+  const sessionHistory = Array.isArray(request.body?.history)
+    ? request.body.history
+    : [];
   const fullSystemInstruction = `${CASIE_SYSTEM_PROMPT}${getDynamicContext(context)}`;
 
   sessionHistory.push({ role: 'user', parts: [{ text: message }] });
@@ -301,8 +312,12 @@ app.post('/api/cassie', casieLimiter, async (request, response) => {
       sessionHistory.push({ role: 'model', parts: [{ text: replyText }] });
     }
 
-    casieSessions.set(sessionId, sessionHistory.slice(-20));
-    response.json({ message: replyText, places, sessionId });
+    response.json({
+      message: replyText,
+      places,
+      sessionId,
+      history: sessionHistory.slice(-20),
+    });
   } catch (error) {
     response.status(500).json({
       error: error.message || 'Failed to process the Casie request.',
@@ -356,6 +371,8 @@ app.post('/api/directions', async (request, response) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`UPdiKo backend listening on http://localhost:${port}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`UPdiKo backend listening on http://localhost:${port}`);
+  });
+}

@@ -58,6 +58,7 @@ export function useCasie(context) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const sessionIdRef = useRef(null);
+  const historyRef = useRef([]);
   const lastMessageTimeRef = useRef(0);
   const dailyCountRef = useRef({ date: new Date().toDateString(), count: 0 });
 
@@ -109,9 +110,13 @@ export function useCasie(context) {
           message: userMessage,
           context,
           sessionId: sessionIdRef.current,
+          history: historyRef.current,
         });
 
         sessionIdRef.current = payload.sessionId;
+        if (Array.isArray(payload.history)) {
+          historyRef.current = payload.history;
+        }
         appendAssistantMessage(payload.message, payload.places || []);
       } catch (error) {
         appendAssistantMessage(
@@ -130,6 +135,7 @@ export function useCasie(context) {
     }
 
     sessionIdRef.current = null;
+    historyRef.current = [];
     setInput('');
     setMessages([{ role: 'assistant', content: GREETING }]);
   }, []);
