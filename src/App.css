@@ -1,7 +1,7 @@
 .app {
     position: relative;
     margin: auto;
-    width: var(--screen-width);
+    width: min(var(--screen-width), 100dvw);
     height: 100dvh;
     overflow: auto;
 }
