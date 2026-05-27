@@ -17,11 +17,11 @@
 
 
     /* font-size */
-    --fs-caption: 11px;
-    --fs-text: 13px;
-    --fs-heading: 16px;
-    --fs-subtitle: 20px;
-    --fs-title: 32px;
+    --fs-caption: clamp(10px, 2.8vw, 12px);
+    --fs-text: clamp(12px, 3.2vw, 14px);
+    --fs-heading: clamp(14px, 4vw, 18px);
+    --fs-subtitle: clamp(18px, 4.8vw, 22px);
+    --fs-title: clamp(24px, 6vw, 34px);
 
     /* font-weight */
     --fw-regular: 400;
@@ -32,10 +32,10 @@
 
     /* spacing */
     --space-xsmall: 4px;
-    --space-small: 12px;
-    --space-medium: 16px;
-    --space-large: 24px;
-    --space-xlarge: 36px;
+    --space-small: clamp(8px, 3vw, 12px);
+    --space-medium: clamp(12px, 4vw, 18px);
+    --space-large: clamp(16px, 5vw, 24px);
+    --space-xlarge: clamp(24px, 7vw, 36px);
 
     /* border-radius */
     --border-circlify: 50%;

@@ -92,15 +92,15 @@ export default function PersonalPinsPage() {
                                         handleOpenPin(pin.id);
                                     }
                                 }}
-                                style={{"width": "300px", "alignSelf": `${(index % 2 === 0) ? "start" : "end"}`}} 
-                            >   
+                                style={{"width": "clamp(200px, 67vw, 300px)", "alignSelf": `${(index % 2 === 0) ? "start" : "end"}`}} 
+                            >       
                                 <div className={`w-100 bg-white my-small border-roundify p-medium ${(index % 2 === 0) ? "rotate-left" : "rotate-right"}`}>
                                     
                                     {/* Map Preview Placeholder Block */}
                                     <div
                                         style={{
                                         "width": "100%", 
-                                        "height": "170px", 
+                                        "height": "clamp(120px, 40vw, 170px)", 
                                         "display": "flex", 
                                         "alignItems": "center", 
                                         "justifyContent": "center", 
@@ -115,7 +115,7 @@ export default function PersonalPinsPage() {
                                             alt={pin.locationName} 
                                             style={{
                                                 width: "100%",
-                                                height: "100%",
+                                                height: "clamp(120px, 40vw, 170px)",
                                                 objectFit: "cover" // Ensures the image crops nicely instead of stretching
                                             }}
                                         />

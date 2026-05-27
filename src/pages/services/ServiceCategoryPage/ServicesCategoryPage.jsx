@@ -72,18 +72,18 @@ export default function ServiceCategoryPage() {
                                 key={service.id} 
                                 to={`/service/${encodeURIComponent(category)}/${service.id}`}
                                 className='flex'
-                                style={{"width": "300px", "alignSelf": `${(index % 2 === 0) ? "start" : "end"}`}} 
+                                style={{"width": "clamp(200px, 67vw, 300px)", "alignSelf": `${(index % 2 === 0) ? "start" : "end"}`}} 
                             >   
                                 <div className={`w-100 bg-white my-small border-roundify p-medium ${(index % 2 == 0)? "rotate-left": "rotate-right"}`}>
                                     { service.images[0] ? ( 
                                         <img
                                             src={service.images[0]}
-                                            style={{"width": "100%", "height": "170px", "objectFit": "cover"}}
+                                            style={{"width": "100%", "height": "clamp(120px, 40vw, 170px)", "objectFit": "cover"}}
                                             className='border-roundify'
                                         />
                                         ) : (
                                         <div
-                                            style={{"width": "100%", "height": "170px", "objectFit": "cover", "backgroundColor": "#212121"}}
+                                            style={{"width": "100%", "height": "clamp(120px, 40vw, 170px)", "objectFit": "cover", "backgroundColor": "#212121"}}
                                             className='border-roundify'
                                         ></div>
                                         )
