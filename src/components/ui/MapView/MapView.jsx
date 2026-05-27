@@ -756,7 +756,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
       >
         {/* FIX 2: Capture the live map instance so handleMarkerClick can read current zoom */}
         <MapInstanceCapture mapRef={mapRef} />
-        <ChangeView center={center} zoom={mapZoom} />
+        <ChangeView center={center} zoom={mapZoom} bearing={bearing} />
         <RotationController bearing={bearing} />
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
