@@ -202,12 +202,17 @@ function ChangeView({ center, zoom }) {
     
     if (center && (isDifferentCenter || isDifferentZoom)) {
       const targetZoom = zoom || map.getZoom();
-      const offsetPx = window.innerHeight * 0.275;
-      const targetPoint = map.project(center, targetZoom);
-      const offsetPoint = targetPoint.add([0, offsetPx]);
-      const offsetLatLng = map.unproject(offsetPoint, targetZoom);
 
-      map.setView(offsetLatLng, targetZoom, {
+      // Snap first so latLngToContainerPoint is accurate
+      map.setView(center, targetZoom, { animate: false });
+
+      // Offset in screen-space pixels — unaffected by map rotation
+      const markerScreen = map.latLngToContainerPoint(center);
+      const offsetPx = window.innerHeight * 0.275;
+      const targetScreen = L.point(map.getSize().x / 2, markerScreen.y - offsetPx);
+      const shiftedLatLng = map.containerPointToLatLng(targetScreen);
+
+      map.setView(shiftedLatLng, targetZoom, {
         animate: true,
         duration: 0.6,
         easeLinearity: 0.5,
