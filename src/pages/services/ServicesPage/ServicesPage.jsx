@@ -24,6 +24,7 @@ export default function ServicesPage() {
                 <div className='flex flex-col justify-center p-xlarge bg-white border-roundify'>
                     <Title className='fw-extra-bold lh-xlarge pt-medium'>Good Day {user ? (user.user_metadata?.display_name) : "" }!</Title>
                     <WeatherView />
+                    <EventDisplay/>
                     <Heading className='pt-small px-small'>What services do you want to find?</Heading>
                 </div>
                 <div id="service-list">
