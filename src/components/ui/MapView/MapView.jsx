@@ -203,16 +203,30 @@ function ChangeView({ center, zoom }) {
     if (center && (isDifferentCenter || isDifferentZoom)) {
       const targetZoom = zoom || map.getZoom();
 
-      // Snap first so latLngToContainerPoint is accurate
-      map.setView(center, targetZoom, { animate: false });
-
-      // Offset in screen-space pixels — unaffected by map rotation
-      const markerScreen = map.latLngToContainerPoint(center);
+      // We want the marker to sit at a fixed screen position:
+      // horizontally centered, vertically at offsetPx from top
+      // Calculate that as a container point and convert to lat/lng
+      // using the map's CURRENT bearing — no projection math involved
+      const mapSize = map.getSize();
       const offsetPx = window.innerHeight * 0.275;
-      const targetScreen = L.point(map.getSize().x / 2, markerScreen.y - offsetPx);
-      const shiftedLatLng = map.containerPointToLatLng(targetScreen);
 
-      map.setView(shiftedLatLng, targetZoom, {
+      // Where we WANT the marker to appear on screen
+      const desiredScreen = L.point(mapSize.x / 2, offsetPx);
+
+      // Where the marker currently IS on screen (at current view state)
+      const currentMarkerScreen = map.latLngToContainerPoint(L.latLng(center));
+
+      // Shift = difference between current marker screen pos and desired screen pos
+      const currentCenterScreen = L.point(mapSize.x / 2, mapSize.y / 2);
+      const shiftX = currentMarkerScreen.x - desiredScreen.x;
+      const shiftY = currentMarkerScreen.y - desiredScreen.y;
+
+      // Apply that shift to the current map center in screen space,
+      // then convert back to lat/lng — this is always screen-aligned
+      const newCenterScreen = L.point(currentCenterScreen.x + shiftX, currentCenterScreen.y + shiftY);
+      const newCenterLatLng = map.containerPointToLatLng(newCenterScreen);
+
+      map.setView(newCenterLatLng, targetZoom, {
         animate: true,
         duration: 0.6,
         easeLinearity: 0.5,
