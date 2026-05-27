@@ -1,7 +1,8 @@
 import './EventDisplay.css';
 import { useEffect, useState } from 'react';
 import customEvents from './custom-events.json';
-import { Text, Caption } from '../typography';
+import { Text, Caption, Heading } from '../typography';
+import { Icon } from '../ui';
 
 const MANILA_FORMATTER = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Manila',
@@ -55,18 +56,18 @@ function EventDisplay() {
 
     // Always show the card — either an event name or just today's date
     return (
-        <div className='event-card'>
-            <Caption className='event-card-label'>📅 Today</Caption>
-            {loaded && todayEvents.length > 0 ? (
-                <>
-                    <Text><em className='fw-bold'>{todayEvents[0].name}</em></Text>
-                    <Caption className='text-muted'>is Happening!</Caption>
-                    {todayEvents.length > 1 && (
-                        <Caption className='text-muted'>+{todayEvents.length - 1} more</Caption>
-                    )}
-                </>
+        <div className='event-card px-small'>
+            {(loaded && todayEvents.length > 0) ? (
+                <div className='flex gap-mediums items-center'>
+                    <Icon name='star' size='xlarge' className='text-muted' />
+                    <div>
+                        <Heading className='fw-bold'>{todayEvents[0].name}</Heading>
+                        <Heading className='text-muted'>is Happening!</Heading>
+                    </div>
+                </div>
             ) : (
-                <Text><em className='fw-bold'>{todayStr ? formatDateDisplay(todayStr) : '—'}</em></Text>
+                <div className='flex gap-large items-center'>
+                </div>
             )}
         </div>
     );
