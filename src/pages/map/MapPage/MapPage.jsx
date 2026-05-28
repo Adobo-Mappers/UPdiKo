@@ -189,11 +189,12 @@ export default function MapPage() {
         const newTrackingState = !trackingEnabled;
         setTrackingEnabled(newTrackingState);
 
+        // Always reset bearing when recenter is clicked
+        smoothResetBearing();
+
         if (newTrackingState && userCurrentLocation) {
             setMapCenter(userCurrentLocation);
-            smoothResetBearing();
-        } else if (!userCurrentLocation) {
-            smoothResetBearing();
+        } else if (!userCurrentLocation && newTrackingState) {
             notify({ message: 'User location is not available', type: 'error' });
             setTrackingEnabled(false);
         }
@@ -646,7 +647,7 @@ export default function MapPage() {
                     <CircularButton width='64px' className='bg-component-dark' onClick={handleRecenter}>
                         <Icon name='compass' size='large' />
                     </CircularButton>
-                     <CircularButton width='64px' className='bg-component-dark' onClick={() => startRotating("left")} onMouseUp={stopRotating} onMouseLeave={stopRotating}>
+                     <CircularButton width='64px' className='bg-component-dark' onClick={() => startRotating("left")}>
                         <Icon name='compass' size='large' />
                     </CircularButton>
                     <CassieWidget
