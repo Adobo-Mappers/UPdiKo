@@ -193,6 +193,7 @@ export default function MapPage() {
             setMapCenter(userCurrentLocation);
             smoothResetBearing();
         } else if (!userCurrentLocation) {
+            smoothResetBearing();
             notify({ message: 'User location is not available', type: 'error' });
             setTrackingEnabled(false);
         }
