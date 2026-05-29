@@ -189,10 +189,12 @@ export default function MapPage() {
         const newTrackingState = !trackingEnabled;
         setTrackingEnabled(newTrackingState);
 
+        // Always reset bearing when recenter is clicked
+        smoothResetBearing();
+
         if (newTrackingState && userCurrentLocation) {
             setMapCenter(userCurrentLocation);
-            smoothResetBearing();
-        } else if (!userCurrentLocation) {
+        } else if (!userCurrentLocation && newTrackingState) {
             notify({ message: 'User location is not available', type: 'error' });
             setTrackingEnabled(false);
         }

@@ -286,6 +286,28 @@ function RotationController({ bearing }) {
   return null;
 }
 
+// Syncs manual touch rotations back to parent component
+function BearingUpdater({ onBearingChange }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !onBearingChange) return;
+
+    const handleRotate = () => {
+      if (map.getBearing) {
+        onBearingChange(map.getBearing());
+      }
+    };
+
+    map.on('rotate', handleRotate);
+    return () => {
+      if (map) map.off('rotate', handleRotate);
+    };
+  }, [map, onBearingChange]);
+
+  return null;
+}
+
 // Captures the live Leaflet map instance so we can read its current zoom
 function MapInstanceCapture({ mapRef }) {
   const map = useMap();
@@ -777,6 +799,7 @@ export function MapView({ userLocation, currentCoords, trackingEnabled, selected
         <MapInstanceCapture mapRef={mapRef} />
         <ChangeView center={center} zoom={mapZoom} bearing={bearing} />
         <RotationController bearing={bearing} />
+        <BearingUpdater onBearingChange={onBearingChange} />
         <TileLayer
           attribution='&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
           url={`https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png?api_key=${import.meta.env.VITE_STADIA_API_KEY}`}
